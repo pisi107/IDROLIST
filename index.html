@@ -45,7 +45,7 @@
         input[type="date"] { appearance: none; -webkit-appearance: none; background-color: #f8fafc; }
 
         button { width: 100%; padding: 13px; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 10px; }
-        .btn-salva { background-color: var(--success); color: white; }
+        .btn-concluso { background-color: var(--success); color: white; }
         .btn-secondary { background-color: #e2e8f0; color: var(--text); }
         hr { border: 0; border-top: 1px solid var(--border); margin: 15px 0; }
         ul { list-style: none; padding: 0; margin: 0; max-height: 180px; overflow-y: auto; }
@@ -120,8 +120,7 @@
             <button class="btn-secondary" onclick="document.getElementById('fotoBolla').click()" style="background:#e0f2fe; color:#0369a1; border: 1px dashed #7dd3fc; margin-top: 4px;">📷 Allega Foto Bolla / Documento</button>
             <div id="statoFoto" class="preview-box" style="display:none;"></div>
 
-            <button class="btn-salva" onclick="salvaRapportinoUfficio()">💾 Salva Rapportino e Invia all'Ufficio</button>
-            <button class="btn-secondary" onclick="segnalaConcluso()">✅ Segna Cantiere Concluso</button>
+            <button class="btn-concluso" onclick="salvaEConcludiCantiere()">✅ Salva e Segna Cantiere Concluso</button>
         </div>
 
         <!-- LISTA MATERIALI -->
@@ -147,10 +146,10 @@
             <label>Quantità</label>
             <input type="number" id="quantitaInput" value="1" min="1">
 
-            <button class="btn-salva" onclick="aggiungiMateriale()" style="background:var(--brand-orange); margin-top: 12px;">Aggiungi alla Lista</button>
+            <button class="btn-concluso" onclick="aggiungiMateriale()" style="background:var(--brand-orange); margin-top: 12px;">Aggiungi alla Lista</button>
             <hr>
             <ul id="listaSpesa"></ul>
-            <button class="btn-salva" onclick="inviaListaWhatsApp()">Invia Lista su WhatsApp</button>
+            <button class="btn-concluso" onclick="inviaListaWhatsApp()">Invia Lista su WhatsApp</button>
             <button class="btn-secondary" onclick="pulisciLista()">Svuota</button>
         </div>
     </div>
@@ -191,17 +190,6 @@
             if(input.files && input.files[0]) {
                 stato.style.display = 'block';
                 stato.innerHTML = `✅ Foto allegata: ${input.files[0].name}`;
-            }
-        }
-
-        function segnalaConcluso() {
-            const index = document.getElementById('selezionaCantiere').value;
-            if(index === "") return alert("Seleziona un cantiere!");
-            if(confirm("Segnare il cantiere come concluso?")) {
-                cantieriDB[index].stato = 'Concluso';
-                localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-                alert("Cantiere chiuso e aggiornato nel pannello ufficio!");
-                cambiaSezione('home');
             }
         }
 
@@ -259,9 +247,9 @@
             window.open(`https://wa.me/?text=` + encodeURIComponent(text));
         }
 
-        function salvaRapportinoUfficio() {
+        function salvaEConcludiCantiere() {
             let cliente = document.getElementById('rapCliente').value;
-            if(!cliente) return alert("Seleziona un cantiere valido!");
+            if(!cliente) return alert("Seleziona un cantiere!");
             
             let dataLavoro = document.getElementById('rapData').value;
             let tipoLavoro = document.getElementById('rapTipoLavoro').value;
@@ -274,6 +262,7 @@
             let indexCantiere = document.getElementById('selezionaCantiere').value;
             if(indexCantiere !== "") {
                 if(!cantieriDB[indexCantiere].storico) cantieriDB[indexCantiere].storico = [];
+                // Aggiunge il rapportino allo storico dell'ufficio
                 cantieriDB[indexCantiere].storico.push({
                     data: dataLavoro,
                     tipo: tipoLavoro,
@@ -282,12 +271,14 @@
                     note: note,
                     bolla: haFoto ? "📎 Bolla allegata" : "Nessuna bolla"
                 });
+                // Segna il cantiere come concluso
+                cantieriDB[indexCantiere].stato = 'Concluso';
                 localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             }
 
-            alert("✅ Rapportino salvato con successo e inviato allo storico dell'ufficio!");
+            alert("✅ Rapportino salvato e cantiere chiuso con successo nell'app!");
             
-            // Pulisce il form e torna alla home
+            // Pulisci e torna alla home
             document.getElementById('rapOperai').value = '';
             document.getElementById('rapNote').value = '';
             document.getElementById('fotoBolla').value = '';
