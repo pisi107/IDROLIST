@@ -594,7 +594,7 @@
                 cantieriDB = [];
             }
 
-            // Normalizziamo le stringhe per il controllo anti-duplicato (tutto minuscolo e senza spazi extra)
+            // Normalizziamo le stringhe per il controllo
             let clienteNorm = cliente.toLowerCase().replace(/\s+/g, ' ');
             let indirizzoNorm = indirizzo.toLowerCase().replace(/\s+/g, ' ');
 
@@ -605,7 +605,28 @@
             );
 
             if (cantiereEsistente) {
-                alert("⚠️ Attenzione: Esiste già una cartella per questo cliente a questo indirizzo! Il sistema ha riconosciuto il cliente come unico.");
+                // Chiediamo conferma all'utente se intende il cantiere esistente
+                let conferma = confirm(`⚠️ Esiste già una cartella per "${cantiereEsistente.cliente}" in "${cantiereEsistente.indirizzo}".\n\nÈ un nuovo intervento/foglio di lavoro per questo cantiere esistente?\n\n(Premi OK per riaprirlo o spostarlo nei cantieri da fare se era chiuso, oppure Annulla se è un cliente/indirizzo diverso).`);
+                
+                if (conferma) {
+                    // Se l'utente conferma, rimettiamo il cantiere nello stato attivo (da fare) se era terminato, così può lavorarci
+                    cantiereEsistente.completato = false;
+                    localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+                    clienteEl.value = '';
+                    indirizzoEl.value = '';
+                    cambiaCartella('da_fare');
+                    alert("✅ Il cantiere esistente è stato richiamato ed è ora attivo nella cartella 'Da Terminare' pronto per un nuovo intervento.");
+                    return;
+                } else {
+                    // Se l'utente preme annulla, significa che vuole creare una nuova scheda separata (es. omonimo o nuovo cantiere dello stesso cliente)
+                    cantieriDB.push({
+                        cliente: cliente,
+                        indirizzo: indirizzo,
+                        completato: false,
+                        storico: []
+                    });
+                    alert("✅ È stata creata una nuova scheda cantiere separata.");
+                }
             } else {
                 cantieriDB.push({
                     cliente: cliente,
