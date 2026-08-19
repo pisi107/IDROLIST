@@ -52,6 +52,7 @@
         .badge-fatto { background: #dcfce7; color: #15803d; }
         .badge-alert { background: #fee2e2; color: #b91c1c; }
         .badge-assenza { background: #e0f2fe; color: #0369a1; }
+        .badge-stampato { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
 
         .tabs-container { display: flex; gap: 8px; margin-bottom: 8px; }
         .tab-btn { flex: 1; padding: 12px; border: 2px solid var(--border); background: #f1f5f9; font-weight: 700; font-size: 0.85rem; border-radius: 10px; cursor: pointer; color: var(--text-light); text-align: center; }
@@ -94,7 +95,7 @@
 
         <div class="content-body">
             
-            <!-- SEZIONE CONTROLLO MANCATI FOGLI (RAGGRUPPATI PER OPERAIO - ESCLUSI SPECIFICI) -->
+            <!-- SEZIONE CONTROLLO MANCATI FOGLI -->
             <div class="card-box" style="border-color: #ef4444; background: #fff5f5;">
                 <div style="font-size: 1.05rem; font-weight: 800; color: #b91c1c;">🚨 Controllo Ufficio: Mancati Fogli Lavoro (Ultimi 2 Giorni)</div>
                 <div style="font-size: 0.8rem; color: #7f1d1d; line-height: 1.4;">Elenco dipendenti che negli ultimi 2 giorni non hanno completato le ore o il report:</div>
@@ -473,7 +474,6 @@
             let corpoTabella = document.getElementById('corpoTabellaControlloMancanti');
             corpoTabella.innerHTML = '';
 
-            // Lista degli operai da escludere dagli allarmi
             const operaiEsclusi = ["Bruno Nicola", "Coriglione Alessandro", "Marinoni Alessandro"];
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
@@ -486,7 +486,6 @@
                 let dataStr = d.toISOString().split('T')[0];
 
                 elencoOperaiTotali.forEach(nomeOp => {
-                    // Se l'operaio è nella lista degli esclusi, saltalo completamente
                     if (operaiEsclusi.includes(nomeOp)) return;
 
                     let eAssente = isOperaioAssenteInData(nomeOp, dataStr);
@@ -550,14 +549,14 @@
 
             let cantieriFiltratiCount = 0;
 
-            cantieriDB.forEach((c, idx) => {
+            cantieriDB.forEach((c, cIdx) => {
                 let isCompletato = c.completato === true;
                 if ((cartellaCorrente === 'da_fare' && !isCompletato) || (cartellaCorrente === 'terminati' && isCompletato)) {
                     cantieriFiltratiCount++;
 
                     let storicoHtml = '';
                     if (c.storico && c.storico.length > 0) {
-                        c.storico.forEach((s) => {
+                        c.storico.forEach((s, sIdx) => {
                             let fotoBolleHtml = '';
                             if (s.fotoBolle && s.fotoBolle.length > 0) {
                                 fotoBolleHtml += `<div style="margin-top: 4px; font-size: 0.75rem; font-weight: 700; color: var(--text-light);">Bolle:</div><div class="foto-thumb-container">`;
@@ -576,10 +575,15 @@
                                 fotoLavoriHtml += `</div>`;
                             }
 
+                            let badgeStampato = s.stampato ? `<span class="badge-stampato">STAMPATO (${s.dataStampa})</span>` : ``;
+
                             storicoHtml += `
                                 <div style="font-size: 0.8rem; background: #f1f5f9; padding: 10px; border-radius: 8px; margin-top: 6px;">
-                                    <b>${s.data}</b> - ${s.operai}<br>
-                                    <i>Note: ${s.note}</i>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                        <div><b>${s.data}</b> - ${s.operai} ${badgeStampato}</div>
+                                        <button class="action-btn btn-orange" style="width: auto; padding: 4px 10px; font-size: 0.75rem;" onclick="stampaSingoloFoglio(${cIdx}, ${sIdx})">🖨️ Stampa</button>
+                                    </div>
+                                    <div><i>Note: ${s.note}</i></div>
                                     ${fotoBolleHtml}
                                     ${fotoLavoriHtml}
                                 </div>
@@ -622,6 +626,65 @@
             }
 
             aggiornaTabellaRiepilogo(cantieriDB);
+        }
+
+        function stampaSingoloFoglio(cIdx, sIdx) {
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            let c = cantieriDB[cIdx];
+            let s = c.storico[sIdx];
+
+            let oraCorrente = new Date().toLocaleDateString('it-IT') + ' ' + new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
+            s.stampato = true;
+            s.dataStampa = oraCorrente;
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+            aggiornaVistaUfficio();
+
+            let finestraStampa = window.open('', '_blank');
+            let bolleHtml = "";
+            if (s.fotoBolle && s.fotoBolle.length > 0) {
+                bolleHtml = `<div style="margin-top:15px;"><b>Foto Bolle Allega:</b><div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;">` + 
+                    s.fotoBolle.map(img => `<img src="${img}" style="width:180px; height:180px; object-fit:cover; border:1px solid #999; border-radius:4px;">`).join('') + 
+                    `</div></div>`;
+            } else {
+                bolleHtml = `<div style="margin-top:10px; font-size:13px; color:#666;"><i>Nessuna foto bolla allegata.</i></div>`;
+            }
+
+            let htmlContent = `
+                <!DOCTYPE html>
+                <html lang="it">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Foglio di Lavoro - Idrotech Varese</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; color: #000; margin: 30px; font-size: 15px; }
+                        h1 { font-size: 22px; border-bottom: 2px solid #000; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+                        .box { border: 2px solid #333; padding: 20px; border-radius: 8px; margin-top: 20px; position: relative; }
+                        .stampato-badge { background: #1e40af; color: white; padding: 6px 14px; font-weight: bold; border-radius: 4px; font-size: 14px; text-transform: uppercase; }
+                        @media print { .no-print { display: none; } }
+                    </style>
+                </head>
+                <body>
+                    <div class="no-print" style="margin-bottom: 20px;">
+                        <button onclick="window.print()" style="padding:10px 20px; font-size:16px; cursor:pointer; background:#f28c1e; color:#fff; border:none; border-radius:5px;">🖨️ Stampa Ora</button>
+                    </div>
+                    <h1>
+                        <span>IDROTECH VARESE - Foglio di Lavoro</span>
+                        <span class="stampato-badge">STAMPATO (${oraCorrente})</span>
+                    </h1>
+                    <div class="box">
+                        <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">🏢 Cliente: ${c.cliente}</div>
+                        <div style="font-size: 15px; margin-bottom: 12px; color: #444;">📍 Indirizzo Cantiere: ${c.indirizzo}</div>
+                        <hr style="border:0; border-top:1px solid #ddd; margin:12px 0;">
+                        <div style="margin-bottom: 8px;"><b>Data Intervento:</b> ${s.data}</div>
+                        <div style="margin-bottom: 8px;"><b>Personale e Ore:</b> ${s.operai}</div>
+                        <div style="margin-bottom: 12px;"><b>Note / Lavori Eseguiti:</b><br><div style="background:#f9f9f9; padding:10px; border:1px solid #ccc; margin-top:4px; border-radius:4px;">${s.note}</div></div>
+                        ${bolleHtml}
+                    </div>
+                </body>
+                </html>
+            `;
+            finestraStampa.document.write(htmlContent);
+            finestraStampa.document.close();
         }
 
         function popolaSelectCantieriUfficio() {
@@ -806,7 +869,9 @@
                 note: note ? note : "Inserito dall'ufficio",
                 statoIntervento: cantieriDB[cantiereIdx].completato ? "Terminato" : "Da terminare",
                 fotoBolle: [],
-                fotoLavori: []
+                fotoLavori: [],
+                stampato: false,
+                dataStampa: ""
             });
 
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
