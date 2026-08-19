@@ -109,7 +109,7 @@
                     <h2 class="nav-title">Registro Ore & Calendario</h2>
                 </div>
 
-                <!-- BOX DI RICERCA: DOV'ERA IL DIPENDENTE IN UNA CERTA DATA? -->
+                <!-- BOX DI RICERCA -->
                 <div class="search-box-container">
                     <div style="font-weight: 800; font-size: 0.95rem; color: var(--text);">🔍 Cerca: "Dov'era il dipendente?"</div>
                     <div style="display: flex; gap: 8px;">
@@ -298,8 +298,8 @@
             let dipFiltro = document.getElementById('filtroDipendenteRicerca').value.toLowerCase().trim();
 
             let risultati = cacheInterventiUfficio.filter(item => {
-                let matchData = dataFiltro === '' || item.data === dataFiltro;
-                let matchDip = dipFiltro === '' || item.operai.toLowerCase().includes(dipFiltro);
+                let matchData = !dataFiltro || item.data === dataFiltro;
+                let matchDip = !dipFiltro || item.operai.toLowerCase().includes(dipFiltro);
                 return matchData && matchDip;
             });
 
@@ -313,16 +313,18 @@
         }
 
         function mostraCalendarioFiltrato(listaInterventi) {
-            listaInterventi.sort((a, b) => new Date(b.data) - new Date(a.data));
+            // Copiamo l'array per non alterare l'ordine originale della cache
+            let listaDaMostrare = [...listaInterventi];
+            listaDaMostrare.sort((a, b) => new Date(b.data) - new Date(a.data));
 
             let divCalendario = document.getElementById('calendarioInterventi');
-            if(listaInterventi.length === 0) {
-                divCalendario.innerHTML = '<div style="font-size:0.85rem; color:var(--text-light); font-style:italic; padding: 10px; text-align: center;">Nessun intervento trovato con questi filtri.</div>';
+            if(listaDaMostrare.length === 0) {
+                divCalendario.innerHTML = '<div style="font-size:0.85rem; color:var(--text-light); font-style:italic; padding: 15px; text-align: center; background: white; border-radius: 10px; border: 1px solid var(--border);">Nessun intervento trovato con questi filtri.</div>';
                 return;
             }
 
             let calendarioHtml = '';
-            listaInterventi.forEach(item => {
+            listaDaMostrare.forEach(item => {
                 calendarioHtml += `
                     <div class="giorno-calendario-card">
                         <div class="giorno-data-title">
