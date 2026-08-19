@@ -147,15 +147,17 @@
                 </div>
 
                 <div>
-                    <label>Allegati Fotografici</label>
+                    <label>Allegati Fotografici Multipli</label>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div>
-                            <input type="file" id="fotoBolla" accept="image/*" capture="environment" style="display:none;" onchange="mostraStatoFoto('fotoBolla', 'statoBolla')">
-                            <button class="action-btn btn-blue-light" onclick="document.getElementById('fotoBolla').click()" style="margin:0; font-size:0.8rem;">📷 Foto Bolla</button>
+                            <!-- Aggiunto multiple -->
+                            <input type="file" id="fotoBolla" accept="image/*" multiple style="display:none;" onchange="mostraStatoFoto('fotoBolla', 'statoBolla')">
+                            <button class="action-btn btn-blue-light" onclick="document.getElementById('fotoBolla').click()" style="margin:0; font-size:0.8rem;">📎 Foto Bolla (Più foto)</button>
                         </div>
                         <div>
-                            <input type="file" id="fotoLavoro" accept="image/*" capture="environment" style="display:none;" onchange="mostraStatoFoto('fotoLavoro', 'statoLavoro')">
-                            <button class="action-btn btn-blue-light" onclick="document.getElementById('fotoLavoro').click()" style="margin:0; font-size:0.8rem;">📸 Foto Lavoro</button>
+                            <!-- Aggiunto multiple -->
+                            <input type="file" id="fotoLavoro" accept="image/*" multiple style="display:none;" onchange="mostraStatoFoto('fotoLavoro', 'statoLavoro')">
+                            <button class="action-btn btn-blue-light" onclick="document.getElementById('fotoLavoro').click()" style="margin:0; font-size:0.8rem;">📸 Foto Lavoro (Più foto)</button>
                         </div>
                     </div>
                     <div id="statoBolla" class="preview-box" style="display:none; margin-top: 5px;"></div>
@@ -234,9 +236,9 @@
         function mostraStatoFoto(inputId, statoId) {
             const input = document.getElementById(inputId);
             const stato = document.getElementById(statoId);
-            if(input.files && input.files[0]) {
+            if(input.files && input.files.length > 0) {
                 stato.style.display = 'block';
-                stato.innerHTML = `✅ ${input.files[0].name}`;
+                stato.innerHTML = `✅ Selezionate n. ${input.files.length} foto`;
             }
         }
 
@@ -294,38 +296,46 @@
             window.open(`https://wa.me/?text=` + encodeURIComponent(text));
         }
 
+        // Funzione ricorsiva per convertire una lista di File in un array di stringhe Base64
+        function convertiFileInBase64(files, callback) {
+            let risultati = [];
+            if (!files || files.length === 0) {
+                callback(risultati);
+                return;
+            }
+            let index = 0;
+            function leggiProssimo() {
+                if (index >= files.length) {
+                    callback(risultati);
+                    return;
+                }
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    risultati.push(e.target.result);
+                    index++;
+                    leggiProssimo();
+                };
+                reader.readAsDataURL(files[index]);
+            }
+            leggiProssimo();
+        }
+
         function salvaEConcludiCantiere() {
             let indexCantiere = document.getElementById('selezionaCantiere').value;
             if(indexCantiere === "") return alert("Seleziona un cantiere dalla lista!");
             
-            let fotoBolla = document.getElementById('fotoBolla');
-            let fotoLavoro = document.getElementById('fotoLavoro');
+            let filesBolla = document.getElementById('fotoBolla').files;
+            let filesLavoro = document.getElementById('fotoLavoro').files;
 
-            const reader1 = new FileReader();
-            const reader2 = new FileReader();
-
-            reader1.onload = function(e1) {
-                if(fotoLavoro.files && fotoLavoro.files[0]) {
-                    reader2.onload = function(e2) {
-                        salvaDatiNelDb(e1.target.result, e2.target.result);
-                    };
-                    reader2.readAsDataURL(fotoLavoro.files[0]);
-                } else {
-                    salvaDatiNelDb(e1.target.result, null);
-                }
-            };
-
-            if(fotoBolla.files && fotoBolla.files[0]) {
-                reader1.readAsDataURL(fotoBolla.files[0]);
-            } else if(fotoLavoro.files && fotoLavoro.files[0]) {
-                reader2.onload = function(e2) { salvaDatiNelDb(null, e2.target.result); };
-                reader2.readAsDataURL(fotoLavoro.files[0]);
-            } else {
-                salvaDatiNelDb(null, null);
-            }
+            // Convertiamo prima tutte le bolle, poi tutti i lavori
+            convertiFileInBase64(filesBolla, function(arrayBolle) {
+                convertiFileInBase64(filesLavoro, function(arrayLavori) {
+                    salvaDatiNelDb(arrayBolle, arrayLavori);
+                });
+            });
         }
 
-        function salvaDatiNelDb(fotoBollaBase64, fotoLavoroBase64) {
+        function salvaDatiNelDb(arrayBolle, arrayLavori) {
             let indexCantiere = document.getElementById('selezionaCantiere').value;
             
             if(!cantieriDB[indexCantiere].storico) {
@@ -338,17 +348,17 @@
                 operai: document.getElementById('rapOperai').value || 'Non specificato',
                 ore: document.getElementById('rapOre').value || 'Non specificate',
                 note: document.getElementById('rapNote').value,
-                foto: fotoBollaBase64,
-                fotoLavoro: fotoLavoroBase64
+                fotoBolle: arrayBolle,    // Array di immagini bolla
+                fotoLavori: arrayLavori   // Array di immagini lavoro
             });
             
             cantieriDB[indexCantiere].stato = 'Concluso';
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
 
-            alert("✅ Rapportino, foto e chiusura cantiere inviati all'ufficio!");
+            alert("✅ Rapportino e foto multiple inviati all'ufficio!");
             cambiaSezione('home');
             
-            // Pulisci campi
+            // Pulisci i campi
             document.getElementById('rapOperai').value = '';
             document.getElementById('rapNote').value = '';
             document.getElementById('fotoBolla').value = '';
