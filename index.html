@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Idrotech Varese - Accesso Operai</title>
+    <title>Idrotech Varese - Gestione Totale</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -27,7 +27,7 @@
         .header-app h1 span { color: var(--brand-orange); }
         .header-app p { font-size: 0.75rem; color: #94a3b8; margin: 5px 0 0 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
 
-        .content-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 16px; justify-content: center; }
+        .content-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 16px; }
         .view-section { display: none; flex-direction: column; gap: 16px; }
         .view-section.active { display: flex; }
 
@@ -37,71 +37,120 @@
         input[type="file"] { padding: 10px; font-size: 0.85rem; background: #fff; }
 
         .action-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
+        .btn-green { background-color: var(--success); color: white; }
         .btn-orange { background: linear-gradient(135deg, #f28c1e, #d97712); color: white; }
+        .btn-danger { background-color: var(--danger); color: white; padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; box-shadow: none; width: auto; }
         .btn-dark { background: var(--brand-dark); color: white; }
 
         .card-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        
+        .accordion-header { background: #1e293b; color: white; padding: 16px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .accordion-content { display: none; flex-direction: column; gap: 12px; margin-top: 10px; padding-top: 5px; }
+        .accordion-content.open { display: flex; }
+
+        .cantiere-card { background: #fff; border: 2px solid var(--border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+        .cantiere-card.terminato { border-color: var(--success); background: #f0fdf4; }
+        
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .badge-da-fare { background: #fef3c7; color: #b45309; }
+        .badge-fatto { background: #dcfce7; color: #15803d; }
+        .badge-alert { background: #fee2e2; color: #b91c1c; }
+        .badge-assenza { background: #e0f2fe; color: #0369a1; }
+
+        .tabs-container { display: flex; gap: 8px; margin-bottom: 8px; }
+        .tab-btn { flex: 1; padding: 12px; border: 2px solid var(--border); background: #f1f5f9; font-weight: 700; font-size: 0.85rem; border-radius: 10px; cursor: pointer; color: var(--text-light); text-align: center; }
+        .tab-btn.active-da-fare { background: #fef3c7; border-color: #f59e0b; color: #b45309; }
+        .tab-btn.active-terminati { background: #dcfce7; border-color: var(--success); color: #15803d; }
 
         .collega-card-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
         .collega-card-item label { margin: 0; font-size: 0.9rem; color: var(--text); text-transform: none; display: flex; align-items: center; gap: 8px; cursor: pointer; }
         .collega-card-item input[type="checkbox"] { width: 18px; height: 18px; }
-        .collega-card-item select { width: 120px; padding: 8px; font-size: 0.9rem; }
+        .collega-card-item select { width: 110px; padding: 8px; font-size: 0.9rem; }
         .container-colleghi-scroll { max-height: 220px; overflow-y: auto; background: #fff; padding: 8px; border: 1px solid var(--border); border-radius: 10px; }
+
+        .riepilogo-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+        .riepilogo-table th, .riepilogo-table td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+        .riepilogo-table th { background: #1e293b; color: white; font-size: 0.75rem; text-transform: uppercase; }
+        .riepilogo-table tr:last-child td { border-bottom: none; }
+        
+        .presenza-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px; }
         .user-logged-box { display: flex; justify-content: space-between; align-items: center; background: #e2e8f0; padding: 10px 14px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; }
+
+        .foto-thumb-container { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+        .foto-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s; }
+        .foto-thumb:hover { transform: scale(1.05); }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 999; justify-content: center; align-items: center; padding: 15px; }
+        .modal-overlay.open { display: flex; }
+        .modal-card { background: #fff; width: 100%; max-width: 480px; max-height: 90vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .modal-header { background: #1e293b; color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 1.1rem; }
+        .modal-body { padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+        .close-modal-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="app-container">
         <div class="header-app">
             <h1>IDROTECH <span>VARESE</span></h1>
-            <p>Portale Operai</p>
+            <p id="sottotitoloHeader">Portale Unificato</p>
         </div>
 
         <div class="content-body">
             
-            <!-- ================= 1. SCHERMATA LOGIN ================= -->
-            <div id="viewLoginOperaio" class="view-section active">
+            <!-- SELETTORE MODALITA' (UFFICIO / OPERAIO) -->
+            <div id="viewSelezioneRuolo" class="view-section active">
                 <div class="card-box" style="border-color: var(--brand-orange); text-align: center; padding: 30px 20px;">
-                    <div style="font-size: 1.2rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 10px;">🔐 Accesso Operai</div>
-                    <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 20px;">Seleziona il tuo nome e inserisci la password (al primo accesso usa il tuo nome tutto minuscolo senza spazi).</div>
+                    <div style="font-size: 1.2rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 10px;">👋 Benvenuto</div>
+                    <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 25px;">Seleziona come desideri accedere:</div>
                     
-                    <div style="text-align: left; margin-bottom: 12px;">
+                    <button class="action-btn btn-orange" style="margin-bottom: 12px;" onclick="mostraVista('ufficio')">Accesso Ufficio / Admin</button>
+                    <button class="action-btn btn-dark" onclick="mostraVista('login_operaio')">Accesso Operai</button>
+                </div>
+            </div>
+
+            <!-- ================= 1. VISTA LOGIN OPERAIO ================= -->
+            <div id="viewLoginOperaio" class="view-section">
+                <div class="card-box" style="border-color: var(--brand-orange); text-align: center; padding: 25px 15px;">
+                    <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 8px;">🔐 Accesso Operai</div>
+                    
+                    <div style="text-align: left; margin-bottom: 10px;">
                         <label>Seleziona il tuo Nome *</label>
                         <select id="selectLoginOperaio">
                             <option value="">-- Il mio nome --</option>
                         </select>
                     </div>
 
-                    <div style="text-align: left; margin-bottom: 20px;">
+                    <div style="text-align: left; margin-bottom: 15px;">
                         <label>Password *</label>
                         <input type="password" id="inputPasswordLogin" placeholder="Inserisci password...">
                     </div>
 
-                    <button class="action-btn btn-orange" onclick="effettuaLoginOperaio()">Accedi</button>
+                    <button class="action-btn btn-orange" style="margin-bottom: 8px;" onclick="effettuaLoginOperaio()">Accedi</button>
+                    <button class="action-btn btn-dark" style="background: #64748b;" onclick="mostraVista('selezione')">← Indietro</button>
                 </div>
             </div>
 
-            <!-- ================= 2. SCHERMATA CAMBIO PASSWORD OBBLIGATORIO ================= -->
+            <!-- ================= 2. VISTA CAMBIO PASSWORD OPERAIO ================= -->
             <div id="viewCambioPassword" class="view-section">
-                <div class="card-box" style="border-color: var(--brand-orange); padding: 30px 20px;">
-                    <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); text-align: center; margin-bottom: 5px;">🔑 Cambio Password Obbligatorio</div>
-                    <div style="font-size: 0.8rem; color: var(--text-light); text-align: center; margin-bottom: 20px;">È il tuo primo accesso o stai usando la password predefinita. Scegli una nuova password personale per continuare.</div>
+                <div class="card-box" style="border-color: var(--brand-orange); padding: 25px 15px;">
+                    <div style="font-size: 1rem; font-weight: 800; color: var(--brand-dark); text-align: center; margin-bottom: 5px;">🔑 Cambio Password Obbligatorio</div>
+                    <div style="font-size: 0.75rem; color: var(--text-light); text-align: center; margin-bottom: 15px;">Scegli una nuova password personale (min 4 caratteri).</div>
 
-                    <div style="margin-bottom: 15px;">
-                        <label>Nuova Password Personale *</label>
-                        <input type="password" id="nuovaPasswordInput" placeholder="Minimo 4 caratteri...">
+                    <div style="margin-bottom: 10px;">
+                        <label>Nuova Password *</label>
+                        <input type="password" id="nuovaPasswordInput" placeholder="Nuova password...">
                     </div>
 
-                    <div style="margin-bottom: 20px;">
-                        <label>Conferma Nuova Password *</label>
-                        <input type="password" id="confermaPasswordInput" placeholder="Ripeti nuova password...">
+                    <div style="margin-bottom: 15px;">
+                        <label>Conferma Password *</label>
+                        <input type="password" id="confermaPasswordInput" placeholder="Ripeti password...">
                     </div>
 
                     <button class="action-btn btn-orange" onclick="salvaNuovaPassword()">Salva e Accedi</button>
                 </div>
             </div>
 
-            <!-- ================= 3. VISTA COMPILAZIONE FOGLIO LAVORO ================= -->
+            <!-- ================= 3. VISTA COMPILAZIONE FOGLIO LAVORO OPERAIO ================= -->
             <div id="viewFormOperaio" class="view-section">
                 <div class="user-logged-box">
                     <span id="labelUtenteConnesso">Utente: -</span>
@@ -113,7 +162,17 @@
                     
                     <div>
                         <label>Cerca Cantiere Aperto</label>
-                        <input type="text" id="inputRicercaCantiereOperaio" placeholder="Scrivi per filtrare i cantieri..." oninput="filtraSelectCantieriOperaio()">
+                        <input type="text" id="inputRicercaCantiereOperaio" placeholder="Scrivi per filtrare i cantieri..." oninput="popolaCantieriOperaio()">
+                    </div>
+
+                    <!-- BOX AGGIUNTA RAPIDA CANTIERE DA PARTE DELL'OPERAIO -->
+                    <div style="background: #f1f5f9; padding: 12px; border-radius: 10px; border: 1px dashed var(--brand-orange);">
+                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--brand-dark); margin-bottom: 6px;">➕ Cantiere non trovato? Crealo subito:</div>
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <input type="text" id="nuovoClienteOperaio" placeholder="Nome Cliente..." style="padding: 10px; font-size: 0.9rem;">
+                            <input type="text" id="nuovoIndirizzoOperaio" placeholder="Indirizzo Cantiere..." style="padding: 10px; font-size: 0.9rem;">
+                            <button type="button" class="action-btn btn-dark" style="padding: 10px; font-size: 0.85rem;" onclick="creaCantiereAlVoloOperaio()">Crea e Seleziona Cantiere</button>
+                        </div>
                     </div>
 
                     <div>
@@ -149,27 +208,14 @@
                     <div>
                         <label>Le tue Ore Lavorate *</label>
                         <select id="mieOreLavorate">
-                            <option value="">Seleziona ore...</option>
-                            <option value="0.5">0.5 Ore</option>
-                            <option value="1">1 Ora</option>
-                            <option value="1.5">1.5 Ore</option>
-                            <option value="2">2 Ore</option>
-                            <option value="2.5">2.5 Ore</option>
-                            <option value="3">3 Ore</option>
-                            <option value="3.5">3.5 Ore</option>
-                            <option value="4">4 Ore</option>
-                            <option value="4.5">4.5 Ore</option>
-                            <option value="5">5 Ore</option>
-                            <option value="5.5">5.5 Ore</option>
-                            <option value="6">6 Ore</option>
-                            <option value="6.5">6.5 Ore</option>
-                            <option value="7">7 Ore</option>
-                            <option value="7.5">7.5 Ore</option>
                             <option value="8" selected>8 Ore</option>
-                            <option value="8.5">8.5 Ore</option>
-                            <option value="9">9 Ore</option>
-                            <option value="9.5">9.5 Ore</option>
-                            <option value="10">10 Ore</option>
+                            <option value="7">7 Ore</option>
+                            <option value="6">6 Ore</option>
+                            <option value="5">5 Ore</option>
+                            <option value="4">4 Ore</option>
+                            <option value="3">3 Ore</option>
+                            <option value="2">2 Ore</option>
+                            <option value="1">1 Ora</option>
                         </select>
                     </div>
 
@@ -184,12 +230,12 @@
                     </div>
 
                     <div>
-                        <label>📷 Foto Bolle (Puoi selezionare più foto)</label>
+                        <label>📷 Foto Bolle</label>
                         <input type="file" id="fotoBolleInput" accept="image/*" multiple>
                     </div>
 
                     <div>
-                        <label>📷 Foto Lavori / Installazioni (Puoi selezionare più foto)</label>
+                        <label>📷 Foto Lavori</label>
                         <input type="file" id="fotoLavoriInput" accept="image/*" multiple>
                     </div>
 
@@ -197,6 +243,142 @@
                 </div>
             </div>
 
+            <!-- ================= 4. VISTA PANNELLO UFFICIO ================= -->
+            <div id="viewUfficio" class="view-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; background: #e2e8f0; padding: 10px 14px; border-radius: 10px; font-weight: 700; font-size: 0.9rem;">
+                    <span>📊 Pannello Amministrazione</span>
+                    <button class="action-btn btn-dark" style="width: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="mostraVista('selezione')">Cambia Vista</button>
+                </div>
+
+                <!-- CONTROLLO MANCATI FOGLI -->
+                <div class="card-box" style="border-color: #ef4444; background: #fff5f5;">
+                    <div style="font-size: 1rem; font-weight: 800; color: #b91c1c;">🚨 Controllo Ufficio: Mancati Fogli (Ultimi 2 Giorni)</div>
+                    <div style="overflow-x: auto;">
+                        <table class="riepilogo-table" id="tabellaControlloMancanti">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Dipendente</th>
+                                    <th>Ore</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpoTabellaControlloMancanti"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- GESTIONE PRESENZE / ASSENZE -->
+                <div>
+                    <div class="accordion-header" onclick="toggleAccordion('contentPresenze', this)">
+                        <span>📋 Gestione Presenze / Assenze</span>
+                        <span id="arrowPresenze">▼</span>
+                    </div>
+                    <div id="contentPresenze" class="accordion-content card-box" style="border-color: var(--brand-orange);">
+                        <div class="container-colleghi-scroll" id="listaPresenzeUfficio" style="max-height: 250px;"></div>
+                        <button class="action-btn btn-orange" onclick="salvaPresenzeUfficio()">Salva Stato Assenze</button>
+                    </div>
+                </div>
+
+                <!-- REGISTRAZIONE PER CONTO DIPENDENTI -->
+                <div>
+                    <div class="accordion-header" onclick="toggleAccordion('contentRegistrazione', this)">
+                        <span>✏️ Registra per conto Dipendenti</span>
+                        <span id="arrowRegistrazione">▼</span>
+                    </div>
+                    <div id="contentRegistrazione" class="accordion-content card-box" style="border-color: var(--brand-orange);">
+                        <div>
+                            <label>Cerca Cantiere</label>
+                            <input type="text" id="inputRicercaCantiereUfficio" placeholder="Filtra cantieri..." oninput="popolaSelectCantieriUfficio()">
+                        </div>
+                        <div>
+                            <label>Seleziona Cantiere</label>
+                            <select id="selectCantiereUfficio"></select>
+                        </div>
+                        <div>
+                            <label>Data Intervento</label>
+                            <input type="date" id="dataInterventoUfficio">
+                        </div>
+                        <div>
+                            <label>Dipendenti e Ore</label>
+                            <div class="container-colleghi-scroll" id="listaDipendentiUfficioMultiplo"></div>
+                        </div>
+                        <div>
+                            <label>Note</label>
+                            <textarea id="noteUfficio" rows="2" placeholder="Dettagli..."></textarea>
+                        </div>
+                        <button class="action-btn btn-orange" onclick="registraUfficioMultiplo()">Registra per conto Dipendenti</button>
+                    </div>
+                </div>
+
+                <!-- CREA NUOVO CANTIERE UFFICIO -->
+                <div class="card-box">
+                    <div style="font-size: 1rem; font-weight: 800; color: var(--brand-dark);">Inserisci Nuovo Cantiere</div>
+                    <div><label>Cliente</label><input type="text" id="nuovoCliente" placeholder="Nome cliente..."></div>
+                    <div><label>Indirizzo</label><input type="text" id="nuovoIndirizzo" placeholder="Indirizzo..."></div>
+                    <button class="action-btn btn-green" onclick="creaCantiereUfficio()">Crea Cantiere</button>
+                </div>
+
+                <!-- ARCHIVIO CANTIERI -->
+                <div class="card-box">
+                    <div style="font-size: 1rem; font-weight: 800; color: var(--brand-dark);">Archivio Cantieri</div>
+                    <div class="tabs-container">
+                        <button id="btnTabDaFare" class="tab-btn active-da-fare" onclick="cambiaCartella('da_fare')">📁 Da Terminare</button>
+                        <button id="btnTabTerminati" class="tab-btn" onclick="cambiaCartella('terminati')">📁 Terminati</button>
+                    </div>
+                    <div id="listaCantieriUfficio"></div>
+                </div>
+
+                <!-- RIEPILOGO ORE -->
+                <div class="card-box">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                        <div style="font-size: 1rem; font-weight: 800; color: var(--brand-dark);">📊 Riepilogo Ore</div>
+                        <button class="action-btn btn-orange" style="width: auto; padding: 10px; font-size: 0.8rem;" onclick="apriModaleFiltri()">📁 Filtri Avanzati</button>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="riepilogo-table">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Dipendente</th>
+                                    <th>Cantiere</th>
+                                    <th>Ore</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpoTabellaRiepilogo"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODALE FILTRI -->
+    <div class="modal-overlay" id="modalFiltri">
+        <div class="modal-card">
+            <div class="modal-header">
+                <span>📁 Archivio e Filtri</span>
+                <button class="close-modal-btn" onclick="chiudiModaleFiltri()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div><label>Filtra per Dipendente</label><select id="selectFiltroDipendente" onchange="filtraArchivioModale()"><option value="">Tutti</option></select></div>
+                <div><label>Filtra per Data</label><input type="date" id="inputFiltroData" onchange="filtraArchivioModale()"></div>
+                <div><label>Cerca Cantiere</label><input type="text" id="inputFiltroCantiere" placeholder="Cerca..." oninput="filtraArchivioModale()"></div>
+                <div style="font-size: 0.8rem; color: var(--text-light);" id="infoTotaleOreFiltro"></div>
+                <div style="overflow-x: auto;">
+                    <table class="riepilogo-table">
+                        <thead><tr><th>Data</th><th>Dipendente</th><th>Cantiere</th><th>Ore</th></tr></thead>
+                        <tbody id="corpoTabellaModaleFiltri"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE ZOOM FOTO -->
+    <div class="modal-overlay" id="modalFotoZoom" onclick="chiudiZoomFoto()">
+        <div style="max-width: 90%; max-height: 90%; display: flex; justify-content: center; align-items: center;" onclick="event.stopPropagation()">
+            <img id="imgZoomFull" src="" style="max-width: 100%; max-height: 85vh; border-radius: 10px;">
         </div>
     </div>
 
@@ -209,12 +391,37 @@
         ];
 
         let utenteCorrente = "";
+        let cartellaCorrente = 'da_fare';
 
         window.onload = function() {
-            document.getElementById('dataInterventoOperaio').value = new Date().toISOString().split('T')[0];
+            let oggiStr = new Date().toISOString().split('T')[0];
+            document.getElementById('dataInterventoOperaio').value = oggiStr;
+            document.getElementById('dataInterventoUfficio').value = oggiStr;
             popolaTendinaLogin();
         };
 
+        function mostraVista(vista) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            let sub = document.getElementById('sottotitoloHeader');
+
+            if (vista === 'selezione') {
+                document.getElementById('viewSelezioneRuolo').classList.add('active');
+                sub.innerText = "Portale Unificato";
+            } else if (vista === 'login_operaio') {
+                document.getElementById('viewLoginOperaio').classList.add('active');
+                sub.innerText = "Accesso Operai";
+            } else if (vista === 'ufficio') {
+                document.getElementById('viewUfficio').classList.add('active');
+                sub.innerText = "Pannello Ufficio";
+                popolaDipendentiUfficioMultiplo();
+                popolaTabellaPresenzeUfficio();
+                popolaSelectFiltroDipendenti();
+                aggiornaVistaUfficio();
+                eseguiControlloMancantiUfficio();
+            }
+        }
+
+        // GESTIONE LOGIN OPERAIO
         function popolaTendinaLogin() {
             let select = document.getElementById('selectLoginOperaio');
             select.innerHTML = '<option value="">-- Il mio nome --</option>';
@@ -223,47 +430,22 @@
             });
         }
 
-        function getPasswordDefault(nome) {
-            return nome.toLowerCase().replace(/\s+/g, '');
-        }
-
-        function getDatabasePassword(nome) {
-            let passwordDB = JSON.parse(localStorage.getItem('idra_password_operai')) || {};
-            return passwordDB[nome] || null;
-        }
-
-        function salvaDatabasePassword(nome, nuovaPass) {
-            let passwordDB = JSON.parse(localStorage.getItem('idra_password_operai')) || {};
-            passwordDB[nome] = nuovaPass;
-            localStorage.setItem('idra_password_operai', JSON.stringify(passwordDB));
-        }
-
         function effettuaLoginOperaio() {
             let nome = document.getElementById('selectLoginOperaio').value;
             let passInserita = document.getElementById('inputPasswordLogin').value.trim();
+            if (!nome || !passInserita) return alert("⚠️ Seleziona nome e password!");
 
-            if (!nome) {
-                alert("⚠️ Seleziona il tuo nome!");
-                return;
-            }
-            if (!passInserita) {
-                alert("⚠️ Inserisci la password!");
-                return;
-            }
-
-            let defPass = getPasswordDefault(nome);
-            let customPass = getDatabasePassword(nome);
+            let defPass = nome.toLowerCase().replace(/\s+/g, '');
+            let passwordDB = JSON.parse(localStorage.getItem('idra_password_operai')) || {};
+            let customPass = passwordDB[nome];
 
             if (!customPass) {
                 if (passInserita === defPass) {
                     utenteCorrente = nome;
                     document.getElementById('viewLoginOperaio').classList.remove('active');
                     document.getElementById('viewCambioPassword').classList.add('active');
-                    document.getElementById('inputPasswordLogin').value = '';
-                    return;
                 } else {
                     alert("⚠️ Password errata! Al primo accesso usa il tuo nome tutto minuscolo.");
-                    return;
                 }
             } else {
                 if (passInserita === customPass) {
@@ -277,249 +459,329 @@
         function salvaNuovaPassword() {
             let nuovaP = document.getElementById('nuovaPasswordInput').value.trim();
             let confermaP = document.getElementById('confermaPasswordInput').value.trim();
+            if (nuovaP.length < 4 || nuovaP !== confermaP) return alert("⚠️ Controlla le password (min 4 caratteri e coincidenti)!");
 
-            if (nuovaP.length < 4) {
-                alert("⚠️ La nuova password deve essere di almeno 4 caratteri.");
-                return;
-            }
-            if (nuovaP !== confermaP) {
-                alert("⚠️ Le password non coincidono!");
-                return;
-            }
+            let passwordDB = JSON.parse(localStorage.getItem('idra_password_operai')) || {};
+            passwordDB[utenteCorrente] = nuovaP;
+            localStorage.setItem('idra_password_operai', JSON.stringify(passwordDB));
 
-            let defPass = getPasswordDefault(utenteCorrente);
-            if (nuovaP === defPass) {
-                alert("⚠️ Per motivi di sicurezza, la nuova password deve essere diversa da quella predefinita!");
-                return;
-            }
-
-            salvaDatabasePassword(utenteCorrente, nuovaP);
-            alert("✅ Password aggiornata con successo! Benvenuto.");
-
-            document.getElementById('nuovaPasswordInput').value = '';
-            document.getElementById('confermaPasswordInput').value = '';
-
+            alert("✅ Password salvata!");
             avviaSessioneOperaio(utenteCorrente);
         }
 
         function avviaSessioneOperaio(nome) {
             utenteCorrente = nome;
             document.getElementById('labelUtenteConnesso').innerText = `Utente: ${utenteCorrente}`;
-            
-            document.getElementById('viewLoginOperaio').classList.remove('active');
-            document.getElementById('viewCambioPassword').classList.remove('active');
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById('viewFormOperaio').classList.add('active');
-            document.getElementById('inputPasswordLogin').value = '';
-
+            document.getElementById('sottotitoloHeader').innerText = "Portale Operai";
             popolaCantieriOperaio();
             popolaColleghiOperaio();
         }
 
         function esciLoginOperaio() {
             utenteCorrente = "";
-            document.getElementById('selectLoginOperaio').value = "";
-            document.getElementById('inputPasswordLogin').value = "";
-            document.getElementById('viewFormOperaio').classList.remove('active');
-            document.getElementById('viewLoginOperaio').classList.add('active');
+            mostraVista('selezione');
+        }
+
+        // FUNZIONE CREAZIONE CANTIERE AL VOLO DA PARTE DELL'OPERAIO
+        function creaCantiereAlVoloOperaio() {
+            let cliente = document.getElementById('nuovoClienteOperaio').value.trim();
+            let indirizzo = document.getElementById('nuovoIndirizzoOperaio').value.trim();
+            if (!cliente || !indirizzo) return alert("⚠️ Inserisci sia il cliente che l'indirizzo!");
+
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            cantieriDB.push({ cliente: cliente, indirizzo: indirizzo, completato: false, storico: [] });
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+
+            document.getElementById('nuovoClienteOperaio').value = '';
+            document.getElementById('nuovoIndirizzoOperaio').value = '';
+            document.getElementById('inputRicercaCantiereOperaio').value = '';
+
+            popolaCantieriOperaio();
+            let selectCantiere = document.getElementById('selectCantiereOperaio');
+            selectCantiere.selectedIndex = selectCantiere.options.length - 1;
+            alert("✅ Cantiere creato e selezionato con successo!");
         }
 
         function popolaCantieriOperaio() {
             let select = document.getElementById('selectCantiereOperaio');
-            let inputRicerca = document.getElementById('inputRicercaCantiereOperaio');
-            if (!select) return;
-
-            let query = inputRicerca ? inputRicerca.value.toLowerCase().trim() : '';
+            let query = document.getElementById('inputRicercaCantiereOperaio').value.toLowerCase().trim();
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             select.innerHTML = '';
 
-            let countAperti = 0;
+            let count = 0;
             cantieriDB.forEach((c, idx) => {
-                if (!c.completato) {
-                    let testoCompleto = `${c.cliente} - ${c.indirizzo}`.toLowerCase();
-                    if (query === '' || testoCompleto.includes(query)) {
-                        select.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo}</option>`;
-                        countAperti++;
-                    }
+                if (!c.completato && (`${c.cliente} - ${c.indirizzo}`.toLowerCase().includes(query))) {
+                    select.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo}</option>`;
+                    count++;
                 }
             });
-
-            if (countAperti === 0) {
-                select.innerHTML = '<option value="">Nessun cantiere aperto trovato</option>';
-            }
-        }
-
-        function filtraSelectCantieriOperaio() {
-            popolaCantieriOperaio();
+            if (count === 0) select.innerHTML = '<option value="">Nessun cantiere trovato</option>';
         }
 
         function popolaColleghiOperaio() {
             let container = document.getElementById('listaColleghiOperaio');
-            if (!container) return;
             container.innerHTML = '';
             elencoOperaiTotali.forEach(op => {
-                if (op === utenteCorrente) return; 
+                if (op === utenteCorrente) return;
                 let idSelect = `ore_collega_${op.replace(/\s+/g, '_')}`;
-                let optionsHtml = '';
-                for (let i = 0.5; i <= 10; i += 0.5) {
-                    let sel = (i === 8) ? 'selected' : '';
-                    optionsHtml += `<option value="${i}" ${sel}>${i} ${i === 1 ? 'Ora' : 'Ore'}</option>`;
-                }
                 container.innerHTML += `
                     <div class="collega-card-item">
-                        <label>
-                            <input type="checkbox" name="collegaCheckbox" value="${op}" onchange="toggleSelectCollega('${idSelect}', this)">
-                            ${op}
-                        </label>
-                        <select id="${idSelect}" disabled>${optionsHtml}</select>
+                        <label><input type="checkbox" name="collegaCheckbox" value="${op}" onchange="document.getElementById('${idSelect}').disabled = !this.checked"> ${op}</label>
+                        <select id="${idSelect}" disabled><option value="8">8 Ore</option><option value="7">7 Ore</option><option value="6">6 Ore</option><option value="5">5 Ore</option><option value="4">4 Ore</option></select>
                     </div>
                 `;
             });
         }
 
-        function toggleSelectCollega(idSelect, checkbox) {
-            let selectEl = document.getElementById(idSelect);
-            if (selectEl) selectEl.disabled = !checkbox.checked;
-        }
-
-        // Funzione ottimizzata per comprimere e convertire le immagini in Base64 (evita il blocco di memoria)
+        // COMPRESSIONE IMMAGINI
         function comprimiEConvertiImmagine(file) {
             return new Promise((resolve) => {
                 let reader = new FileReader();
                 reader.readAsDataURL(file);
-                reader.onload = function(event) {
+                reader.onload = function(e) {
                     let img = new Image();
-                    img.src = event.target.result;
+                    img.src = e.target.result;
                     img.onload = function() {
                         let canvas = document.createElement('canvas');
-                        let maxDim = 1000; // Imposta la dimensione massima a 1000px per alleggerire il file
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > height) {
-                            if (width > maxDim) {
-                                height *= maxDim / width;
-                                width = maxDim;
-                            }
-                        } else {
-                            if (height > maxDim) {
-                                width *= maxDim / height;
-                                height = maxDim;
-                            }
-                        }
-
-                        canvas.width = width;
-                        canvas.height = height;
-                        let ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-
-                        // Converte in formato JPEG compresso al 75%
-                        let dataUrl = canvas.toDataURL('image/jpeg', 0.75);
-                        resolve(dataUrl);
+                        let maxDim = 1000, w = img.width, h = img.height;
+                        if (w > h && w > maxDim) { h *= maxDim / w; w = maxDim; }
+                        else if (h > maxDim) { w *= maxDim / h; h = maxDim; }
+                        canvas.width = w; canvas.height = h;
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', 0.75));
                     };
-                    img.onerror = function() {
-                        resolve(null);
-                    };
-                };
-                reader.onerror = function() {
-                    resolve(null);
                 };
             });
         }
 
         async function elaboraListaFile(fileList) {
-            let arrayBase64 = [];
-            if (!fileList || fileList.length === 0) return arrayBase64;
+            let arr = [];
             for (let i = 0; i < fileList.length; i++) {
-                let base64 = await comprimiEConvertiImmagine(fileList[i]);
-                if (base64) arrayBase64.push(base64);
+                let b64 = await comprimiEConvertiImmagine(fileList[i]);
+                if (b64) arr.push(b64);
             }
-            return arrayBase64;
+            return arr;
         }
 
         async function salvaFoglioLavoroOperaio() {
-            let cantiereIdx = document.getElementById('selectCantiereOperaio').value;
-            let statoCantiereIntervento = document.getElementById('selectStatoCantiereIntervento').value;
+            let cIdx = document.getElementById('selectCantiereOperaio').value;
+            let stato = document.getElementById('selectStatoCantiereIntervento').value;
             let data = document.getElementById('dataInterventoOperaio').value;
-            let tipoLavoro = document.getElementById('tipoLavoroOperaio').value;
-            let mieOre = document.getElementById('mieOreLavorate').value;
+            let tipo = document.getElementById('tipoLavoroOperaio').value;
+            let ore = document.getElementById('mieOreLavorate').value;
             let note = document.getElementById('noteInterventoOperaio').value.trim();
 
-            if (cantiereIdx === "") {
-                alert("⚠️ Errore: Seleziona obbligatoriamente un cantiere!");
-                return;
-            }
-            if (statoCantiereIntervento === "") {
-                alert("⚠️ Errore: Seleziona lo stato del cantiere per questo intervento!");
-                return;
-            }
-            if (mieOre === "") {
-                alert("⚠️ Errore: Seleziona le ore lavorative!");
-                return;
-            }
-            if (note === "") {
-                alert("⚠️ Errore: Inserisci le note o i lavori eseguiti!");
-                return;
-            }
+            if (cIdx === "" || stato === "" || !note) return alert("⚠️ Compila tutti i campi obbligatori!");
 
-            let partecipantiArray = [`${utenteCorrente} (${mieOre}h)`];
-            let collegheCheck = document.querySelectorAll('input[name="collegaCheckbox"]:checked');
-            collegheCheck.forEach(cb => {
-                let nomeCollega = cb.value;
-                let idSelect = `ore_collega_${nomeCollega.replace(/\s+/g, '_')}`;
-                let selectOreCollega = document.getElementById(idSelect);
-                let oreCollega = selectOreCollega ? selectOreCollega.value : 8;
-                participantiArray.push(`${nomeCollega} (${oreCollega}h)`);
+            let partecipanti = [`${utenteCorrente} (${ore}h)`];
+            document.querySelectorAll('input[name="collegaCheckbox"]:checked').forEach(cb => {
+                let oCollega = document.getElementById(`ore_collega_${cb.value.replace(/\s+/g, '_')}`).value;
+                participanti.push(`${cb.value} (${oCollega}h)`);
             });
 
-            let fileBolle = document.getElementById('fotoBolleInput').files;
-            let fileLavori = document.getElementById('fotoLavoriInput').files;
-
-            let bolleBase64Array = await elaboraListaFile(fileBolle);
-            let lavoriBase64Array = await elaboraListaFile(fileLavori);
+            let bolle = await elaboraListaFile(document.getElementById('fotoBolleInput').files);
+            let lavori = await elaboraListaFile(document.getElementById('fotoLavoriInput').files);
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            if (!cantieriDB[cantiereIdx].storico) cantieriDB[cantiereIdx].storico = [];
+            if (!cantieriDB[cIdx].storico) cantieriDB[cIdx].storico = [];
 
-            cantieriDB[cantiereIdx].storico.push({
-                data: data,
-                tipo: tipoLavoro,
-                operai: partecipantiArray.join(', '),
-                note: note,
-                statoIntervento: statoCantiereIntervento,
-                fotoBolle: bolleBase64Array,
-                fotoLavori: lavoriBase64Array
-            });
+            cantieriDB[cIdx].storico.push({ data, tipo, operai: partecipanti.join(', '), note, statoIntervento: stato, fotoBolle: bolle, fotoLavori: lavori });
+            cantieriDB[cIdx].completato = (stato === "Terminato");
 
-            if (statoCantiereIntervento === "Terminato") {
-                cantieriDB[cantiereIdx].completato = true;
-            } else {
-                cantieriDB[cantiereIdx].completato = false;
-            }
-
-            try {
-                localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-                alert("✅ Foglio di lavoro e foto salvati con successo!");
-            } catch (e) {
-                alert("⚠️ Memoria del browser quasi piena. Prova a caricare meno foto o immagini più leggere.");
-                return;
-            }
-
-            // Reset form
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+            alert("✅ Salvato con successo!");
             document.getElementById('noteInterventoOperaio').value = '';
-            document.getElementById('selectStatoCantiereIntervento').value = '';
-            document.getElementById('mieOreLavorate').value = '8';
-            document.getElementById('fotoBolleInput').value = '';
-            document.getElementById('fotoLavoriInput').value = '';
-            if(document.getElementById('inputRicercaCantiereOperaio')) document.getElementById('inputRicercaCantiereOperaio').value = '';
-            
             popolaCantieriOperaio();
+        }
 
-            document.querySelectorAll('input[name="collegaCheckbox"]').forEach(cb => {
-                cb.checked = false;
-                let idSelect = `ore_collega_${cb.value.replace(/\s+/g, '_')}`;
-                let sel = document.getElementById(idSelect);
-                if(sel) sel.disabled = true;
+        // GESTIONE UFFICIO
+        function popolaSelectFiltroDipendenti() {
+            let sel = document.getElementById('selectFiltroDipendente');
+            sel.innerHTML = '<option value="">Tutti</option>';
+            elencoOperaiTotali.forEach(op => sel.innerHTML += `<option value="${op}">${op}</option>`);
+        }
+
+        function apriModaleFiltri() { document.getElementById('modalFiltri').classList.add('open'); filtraArchivioModale(); }
+        function chiudiModaleFiltri() { document.getElementById('modalFiltri').classList.remove('open'); }
+        function apriZoomFoto(src) { document.getElementById('imgZoomFull').src = src; document.getElementById('modalFotoZoom').classList.add('open'); }
+        function chiudiZoomFoto() { document.getElementById('modalFotoZoom').classList.remove('open'); }
+        function toggleAccordion(id, el) { document.getElementById(id).classList.toggle('open'); el.querySelector('span:last-child').innerText = document.getElementById(id).classList.contains('open') ? '▲' : '▼'; }
+
+        function popolaDipendentiUfficioMultiplo() {
+            let c = document.getElementById('listaDipendentiUfficioMultiplo');
+            c.innerHTML = '';
+            elencoOperaiTotali.forEach(op => {
+                let id = `ore_uff_${op.replace(/\s+/g, '_')}`;
+                c.innerHTML += `<div class="collega-card-item"><label><input type="checkbox" name="dipUffChk" value="${op}" onchange="document.getElementById('${id}').disabled = !this.checked"> ${op}</label><select id="${id}" disabled><option value="8">8h</option><option value="7">7h</option><option value="6">6h</option></select></div>`;
             });
+        }
+
+        function popolaTabellaPresenzeUfficio() {
+            let c = document.getElementById('listaPresenzeUfficio');
+            c.innerHTML = '';
+            let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
+            elencoOperaiTotali.forEach(op => {
+                let sId = op.replace(/\s+/g, '_');
+                let d = assenzeDB[op] || { stato: 'Presente', finoA: '', tipo: 'Ferie' };
+                c.innerHTML += `<div class="presenza-item"><b>${op}</b><select id="st_${sId}" onchange="document.getElementById('det_${sId}').style.display = (this.value==='Assente'?'flex':'none')"><option value="Presente" ${d.stato==='Presente'?'selected':''}>Presente</option><option value="Assente" ${d.stato==='Assente'?'selected':''}>Assente</option></select><div id="det_${sId}" style="display:${d.stato==='Assente'?'flex':'none'}; gap:5px;"><select id="tp_${sId}"><option value="Ferie">Ferie</option><option value="Malattia">Malattia</option></select><input type="date" id="fn_${sId}" value="${d.finoA}"></div></div>`;
+            });
+        }
+
+        function salvaPresenzeUfficio() {
+            let db = {};
+            elencoOperaiTotali.forEach(op => {
+                let id = op.replace(/\s+/g, '_');
+                db[op] = { stato: document.getElementById(`st_${id}`).value, tipo: document.getElementById(`tp_${id}`).value, finoA: document.getElementById(`fn_${id}`).value };
+            });
+            localStorage.setItem('idra_assenze_dettaglio_db', JSON.stringify(db));
+            alert("✅ Presenze salvate!");
+            eseguiControlloMancantiUfficio();
+        }
+
+        function creaCantiereUfficio() {
+            let cliente = document.getElementById('nuovoCliente').value.trim();
+            let indirizzo = document.getElementById('nuovoIndirizzo').value.trim();
+            if (!cliente || !indirizzo) return alert("Inserisci cliente e indirizzo!");
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            cantieriDB.push({ cliente, indirizzo, completato: false, storico: [] });
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+            document.getElementById('nuovoCliente').value = ''; document.getElementById('nuovoIndirizzo').value = '';
+            aggiornaVistaUfficio();
+            alert("✅ Cantiere creato!");
+        }
+
+        function popolaSelectCantieriUfficio() {
+            let sel = document.getElementById('selectCantiereUfficio');
+            let q = document.getElementById('inputRicercaCantiereUfficio').value.toLowerCase().trim();
+            let db = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            sel.innerHTML = '';
+            db.forEach((c, idx) => {
+                if (!c.completato && `${c.cliente} - ${c.indirizzo}`.toLowerCase().includes(q)) {
+                    sel.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo}</option>`;
+                }
+            });
+        }
+
+        function registraUfficioMultiplo() {
+            let idx = document.getElementById('selectCantiereUfficio').value;
+            let data = document.getElementById('dataInterventoUfficio').value;
+            let note = document.getElementById('noteUfficio').value.trim();
+            if (idx === "") return alert("Seleziona cantiere!");
+
+            let ops = [];
+            document.querySelectorAll('input[name="dipUffChk"]:checked').forEach(cb => {
+                let o = document.getElementById(`ore_uff_${cb.value.replace(/\s+/g, '_')}`).value;
+                ops.push(`${cb.value} (${o})`);
+            });
+            if (ops.length === 0) return alert("Seleziona dipendenti!");
+
+            let db = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            if (!db[idx].storico) db[idx].storico = [];
+            db[idx].storico.push({ data, tipo: "Ufficio", operai: ops.join(', '), note, statoIntervento: "In Corso", fotoBolle: [], fotoLavori: [] });
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(db));
+            alert("✅ Registrato!");
+            aggiornaVistaUfficio();
+        }
+
+        function cambiaCartella(t) {
+            cartellaCorrente = t;
+            document.getElementById('btnTabDaFare').className = t === 'da_fare' ? 'tab-btn active-da-fare' : 'tab-btn';
+            document.getElementById('btnTabTerminati').className = t === 'terminati' ? 'tab-btn active-terminati' : 'tab-btn';
+            aggiornaVistaUfficio();
+        }
+
+        function aggiornaVistaUfficio() {
+            popolaSelectCantieriUfficio();
+            let db = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            let cont = document.getElementById('listaCantieriUfficio');
+            cont.innerHTML = '';
+            db.forEach((c, idx) => {
+                if ((cartellaCorrente === 'da_fare' && !c.completato) || (cartellaCorrente === 'terminati' && c.completato)) {
+                    let stHtml = '';
+                    if (c.storico) {
+                        c.storico.forEach(s => {
+                            let fb = s.fotoBolle ? s.fotoBolle.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('') : '';
+                            let fl = s.fotoLavori ? s.fotoLavori.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('') : '';
+                            stHtml += `<div style="background:#f1f5f9; padding:8px; border-radius:6px; margin-top:5px; font-size:0.8rem;"><b>${s.data}</b> - ${s.operai}<br><i>${s.note}</i><div class="foto-thumb-container">${fb}${fl}</div></div>`;
+                        });
+                    }
+                    cont.innerHTML += `<div class="cantiere-card ${c.completato?'terminato':''}"><div style="font-weight:800;">${c.cliente}</div><div style="font-size:0.8rem; color:var(--text-light);">${c.indirizzo}</div>${stHtml}<div style="display:flex; gap:6px; margin-top:8px;"><button class="action-btn ${c.completato?'btn-green':'btn-orange'}" style="padding:6px; font-size:0.8rem;" onclick="toggleStato(${idx})">${c.completato?'Riapri':'Termina'}</button><button class="action-btn btn-danger" onclick="eliminaCantiere(${idx})">Elimina</button></div></div>`;
+                }
+            });
+            aggiornaTabellaRiepilogo(db);
+        }
+
+        function toggleStato(idx) {
+            let db = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            db[idx].completato = !db[idx].completato;
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(db));
+            aggiornaVistaUfficio();
+        }
+
+        function eliminaCantiere(idx) {
+            if (confirm("Eliminare?")) {
+                let db = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+                db.splice(idx, 1);
+                localStorage.setItem('idra_cantieri_db', JSON.stringify(db));
+                aggiornaVistaUfficio();
+            }
+        }
+
+        function raccogliRighe(db) {
+            let righe = [];
+            db.forEach(c => {
+                if (c.storico) {
+                    c.storico.forEach(s => {
+                        s.operai.split(',').forEach(p => {
+                            let m = p.trim().match(/^(.*?)\s*\(([\d.]+)h\)$/);
+                            if (m) righe.push({ data: s.data, dipendente: m[1].trim(), cantiere: c.cliente, oreNum: parseFloat(m[2]) || 0, ore: `${m[2]}h` });
+                        });
+                    });
+                }
+            });
+            return righe;
+        }
+
+        function aggiornaTabellaRiepilogo(db) {
+            let tb = document.getElementById('corpoTabellaRiepilogo');
+            tb.innerHTML = '';
+            let righe = raccogliRighe(db).slice(0, 5);
+            if (righe.length === 0) { tb.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-light);">Nessun dato.</td></tr>`; return; }
+            righe.forEach(r => tb.innerHTML += `<tr><td><b>${r.data}</b></td><td><b>${r.dipendente}</b></td><td>${r.cantiere}</td><td><b>${r.ore}</b></td></tr>`);
+        }
+
+        function filtraArchivioModale() {
+            let dF = document.getElementById('selectFiltroDipendente').value;
+            let dtF = document.getElementById('inputFiltroData').value;
+            let cF = document.getElementById('inputFiltroCantiere').value.toLowerCase().trim();
+            let tb = document.getElementById('corpoTabellaModaleFiltri');
+            tb.innerHTML = '';
+            let righe = raccogliRighe(JSON.parse(localStorage.getItem('idra_cantieri_db')) || []).filter(r => (dF === "" || r.dipendente === dF) && (dtF === "" || r.data.includes(dtF)) && (cF === "" || r.cantiere.toLowerCase().includes(cF)));
+            let tot = 0;
+            righe.forEach(r => { tot += r.oreNum; tb.innerHTML += `<tr><td><b>${r.data}</b></td><td><b>${r.dipendente}</b></td><td>${r.cantiere}</td><td><b>${r.ore}</b></td></tr>`; });
+            document.getElementById('infoTotaleOreFiltro').innerHTML = `<b>Totale Ore:</b> ${tot}h`;
+        }
+
+        function eseguiControlloMancantiUfficio() {
+            let tb = document.getElementById('corpoTabellaControlloMancanti');
+            tb.innerHTML = '';
+            let db = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            let oggi = new Date(), trovati = 0;
+            for (let i = 1; i <= 2; i++) {
+                let d = new Date(); d.setDate(oggi.getDate() - i);
+                let dStr = d.toISOString().split('T')[0];
+                elencoOperaiTotali.forEach(op => {
+                    let oreTot = 0;
+                    db.forEach(c => { if(c.storico) c.storico.forEach(s => { if(s.data === dStr && s.operai.includes(op)) oreTot += 8; }); });
+                    if(oreTot < 8) {
+                        trovati++;
+                        tb.innerHTML += `<tr><td>${dStr}</td><td>${op}</td><td><span class="badge badge-alert">Mancano ${8-oreTot}h</span></td></tr>`;
+                    }
+                });
+            }
+            if(trovati === 0) tb.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--success);">Tutti in regola! 🎉</td></tr>`;
         }
     </script>
 </body>
