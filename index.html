@@ -2,155 +2,203 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Idrotech Varese - Area Operai</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --brand-orange: #f28c1e;
             --brand-orange-hover: #d97712;
-            --brand-dark: #2d3748;
+            --brand-dark: #1e293b;
             --success: #16a34a;
             --danger: #dc2626;
-            --bg: #0f172a;
+            --bg: #0b0f19;
             --card-bg: #ffffff;
-            --text: #1e293b;
+            --text: #0f172a;
             --text-light: #64748b;
-            --border: #e2e8f0;
+            --border: #cbd5e1;
         }
-        * { box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 12px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
-        .container { width: 100%; max-width: 460px; background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); }
-        .brand-header { text-align: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #f1f5f9; }
-        .brand-logo-text { font-size: 1.5rem; font-weight: 800; color: var(--brand-dark); margin: 0; }
-        .brand-logo-text span { color: var(--brand-orange); }
-        .brand-subtitle { font-size: 0.75rem; color: var(--text-light); font-style: italic; margin-top: 4px; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; justify-content: center; min-height: 100vh; }
         
-        .home-screen { text-align: center; padding: 10px 0; }
-        .home-menu-title { font-size: 0.85rem; font-weight: 600; color: var(--text-light); margin-bottom: 15px; text-transform: uppercase; }
-        .home-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 16px; font-size: 1.05rem; font-weight: 600; border-radius: 12px; border: none; cursor: pointer; margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .btn-lavoro { background-color: var(--brand-orange); color: white; }
-        .btn-lista { background-color: var(--brand-dark); color: white; }
+        .app-container { width: 100%; max-width: 500px; background: var(--card-bg); min-height: 100vh; display: flex; flex-direction: column; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
+        
+        .header-app { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 25px 20px 20px 20px; text-align: center; border-bottom: 4px solid var(--brand-orange); }
+        .header-app h1 { font-size: 1.6rem; font-weight: 800; margin: 0; letter-spacing: 0.5px; }
+        .header-app h1 span { color: var(--brand-orange); }
+        .header-app p { font-size: 0.8rem; color: #94a3b8; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+
+        .content-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 16px; }
+
+        .home-menu { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        .big-menu-btn { display: flex; align-items: center; padding: 22px 20px; border-radius: 16px; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; text-align: left; gap: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); transition: transform 0.1s; }
+        .big-menu-btn:active { transform: scale(0.98); }
+        .btn-lavoro-bg { background: linear-gradient(135deg, #f28c1e, #d97712); color: white; }
+        .btn-lista-bg { background: linear-gradient(135deg, #334155, #1e293b); color: white; }
+        .big-menu-btn span { font-size: 1.8rem; }
 
         .app-section { display: none; }
-        .app-section.active { display: block; }
+        .app-section.active { display: flex; flex-direction: column; gap: 14px; animation: fadeIn 0.2s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        .top-nav-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 4px; }
+        .nav-back { background: #f1f5f9; color: var(--text); border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .nav-title { font-size: 1.05rem; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px; margin: 0; }
+
+        label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
         
-        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        .back-btn { background: #f1f5f9; color: var(--text); border: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-        .top-title { font-size: 1rem; font-weight: 700; color: #0f172a; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-light); margin-bottom: 4px; margin-top: 10px; text-transform: uppercase; }
-        
-        input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.9rem; background-color: #f8fafc; color: var(--text); font-family: 'Inter', sans-serif; }
+        input, select, textarea { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; background-color: #f8fafc; color: var(--text); font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; }
+        input:focus, select:focus, textarea:focus { border-color: var(--brand-orange); background-color: #fff; }
         input[type="date"] { appearance: none; -webkit-appearance: none; background-color: #f8fafc; }
 
-        button { width: 100%; padding: 13px; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 10px; }
-        .btn-concluso { background-color: var(--success); color: white; }
-        .btn-secondary { background-color: #e2e8f0; color: var(--text); }
-        hr { border: 0; border-top: 1px solid var(--border); margin: 15px 0; }
-        ul { list-style: none; padding: 0; margin: 0; max-height: 180px; overflow-y: auto; }
-        li { background: #f8fafc; border: 1px solid var(--border); margin-bottom: 6px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; font-size: 0.9rem; }
-        .badge { background: #ffedd5; color: #c2410c; padding: 2px 6px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
-        .delete-btn { background: #fee2e2; color: var(--danger); border: none; width: 28px; height: 28px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .action-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 1.05rem; font-weight: 700; cursor: pointer; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.1); margin-top: 10px; }
+        .btn-green { background-color: var(--success); color: white; }
+        .btn-blue-light { background-color: #e0f2fe; color: #0369a1; border: 2px dashed #38bdf8; }
+        .btn-gray { background-color: #e2e8f0; color: #334155; }
         
-        .preview-box { margin-top: 6px; font-size: 0.8rem; color: var(--success); font-weight: 600; }
+        .preview-box { background: #f0fdf4; border: 2px solid #bbf7d0; padding: 12px; border-radius: 10px; font-size: 0.85rem; color: #166534; font-weight: 600; text-align: center; }
+
+        ul { list-style: none; padding: 0; margin: 0; max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        li { background: #f8fafc; border: 1px solid var(--border); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; border-radius: 10px; font-size: 0.95rem; }
+        .badge { background: #ffedd5; color: #c2410c; padding: 3px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 800; }
+        .delete-btn { background: #fee2e2; color: var(--danger); border: none; width: 32px; height: 32px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- HOME OPERAI -->
-        <div id="sezione-home" class="app-section active">
-            <div class="brand-header">
-                <h1 class="brand-logo-text">IDROTECH <span>VARESE</span></h1>
-                <div class="brand-subtitle">Area Operai - Cantiere</div>
-            </div>
-            <div class="home-screen">
-                <div class="home-menu-title">Seleziona Operazione</div>
-                <button class="home-btn btn-lavoro" onclick="cambiaSezione('rapportino')">📝 Compila Foglio di Lavoro</button>
-                <button class="home-btn btn-lista" onclick="cambiaSezione('lista')">📋 Lista Materiali</button>
-            </div>
+    <div class="app-container">
+        <div class="header-app">
+            <h1>IDROTECH <span>VARESE</span></h1>
+            <p>Pannello Operativo Cantieri</p>
         </div>
 
-        <!-- FOGLIO DI LAVORO -->
-        <div id="sezione-rapportino" class="app-section">
-            <div class="top-nav">
-                <button class="back-btn" onclick="cambiaSezione('home')">🏠 Home</button>
-                <h2 class="top-title">Foglio Lavoro</h2>
+        <div class="content-body">
+            <!-- HOME OPERAI -->
+            <div id="sezione-home" class="app-section active">
+                <div style="font-size: 0.9rem; font-weight: 700; color: var(--text-light); text-align: center; margin-top: 10px; text-transform: uppercase;">Seleziona Operazione</div>
+                <div class="home-menu">
+                    <button class="big-menu-btn btn-lavoro-bg" onclick="cambiaSezione('rapportino')">
+                        <span>📝</span>
+                        <div>
+                            <div>Compila Foglio di Lavoro</div>
+                            <div style="font-size: 0.75rem; font-weight: 400; opacity: 0.85; margin-top: 3px;">Rapportino, ore e chiusura cantiere</div>
+                        </div>
+                    </button>
+                    <button class="big-menu-btn btn-lista-bg" onclick="cambiaSezione('lista')">
+                        <span>📋</span>
+                        <div>
+                            <div>Lista Materiali</div>
+                            <div style="font-size: 0.75rem; font-weight: 400; opacity: 0.85; margin-top: 3px;">Preleva tubi, raccordi e invia lista</div>
+                        </div>
+                    </button>
+                </div>
             </div>
-            
-            <label>Data</label>
-            <input type="date" id="rapData">
-            
-            <label>Seleziona Cantiere</label>
-            <select id="selezionaCantiere" onchange="caricaDatiCantiere()">
-                <option value="">-- Seleziona cantiere --</option>
-            </select>
-            <input type="hidden" id="rapCliente">
-            <input type="hidden" id="rapIndirizzo">
 
-            <label>Tipo di Lavoro</label>
-            <select id="rapTipoLavoro">
-                <option value="Nuovo Lavoro">Nuovo Lavoro / Installazione</option>
-                <option value="Continuazione">Continuazione Lavoro</option>
-                <option value="Riparazione / Urgenza">Riparazione / Urgenza</option>
-                <option value="Manutenzione">Manutenzione</option>
-            </select>
+            <!-- FOGLIO DI LAVORO -->
+            <div id="sezione-rapportino" class="app-section">
+                <div class="top-nav-bar">
+                    <button class="nav-back" onclick="cambiaSezione('home')">🏠 Home</button>
+                    <h2 class="nav-title">Foglio Lavoro</h2>
+                </div>
+                
+                <div>
+                    <label>Data Intervento</label>
+                    <input type="date" id="rapData">
+                </div>
+                
+                <div>
+                    <label>Seleziona Cantiere</label>
+                    <select id="selezionaCantiere" onchange="caricaDatiCantiere()">
+                        <option value="">-- Seleziona cantiere attivo --</option>
+                    </select>
+                    <input type="hidden" id="rapCliente">
+                    <input type="hidden" id="rapIndirizzo">
+                </div>
 
-            <label>Operai Presenti</label>
-            <input type="text" id="rapOperai" placeholder="Es. Mario, Luca">
+                <div>
+                    <label>Tipo di Lavoro</label>
+                    <select id="rapTipoLavoro">
+                        <option value="Nuovo Lavoro">Nuovo Lavoro / Installazione</option>
+                        <option value="Continuazione">Continuazione Lavoro</option>
+                        <option value="Riparazione / Urgenza">Riparazione / Urgenza</option>
+                        <option value="Manutenzione">Manutenzione</option>
+                    </select>
+                </div>
 
-            <label>Ore Lavoro</label>
-            <select id="rapOre">
-                <option value="">Seleziona ore...</option>
-                <option value="1 Ora">1 Ora</option>
-                <option value="2 Ore">2 Ore</option>
-                <option value="3 Ore">3 Ore</option>
-                <option value="4 Ore">4 Ore</option>
-                <option value="5 Ore">5 Ore</option>
-                <option value="6 Ore">6 Ore</option>
-                <option value="7 Ore">7 Ore</option>
-                <option value="8 Ore">8 Ore</option>
-            </select>
+                <div>
+                    <label>Operai Presenti</label>
+                    <input type="text" id="rapOperai" placeholder="Es. Mario, Luca">
+                </div>
 
-            <label>Note / Lavori Eseguiti</label>
-            <textarea id="rapNote" rows="2" placeholder="Descrivi il lavoro fatto..."></textarea>
+                <div>
+                    <label>Ore Lavoro</label>
+                    <select id="rapOre">
+                        <option value="">Seleziona ore...</option>
+                        <option value="1 Ora">1 Ora</option>
+                        <option value="2 Ore">2 Ore</option>
+                        <option value="3 Ore">3 Ore</option>
+                        <option value="4 Ore">4 Ore</option>
+                        <option value="5 Ore">5 Ore</option>
+                        <option value="6 Ore">6 Ore</option>
+                        <option value="7 Ore">7 Ore</option>
+                        <option value="8 Ore">8 Ore</option>
+                    </select>
+                </div>
 
-            <label>Foto Bolla / Documento</label>
-            <input type="file" id="fotoBolla" accept="image/*" capture="environment" style="display:none;" onchange="mostraStatoFoto()">
-            <button class="btn-secondary" onclick="document.getElementById('fotoBolla').click()" style="background:#e0f2fe; color:#0369a1; border: 1px dashed #7dd3fc; margin-top: 4px;">📷 Allega Foto Bolla / Documento</button>
-            <div id="statoFoto" class="preview-box" style="display:none;"></div>
+                <div>
+                    <label>Note / Lavori Eseguiti</label>
+                    <textarea id="rapNote" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea>
+                </div>
 
-            <button class="btn-concluso" onclick="salvaEConcludiCantiere()">✅ Salva e Segna Cantiere Concluso</button>
-        </div>
+                <div>
+                    <label>Foto Bolla / Documento</label>
+                    <input type="file" id="fotoBolla" accept="image/*" capture="environment" style="display:none;" onchange="mostraStatoFoto()">
+                    <button class="action-btn btn-blue-light" onclick="document.getElementById('fotoBolla').click()" style="margin-top:0;">📷 Allega Foto Bolla / Documento</button>
+                    <div id="statoFoto" class="preview-box" style="display:none; margin-top: 8px;"></div>
+                </div>
 
-        <!-- LISTA MATERIALI -->
-        <div id="sezione-lista" class="app-section">
-            <div class="top-nav">
-                <button class="back-btn" onclick="cambiaSezione('home')">🏠 Home</button>
-                <h2 class="top-title">Lista Materiali</h2>
+                <button class="action-btn btn-green" onclick="salvaEConcludiCantiere()">✅ Salva e Segna Cantiere Concluso</button>
             </div>
-            
-            <label>Riferimento Cantiere</label>
-            <input type="text" id="nomeCantiere" placeholder="Nome cantiere">
 
-            <label>Categoria</label>
-            <select id="categoriaSelect" onchange="aggiornaMateriali()">
-                <option value="">Seleziona categoria...</option>
-            </select>
+            <!-- LISTA MATERIALI -->
+            <div id="sezione-lista" class="app-section">
+                <div class="top-nav-bar">
+                    <button class="nav-back" onclick="cambiaSezione('home')">🏠 Home</button>
+                    <h2 class="nav-title">Lista Materiali</h2>
+                </div>
+                
+                <div>
+                    <label>Riferimento Cantiere</label>
+                    <input type="text" id="nomeCantiere" placeholder="Nome cantiere">
+                </div>
 
-            <label>Articolo</label>
-            <select id="materialeSelect">
-                <option value="">Prima seleziona categoria...</option>
-            </select>
+                <div>
+                    <label>Categoria</label>
+                    <select id="categoriaSelect" onchange="aggiornaMateriali()">
+                        <option value="">Seleziona categoria...</option>
+                    </select>
+                </div>
 
-            <label>Quantità</label>
-            <input type="number" id="quantitaInput" value="1" min="1">
+                <div>
+                    <label>Articolo</label>
+                    <select id="materialeSelect">
+                        <option value="">Prima seleziona categoria...</option>
+                    </select>
+                </div>
 
-            <button class="btn-concluso" onclick="aggiungiMateriale()" style="background:var(--brand-orange); margin-top: 12px;">Aggiungi alla Lista</button>
-            <hr>
-            <ul id="listaSpesa"></ul>
-            <button class="btn-concluso" onclick="inviaListaWhatsApp()">Invia Lista su WhatsApp</button>
-            <button class="btn-secondary" onclick="pulisciLista()">Svuota</button>
+                <div>
+                    <label>Quantità</label>
+                    <input type="number" id="quantitaInput" value="1" min="1">
+                </div>
+
+                <button class="action-btn" onclick="aggiungiMateriale()" style="background:var(--brand-orange); color:white; margin-top:0;">Aggiungi alla Lista</button>
+                
+                <hr style="border:0; border-top:2px solid #f1f5f9; margin: 10px 0;">
+                
+                <ul id="listaSpesa"></ul>
+                
+                <button class="action-btn btn-green" onclick="inviaListaWhatsApp()" style="margin-top:5px;">Invia Lista su WhatsApp</button>
+                <button class="action-btn btn-gray" onclick="pulisciLista()" style="margin-top:5px;">Svuota Lista</button>
+            </div>
         </div>
     </div>
 
@@ -165,7 +213,7 @@
 
         function aggiornaTendinaCantieri() {
             const select = document.getElementById('selezionaCantiere');
-            select.innerHTML = '<option value="">-- Seleziona cantiere --</option>';
+            select.innerHTML = '<option value="">-- Seleziona cantiere attivo --</option>';
             cantieriDB.forEach((c, index) => {
                 if(c.stato !== 'Concluso') {
                     let opt = document.createElement('option');
