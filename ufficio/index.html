@@ -594,31 +594,48 @@
                 cantieriDB = [];
             }
 
-            // Normalizziamo le stringhe per il controllo
             let clienteNorm = cliente.toLowerCase().replace(/\s+/g, ' ');
             let indirizzoNorm = indirizzo.toLowerCase().replace(/\s+/g, ' ');
 
-            // Cerchiamo se esiste già un cantiere con lo stesso cliente e indirizzo esatto
+            // Cerchiamo se esiste già un cantiere con lo stesso nome e indirizzo
             let cantiereEsistente = cantieriDB.find(c => 
                 c.cliente.toLowerCase().replace(/\s+/g, ' ') === clienteNorm && 
                 c.indirizzo.toLowerCase().replace(/\s+/g, ' ') === indirizzoNorm
             );
 
             if (cantiereEsistente) {
-                // Chiediamo conferma all'utente se intende il cantiere esistente
-                let conferma = confirm(`⚠️ Esiste già una cartella per "${cantiereEsistente.cliente}" in "${cantiereEsistente.indirizzo}".\n\nÈ un nuovo intervento/foglio di lavoro per questo cantiere esistente?\n\n(Premi OK per riaprirlo o spostarlo nei cantieri da fare se era chiuso, oppure Annulla se è un cliente/indirizzo diverso).`);
+                let conferma = confirm(`⚠️ Esiste già una cartella per "${cantiereEsistente.cliente}" in "${cantiereEsistente.indirizzo}".\n\nÈ un nuovo intervento/foglio di lavoro per questo cantiere?\n\n(Premi OK per aggiungere un nuovo foglio di lavoro a questo cliente, oppure Annulla se è un omonimo / nuovo cliente con altra via).`);
                 
                 if (conferma) {
-                    // Se l'utente conferma, rimettiamo il cantiere nello stato attivo (da fare) se era terminato, così può lavorarci
+                    // L'utente vuole aggiungere un nuovo intervento nello storico di questo cantiere
+                    if (!cantiereEsistente.storico || !Array.isArray(cantiereEsistente.storico)) {
+                        cantiereEsistente.storico = [];
+                    }
+                    
+                    let dataOggi = new Date().toISOString().split('T')[0];
+                    cantiereEsistente.storico.push({
+                        data: dataOggi,
+                        tipo: "Inserito da Ufficio (Ritorno)",
+                        operai: "Da compilare / Registrato da Ufficio",
+                        note: "Nuovo intervento aperto per ritorno in cantiere",
+                        statoIntervento: "Da terminare",
+                        fotoBolle: [],
+                        fotoLavori: [],
+                        stampato: false,
+                        dataStampa: ""
+                    });
+
+                    // Se il cantiere era archiviato come terminato, lo rimettiamo in "Da Terminare"
                     cantiereEsistente.completato = false;
+                    
                     localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
                     clienteEl.value = '';
                     indirizzoEl.value = '';
                     cambiaCartella('da_fare');
-                    alert("✅ Il cantiere esistente è stato richiamato ed è ora attivo nella cartella 'Da Terminare' pronto per un nuovo intervento.");
+                    alert("✅ È stato aggiunto un nuovo foglio di lavoro nello storico del cantiere esistente! Lo trovi nella cartella 'Da Terminare'.");
                     return;
                 } else {
-                    // Se l'utente preme annulla, significa che vuole creare una nuova scheda separata (es. omonimo o nuovo cantiere dello stesso cliente)
+                    // L'utente ha premuto Annulla -> Crea un nuovo cantiere separato (omonimo / nuovo indirizzo)
                     cantieriDB.push({
                         cliente: cliente,
                         indirizzo: indirizzo,
@@ -640,7 +657,6 @@
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             clienteEl.value = '';
             indirizzoEl.value = '';
-            
             aggiornaVistaUfficio();
         }
 
