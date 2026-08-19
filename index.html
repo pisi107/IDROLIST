@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Idrotech Varese - Area Operai</title>
+    <title>Idrotech Varese - Area Operai V2</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -265,7 +265,7 @@
                 localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             }
 
-            let text = `🛠️ Rapportino Lavoro\n👤 Cliente: ${cliente}\n📍 Indirizzo: ${document.getElementById('rapIndirizzo').value}\n📅 Data: ${dataLavoro}\n⚙️ Tipo: ${tipoLavoro}\n👷 Operai: ${operai}\n⏱️ Ore: ${ore}\n📝 Note: ${note}`;
+            let text = `🛠️ Rapportino Lavoro\n👤 Cliente: ${cliente}\n📍 Indirizzo: ${document.getElementById('rapIndirizzo'].value}\n📅 Data: ${dataLavoro}\n⚙️ Tipo: ${tipoLavoro}\n👷 Operai: ${operai}\n⏱️ Ore: ${ore}\n📝 Note: ${note}`;
             window.open(`https://wa.me/?text=` + encodeURIComponent(text));
         }
     </script>
