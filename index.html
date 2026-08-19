@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Idrotech Varese - Area Operai V2</title>
+    <title>Idrotech Varese - Area Operai</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -51,6 +51,9 @@
         li { background: #f8fafc; border: 1px solid var(--border); margin-bottom: 6px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; font-size: 0.9rem; }
         .badge { background: #ffedd5; color: #c2410c; padding: 2px 6px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
         .delete-btn { background: #fee2e2; color: var(--danger); border: none; width: 28px; height: 28px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        
+        /* Anteprima foto */
+        .preview-box { margin-top: 8px; display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--success); font-weight: 600; }
     </style>
 </head>
 <body>
@@ -112,7 +115,12 @@
             <label>Note / Lavori Eseguiti</label>
             <textarea id="rapNote" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea>
 
-            <button class="btn-whatsapp" onclick="inviaRapportinoWhatsApp()">Invia Rapportino su WhatsApp</button>
+            <label>Foto Bolla / Documento</label>
+            <input type="file" id="fotoBolla" accept="image/*" capture="environment" style="display:none;" onchange="mostraStatoFoto()">
+            <button class="btn-secondary" onclick="document.getElementById('fotoBolla').click()" style="background:#e0f2fe; color:#0369a1; border: 1px dashed #7dd3fc;">📷 Allega Foto Bolla / Documento</button>
+            <div id="statoFoto" class="preview-box" style="display:none;"></div>
+
+            <button class="btn-whatsapp" onclick="inviaRapportinoWhatsApp()">Invia Rapportino e Bolla su WhatsApp</button>
             <button class="btn-secondary" onclick="segnalaConcluso()">✅ Segna Cantiere Concluso</button>
         </div>
 
@@ -174,6 +182,15 @@
             if(index !== "") {
                 document.getElementById('rapCliente').value = cantieriDB[index].cliente;
                 document.getElementById('rapIndirizzo').value = cantieriDB[index].indirizzo;
+            }
+        }
+
+        function mostraStatoFoto() {
+            const input = document.getElementById('fotoBolla');
+            const stato = document.getElementById('statoFoto');
+            if(input.files && input.files[0]) {
+                stato.style.display = 'block';
+                stato.innerHTML = `✅ Foto allegata: ${input.files[0].name}`;
             }
         }
 
@@ -251,7 +268,10 @@
             let operai = document.getElementById('rapOperai').value || 'Non specificato';
             let ore = document.getElementById('rapOre').value;
             let note = document.getElementById('rapNote').value;
+            let fotoInput = document.getElementById('fotoBolla');
+            let haFoto = (fotoInput.files && fotoInput.files.length > 0);
 
+            // Salvataggio nello storico locale per l'ufficio
             let indexCantiere = document.getElementById('selezionaCantiere').value;
             if(indexCantiere !== "") {
                 if(!cantieriDB[indexCantiere].storico) cantieriDB[indexCantiere].storico = [];
@@ -260,13 +280,17 @@
                     tipo: tipoLavoro,
                     operai: operai,
                     ore: ore,
-                    note: note
+                    note: note,
+                    bollaAllega: haFoto ? "Sì (Foto allegata)" : "No"
                 });
                 localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             }
 
-            let text = `🛠️ Rapportino Lavoro\n👤 Cliente: ${cliente}\n📍 Indirizzo: ${document.getElementById('rapIndirizzo'].value}\n📅 Data: ${dataLavoro}\n⚙️ Tipo: ${tipoLavoro}\n👷 Operai: ${operai}\n⏱️ Ore: ${ore}\n📝 Note: ${note}`;
+            let text = `🛠️ Rapportino Lavoro\n👤 Cliente: ${cliente}\n📍 Indirizzo: ${document.getElementById('rapIndirizzo').value}\n📅 Data: ${dataLavoro}\n⚙️ Tipo: ${tipoLavoro}\n👷 Operai: ${operai}\n⏱️ Ore: ${ore}\n📝 Note: ${note}${haFoto ? '\n📎 [Bolla/Documento fotografato e allegato dall\'operaio]' : ''}`;
+            
             window.open(`https://wa.me/?text=` + encodeURIComponent(text));
+            
+            // Nota: WhatsApp apre la chat e pre-compila il testo. Su smartphone, se l'utente ha scattato la foto, basterà fare "Incolla" nell'app di WhatsApp subito dopo aver inviato il testo per allegare anche l'immagine catturata!
         }
     </script>
 </body>
