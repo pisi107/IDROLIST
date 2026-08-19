@@ -46,6 +46,12 @@
         .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
         .badge-da-fare { background: #fef3c7; color: #b45309; }
         .badge-fatto { background: #dcfce7; color: #15803d; }
+
+        /* Stili per le cartelle / tab */
+        .tabs-container { display: flex; gap: 8px; margin-bottom: 8px; }
+        .tab-btn { flex: 1; padding: 12px; border: 2px solid var(--border); background: #f1f5f9; font-weight: 700; font-size: 0.85rem; border-radius: 10px; cursor: pointer; color: var(--text-light); text-align: center; }
+        .tab-btn.active-da-fare { background: #fef3c7; border-color: #f59e0b; color: #b45309; }
+        .tab-btn.active-terminati { background: #dcfce7; border-color: var(--success); color: #15803d; }
     </style>
 </head>
 <body>
@@ -88,7 +94,9 @@
                 </div>
                 <div>
                     <label>Ore Lavorate</label>
-                    <input type="number" id="oreInterventoUfficio" value="8" min="1" max="12" step="0.5">
+                    <select id="oreInterventoUfficio">
+                        <!-- Popolato via JS da 0.5 a 10 ore -->
+                    </select>
                 </div>
                 <div>
                     <label>Note / Lavori Eseguiti / Materiali</label>
@@ -111,19 +119,54 @@
                 <button class="action-btn btn-green" onclick="creaCantiereUfficio()">Crea Cantiere</button>
             </div>
 
-            <!-- SEZIONE LISTA CANTIERI ATTIVI E STORICO CON STATO -->
+            <!-- SEZIONE CARTELLE CANTIERI (DA TERMINARE / TERMINATI) -->
             <div class="card-box">
-                <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Cantieri Attivi e Storico Ore</div>
+                <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Archivio Cantieri</div>
+                
+                <!-- Bottoni Tab Cartelle -->
+                <div class="tabs-container">
+                    <button id="btnTabDaFare" class="tab-btn active-da-fare" onclick="cambiaCartella('da_fare')">📁 Da Terminare</button>
+                    <button id="btnTabTerminati" class="tab-btn" onclick="cambiaCartella('terminati')">📁 Lavori Terminati</button>
+                </div>
+
                 <div id="listaCantieriUfficio"></div>
             </div>
         </div>
     </div>
 
     <script>
+        let cartellaCorrente = 'da_fare'; // 'da_fare' oppure 'terminati'
+
         window.onload = function() {
             document.getElementById('dataInterventoUfficio').value = new Date().toISOString().split('T')[0];
+            popolaSelectOreUfficio();
             aggiornaVistaUfficio();
         };
+
+        function popolaSelectOreUfficio() {
+            let select = document.getElementById('oreInterventoUfficio');
+            if (!select) return;
+            select.innerHTML = '';
+            for (let i = 0.5; i <= 10; i += 0.5) {
+                let selected = (i === 8) ? 'selected' : '';
+                select.innerHTML += `<option value="${i}" ${selected}>${i} ${i === 1 ? 'Ora' : 'Ore'}</option>`;
+            }
+        }
+
+        function cambiaCartella(tipo) {
+            cartellaCorrente = tipo;
+            let btnDaFare = document.getElementById('btnTabDaFare');
+            let btnTerminati = document.getElementById('btnTabTerminati');
+
+            if (tipo === 'da_fare') {
+                btnDaFare.className = "tab-btn active-da-fare";
+                btnTerminati.className = "tab-btn";
+            } else {
+                btnDaFare.className = "tab-btn";
+                btnTerminati.className = "tab-btn active-terminati";
+            }
+            aggiornaVistaUfficio();
+        }
 
         function creaCantiereUfficio() {
             let cliente = document.getElementById('nuovoCliente').value.trim();
@@ -157,58 +200,66 @@
 
             if (cantieriDB.length === 0) {
                 selectCantiere.innerHTML = '<option value="">Nessun cantiere disponibile</option>';
-                containerLista.innerHTML = '<div style="font-size: 0.85rem; color: var(--text-light); text-align: center;">Nessun cantiere inserito nel database.</div>';
+                containerLista.innerHTML = '<div style="font-size: 0.85rem; color: var(--text-light); text-align: center; padding: 10px;">Nessun cantiere inserito nel database.</div>';
                 return;
             }
 
+            let cantieriFiltratiCount = 0;
+
             cantieriDB.forEach((c, idx) => {
-                // Popola select
-                selectCantiere.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo}</option>`;
+                // Popola sempre la select rapida per inserire ore
+                selectCantiere.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo} (${c.completato ? 'Terminato' : 'Da terminare'})</option>`;
 
-                // Calcola ore totali
-                let oreTotaliCantiere = 0;
-                let storicoHtml = '';
-                
-                if (c.storico && c.storico.length > 0) {
-                    c.storico.forEach((s, sIdx) => {
-                        // Estrai le ore dalla stringa operai se possibile o somma
-                        oreTotaliCantiere += 8; // stima o calcolo base
-                        storicoHtml += `
-                            <div style="font-size: 0.8rem; background: #f1f5f9; padding: 8px; border-radius: 6px; margin-top: 4px;">
-                                <b>${s.data}</b> - ${s.operai}<br>
-                                <i>Note: ${s.note}</i>
+                // Filtra in base alla cartella attiva
+                let isCompletato = c.completato === true;
+                if ((cartellaCorrente === 'da_fare' && !isCompletato) || (cartellaCorrente === 'terminati' && isCompletato)) {
+                    cantieriFiltratiCount++;
+
+                    let storicoHtml = '';
+                    if (c.storico && c.storico.length > 0) {
+                        c.storico.forEach((s) => {
+                            storicoHtml += `
+                                <div style="font-size: 0.8rem; background: #f1f5f9; padding: 8px; border-radius: 6px; margin-top: 4px;">
+                                    <b>${s.data}</b> - ${s.operai}<br>
+                                    <i>Note: ${s.note}</i>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        storicoHtml = '<div style="font-size: 0.75rem; color: var(--text-light);">Nessun intervento registrato.</div>';
+                    }
+
+                    let badgeStato = isCompletato ? '<span class="badge badge-fatto">Terminato</span>' : '<span class="badge badge-da-fare">Da terminare</span>';
+                    let btnStatoTesto = isCompletato ? 'Segna come Da Terminare' : 'Segna come Terminato';
+                    let classeCard = isCompletato ? 'cantiere-card terminato' : 'cantiere-card';
+                    let btnStatoClasse = isCompletato ? 'action-btn btn-green' : 'action-btn btn-orange';
+
+                    containerLista.innerHTML += `
+                        <div class="${classeCard}">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div>
+                                    <div style="font-weight: 800; font-size: 1rem; color: var(--brand-dark);">${c.cliente}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-light);">${c.indirizzo}</div>
+                                </div>
+                                ${badgeStato}
                             </div>
-                        `;
-                    });
-                } else {
-                    storicoHtml = '<div style="font-size: 0.75rem; color: var(--text-light);">Nessun intervento registrato.</div>';
+                            <div style="font-size: 0.8rem; font-weight: 700; color: var(--brand-orange);">Totale Interventi Registrati: ${c.storico ? c.storico.length : 0}</div>
+                            <div style="margin-top: 5px;">
+                                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-bottom: 4px;">Storico Rapportini:</div>
+                                ${storicoHtml}
+                            </div>
+                            <div style="display: flex; gap: 8px; margin-top: 10px;">
+                                <button class="${btnStatoClasse}" style="padding: 8px; font-size: 0.8rem;" onclick="cambiaStatoCantiere(${idx})">${btnStatoTesto}</button>
+                                <button class="action-btn btn-danger" onclick="eliminaCantiere(${idx})">Elimina</button>
+                            </div>
+                        </div>
+                    `;
                 }
-
-                let badgeStato = c.completato ? '<span class="badge badge-fatto">Terminato</span>' : '<span class="badge badge-da-fare">Da terminare</span>';
-                let btnStatoTesto = c.completato ? 'Segna come Da Terminare' : 'Segna come Terminato';
-                let classeCard = c.completato ? 'cantiere-card terminato' : 'cantiere-card';
-
-                containerLista.innerHTML += `
-                    <div class="${classeCard}">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <div>
-                                <div style="font-weight: 800; font-size: 1rem; color: var(--brand-dark);">${c.cliente}</div>
-                                <div style="font-size: 0.8rem; color: var(--text-light);">${c.indirizzo}</div>
-                            </div>
-                            ${badgeStato}
-                        </div>
-                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--brand-orange);">Totale Interventi Registrati: ${c.storico ? c.storico.length : 0}</div>
-                        <div style="margin-top: 5px;">
-                            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-bottom: 4px;">Storico Rapportini:</div>
-                            ${storicoHtml}
-                        </div>
-                        <div style="display: flex; gap: 8px; margin-top: 10px;">
-                            <button class="action-btn btn-orange" style="padding: 8px; font-size: 0.8rem;" onclick="cambiaStatoCantiere(${idx})">${btnStatoTesto}</button>
-                            <button class="action-btn btn-danger" onclick="eliminaCantiere(${idx})">Elimina</button>
-                        </div>
-                    </div>
-                `;
             });
+
+            if (cantieriFiltratiCount === 0) {
+                containerLista.innerHTML = `<div style="font-size: 0.85rem; color: var(--text-light); text-align: center; padding: 15px;">Nessun cantiere in questa cartella.</div>`;
+            }
         }
 
         function registraUfficioPerDipendente() {
@@ -238,14 +289,12 @@
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             document.getElementById('noteUfficio').value = '';
             aggiornaVistaUfficio();
-            alert(`✅ Registrato con successo per ${dipendente} sul cantiere di ${cantieriDB[cantiereIdx].cliente}!`);
+            alert(`✅ Registrato con successo (${ore}h) per ${dipendente} sul cantiere di ${cantieriDB[cantiereIdx].cliente}!`);
         }
 
         function cambiaStatoCantiere(idx) {
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            cantieriDB[idx].completato = !cantieriDB[cantieriDB[idx].completato ? idx : idx].completato;
-            // Correzione toggle stato
-            cantieriDB[idx].completato = !cantieriDB[idx].completato ? true : false;
+            cantieriDB[idx].completato = !cantieriDB[idx].completato;
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             aggiornaVistaUfficio();
         }
