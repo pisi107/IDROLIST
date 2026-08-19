@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Idrotech Varese - Gestione Ufficio</title>
+    <title>Idrotech Varese - Pannello Ufficio</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -20,7 +20,7 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; justify-content: center; min-height: 100vh; }
         
-        .app-container { width: 100%; max-width: 600px; background: var(--card-bg); min-height: 100vh; display: flex; flex-direction: column; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
+        .app-container { width: 100%; max-width: 500px; background: var(--card-bg); min-height: 100vh; display: flex; flex-direction: column; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
         
         .header-app { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 25px 20px 20px 20px; text-align: center; border-bottom: 4px solid var(--brand-orange); }
         .header-app h1 { font-size: 1.5rem; font-weight: 800; margin: 0; }
@@ -36,8 +36,16 @@
         .action-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
         .btn-green { background-color: var(--success); color: white; }
         .btn-orange { background: linear-gradient(135deg, #f28c1e, #d97712); color: white; }
+        .btn-danger { background-color: var(--danger); color: white; padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; box-shadow: none; width: auto; }
 
         .card-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        
+        .cantiere-card { background: #fff; border: 2px solid var(--border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+        .cantiere-card.terminato { border-color: var(--success); background: #f0fdf4; }
+        
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .badge-da-fare { background: #fef3c7; color: #b45309; }
+        .badge-fatto { background: #dcfce7; color: #15803d; }
     </style>
 </head>
 <body>
@@ -48,20 +56,12 @@
         </div>
 
         <div class="content-body">
-            
-            <!-- NUOVO: BOX INSERIMENTO TELEFONICO DIPENDENTE -->
-            <div class="card-box" style="background: #fffbeb; border: 2px solid #f59e0b;">
-                <div style="font-size: 1.1rem; font-weight: 800; color: #b45309; display: flex; align-items: center; gap: 8px;">
-                    📞 Inserimento Telefonico Dipendente
-                </div>
-                <div style="font-size: 0.85rem; color: #78350f; line-height: 1.4;">
-                    Usa questo modulo se il dipendente ti detta i dati al telefono per compilarli al posto suo.
-                </div>
-                
+            <!-- SEZIONE INSERIMENTO RAPIDO UFFICIO PER CONTO DIPENDENTE -->
+            <div class="card-box" style="border-color: var(--brand-orange);">
+                <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Registrazione per conto Dipendente</div>
                 <div>
                     <label>Seleziona Dipendente</label>
-                    <select id="telSelezionaDipendente">
-                        <option value="">-- Seleziona operaio --</option>
+                    <select id="selectDipendenteUfficio">
                         <option value="Assali Luca">Assali Luca</option>
                         <option value="Bruno Nicola">Bruno Nicola</option>
                         <option value="Comolli Alessandro">Comolli Alessandro</option>
@@ -78,35 +78,28 @@
                         <option value="Saleh Mohamed">Saleh Mohamed</option>
                     </select>
                 </div>
-
                 <div>
                     <label>Seleziona Cantiere</label>
-                    <select id="telSelectCantiere"></select>
+                    <select id="selectCantiereUfficio"></select>
                 </div>
-
                 <div>
                     <label>Data Intervento</label>
-                    <input type="date" id="telDataIntervento">
+                    <input type="date" id="dataInterventoUfficio">
                 </div>
-
                 <div>
                     <label>Ore Lavorate</label>
-                    <input type="number" id="telOreIntervento" value="8" min="1" max="12" step="0.5">
+                    <input type="number" id="oreInterventoUfficio" value="8" min="1" max="12" step="0.5">
                 </div>
-
                 <div>
-                    <label>Note / Materiali dettati</label>
-                    <input type="text" id="telNoteIntervento" placeholder="Es. Lavori eseguiti e materiali usati (dettato via telefono)">
+                    <label>Note / Lavori Eseguiti / Materiali</label>
+                    <textarea id="noteUfficio" rows="2" placeholder="Inserisci dettagli..."></textarea>
                 </div>
-
-                <button class="action-btn btn-orange" onclick="salvaInterventoTelefonico()" style="margin-top: 5px;">
-                    Registra per conto del Dipendente
-                </button>
+                <button class="action-btn btn-orange" onclick="registraUfficioPerDipendente()">Registra per conto del Dipendente</button>
             </div>
 
-            <!-- SEZIONE ORIGINALE: CREAZIONE CANTIERE -->
+            <!-- SEZIONE CREA NUOVO CANTIERE -->
             <div class="card-box">
-                <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark);">Inserisci Nuovo Cantiere</div>
+                <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Inserisci Nuovo Cantiere</div>
                 <div>
                     <label>Nome Cliente</label>
                     <input type="text" id="nuovoCliente" placeholder="Es. Mario Rossi">
@@ -115,90 +108,120 @@
                     <label>Indirizzo Cantiere</label>
                     <input type="text" id="nuovoIndirizzo" placeholder="Es. Via Roma 10, Varese">
                 </div>
-                <button class="action-btn btn-green" onclick="aggiungiCantiereUfficio()">Crea Cantiere</button>
+                <button class="action-btn btn-green" onclick="creaCantiereUfficio()">Crea Cantiere</button>
             </div>
 
-            <!-- SEZIONE ORIGINALE: LISTA CANTIERI -->
+            <!-- SEZIONE LISTA CANTIERI ATTIVI E STORICO CON STATO -->
             <div class="card-box">
-                <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark);">Cantieri Attivi e Storico</div>
-                <div id="listaCantieriUfficio" style="display: flex; flex-direction: column; gap: 10px;">
-                    <!-- Popolato via JavaScript -->
-                </div>
+                <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Cantieri Attivi e Storico Ore</div>
+                <div id="listaCantieriUfficio"></div>
             </div>
         </div>
     </div>
 
     <script>
         window.onload = function() {
-            let campoData = document.getElementById('telDataIntervento');
-            if(campoData) campoData.value = new Date().toISOString().split('T')[0];
-            aggiornaInterfacciaUfficio();
+            document.getElementById('dataInterventoUfficio').value = new Date().toISOString().split('T')[0];
+            aggiornaVistaUfficio();
         };
 
-        function aggiornaInterfacciaUfficio() {
-            caricaCantieriPerUfficioTel();
-            mostraListaCantieriUfficio();
-        }
-
-        function caricaCantieriPerUfficioTel() {
-            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            let select = document.getElementById('telSelectCantiere');
-            if (!select) return;
-            
-            select.innerHTML = '';
-            if (cantieriDB.length === 0) {
-                select.innerHTML = '<option value="">Nessun cantiere disponibile</option>';
-                return;
-            }
-
-            cantieriDB.forEach((c, idx) => {
-                select.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo}</option>`;
-            });
-        }
-
-        function aggiungiCantiereUfficio() {
+        function creaCantiereUfficio() {
             let cliente = document.getElementById('nuovoCliente').value.trim();
             let indirizzo = document.getElementById('nuovoIndirizzo').value.trim();
 
-            if (!cliente || !indirizzo) {
-                return alert("Compila sia il nome del cliente che l'indirizzo!");
-            }
+            if(!cliente || !indirizzo) return alert("Inserisci nome cliente e indirizzo!");
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             cantieriDB.push({
                 cliente: cliente,
                 indirizzo: indirizzo,
+                completato: false,
                 storico: []
             });
 
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-
             document.getElementById('nuovoCliente').value = '';
             document.getElementById('nuovoIndirizzo').value = '';
-
+            
+            aggiornaVistaUfficio();
             alert("✅ Cantiere creato con successo!");
-            aggiornaInterfacciaUfficio();
         }
 
-        function salvaInterventoTelefonico() {
-            let dipendente = document.getElementById('telSelezionaDipendente').value;
-            let cantiereIdx = document.getElementById('telSelectCantiere').value;
-            let data = document.getElementById('telDataIntervento').value;
-            let ore = parseFloat(document.getElementById('telOreIntervento').value) || 8;
-            let note = document.getElementById('telNoteIntervento').value.trim() || "Inserito da ufficio (dettatura telefonica)";
+        function aggiornaVistaUfficio() {
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            let selectCantiere = document.getElementById('selectCantiereUfficio');
+            let containerLista = document.getElementById('listaCantieriUfficio');
 
-            if (!dipendente) return alert("Seleziona il dipendente!");
-            if (cantiereIdx === "") return alert("Seleziona un cantiere valido!");
-            if (!data) return alert("Inserisci una data valida!");
+            selectCantiere.innerHTML = '';
+            containerLista.innerHTML = '';
+
+            if (cantieriDB.length === 0) {
+                selectCantiere.innerHTML = '<option value="">Nessun cantiere disponibile</option>';
+                containerLista.innerHTML = '<div style="font-size: 0.85rem; color: var(--text-light); text-align: center;">Nessun cantiere inserito nel database.</div>';
+                return;
+            }
+
+            cantieriDB.forEach((c, idx) => {
+                // Popola select
+                selectCantiere.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo}</option>`;
+
+                // Calcola ore totali
+                let oreTotaliCantiere = 0;
+                let storicoHtml = '';
+                
+                if (c.storico && c.storico.length > 0) {
+                    c.storico.forEach((s, sIdx) => {
+                        // Estrai le ore dalla stringa operai se possibile o somma
+                        oreTotaliCantiere += 8; // stima o calcolo base
+                        storicoHtml += `
+                            <div style="font-size: 0.8rem; background: #f1f5f9; padding: 8px; border-radius: 6px; margin-top: 4px;">
+                                <b>${s.data}</b> - ${s.operai}<br>
+                                <i>Note: ${s.note}</i>
+                            </div>
+                        `;
+                    });
+                } else {
+                    storicoHtml = '<div style="font-size: 0.75rem; color: var(--text-light);">Nessun intervento registrato.</div>';
+                }
+
+                let badgeStato = c.completato ? '<span class="badge badge-fatto">Terminato</span>' : '<span class="badge badge-da-fare">Da terminare</span>';
+                let btnStatoTesto = c.completato ? 'Segna come Da Terminare' : 'Segna come Terminato';
+                let classeCard = c.completato ? 'cantiere-card terminato' : 'cantiere-card';
+
+                containerLista.innerHTML += `
+                    <div class="${classeCard}">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <div style="font-weight: 800; font-size: 1rem; color: var(--brand-dark);">${c.cliente}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-light);">${c.indirizzo}</div>
+                            </div>
+                            ${badgeStato}
+                        </div>
+                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--brand-orange);">Totale Interventi Registrati: ${c.storico ? c.storico.length : 0}</div>
+                        <div style="margin-top: 5px;">
+                            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-bottom: 4px;">Storico Rapportini:</div>
+                            ${storicoHtml}
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-top: 10px;">
+                            <button class="action-btn btn-orange" style="padding: 8px; font-size: 0.8rem;" onclick="cambiaStatoCantiere(${idx})">${btnStatoTesto}</button>
+                            <button class="action-btn btn-danger" onclick="eliminaCantiere(${idx})">Elimina</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function registraUfficioPerDipendente() {
+            let dipendente = document.getElementById('selectDipendenteUfficio').value;
+            let cantiereIdx = document.getElementById('selectCantiereUfficio').value;
+            let data = document.getElementById('dataInterventoUfficio').value;
+            let ore = parseFloat(document.getElementById('oreInterventoUfficio').value) || 8;
+            let note = document.getElementById('noteUfficio').value.trim();
+
+            if (cantiereIdx === '') return alert("Seleziona un cantiere valido!");
+            if (!data) return alert("Inserisci una data!");
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_db')) || {};
-
-            let chiaveAssenza = `${dipendente}_${data}`;
-            if (assenzeDB[chiaveAssenza]) {
-                delete assenzeDB[chiaveAssenza];
-                localStorage.setItem('idra_assenze_db', JSON.stringify(assenzeDB));
-            }
 
             if (!cantieriDB[cantiereIdx].storico) {
                 cantieriDB[cantiereIdx].storico = [];
@@ -206,42 +229,34 @@
 
             cantieriDB[cantiereIdx].storico.push({
                 data: data,
-                tipo: "Intervento Operativo (Telefonico)",
+                tipo: "Inserito da Ufficio",
                 operai: `${dipendente} (${ore}h)`,
-                note: note,
-                statoIntervento: "Da terminare"
+                note: note ? note : "Inserito dall'ufficio per conto del dipendente",
+                statoIntervento: cantieriDB[cantiereIdx].completato ? "Terminato" : "Da terminare"
             });
 
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            
+            document.getElementById('noteUfficio').value = '';
+            aggiornaVistaUfficio();
             alert(`✅ Registrato con successo per ${dipendente} sul cantiere di ${cantieriDB[cantiereIdx].cliente}!`);
-            document.getElementById('telNoteIntervento').value = '';
-            aggiornaInterfacciaUfficio();
         }
 
-        function mostraListaCantieriUfficio() {
+        function cambiaStatoCantiere(idx) {
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            let container = document.getElementById('listaCantieriUfficio');
-            if (!container) return;
+            cantieriDB[idx].completato = !cantieriDB[cantieriDB[idx].completato ? idx : idx].completato;
+            // Correzione toggle stato
+            cantieriDB[idx].completato = !cantieriDB[idx].completato ? true : false;
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+            aggiornaVistaUfficio();
+        }
 
-            container.innerHTML = '';
-            if (cantieriDB.length === 0) {
-                container.innerHTML = '<div style="font-size: 0.85rem; color: var(--text-light);">Nessun cantiere inserito nel database.</div>';
-                return;
+        function eliminaCantiere(idx) {
+            if(confirm("Sei sicuro di voler eliminare questo cantiere?")) {
+                let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+                cantieriDB.splice(idx, 1);
+                localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+                aggiornaVistaUfficio();
             }
-
-            cantieriDB.forEach((c, idx) => {
-                let numInterventi = c.storico ? c.storico.length : 0;
-                container.innerHTML += `
-                    <div style="background: white; border: 1px solid var(--border); padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="font-weight: 700; color: var(--brand-dark);">${c.cliente}</div>
-                            <div style="font-size: 0.8rem; color: var(--text-light);">${c.indirizzo}</div>
-                            <div style="font-size: 0.75rem; color: var(--success); margin-top: 4px; font-weight: 600;">Interventi registrati: ${numInterventi}</div>
-                        </div>
-                    </div>
-                `;
-            });
         }
     </script>
 </body>
