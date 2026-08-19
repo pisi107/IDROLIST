@@ -124,8 +124,9 @@
                 </div>
 
                 <div>
-                    <label>Tipo di Lavoro</label>
+                    <label>Tipo di Lavoro (Obbligatorio)</label>
                     <select id="rapTipoLavoro">
+                        <option value="">-- Seleziona tipo di lavoro --</option>
                         <option value="Nuovo Lavoro">Nuovo Lavoro / Installazione</option>
                         <option value="Continuazione">Continuazione Lavoro</option>
                         <option value="Riparazione / Urgenza">Riparazione / Urgenza</option>
@@ -413,6 +414,12 @@
             let indexCantiere = document.getElementById('selezionaCantiere').value;
             if(indexCantiere === "") return alert("Seleziona un cantiere dalla lista!");
             
+            // Controllo tipo di lavoro obbligatorio
+            let tipoLavoro = document.getElementById('rapTipoLavoro').value;
+            if(tipoLavoro === "") {
+                return alert("⚠️ Seleziona il tipo di lavoro prima di procedere!");
+            }
+
             // Controllo operai
             let operaiConOre = [];
             elencoOperai.forEach((nome, idx) => {
@@ -437,7 +444,7 @@
 
             cantieriDB[indexCantiere].storico.push({
                 data: document.getElementById('rapData').value,
-                tipo: document.getElementById('rapTipoLavoro').value,
+                tipo: tipoLavoro,
                 operai: operaiConOre.join(', '),
                 note: noteLavoro,
                 fotoBolle: [...fotoBolleArray],
@@ -454,6 +461,7 @@
             fotoLavoriArray = [];
             document.getElementById('containerBolle').innerHTML = '';
             document.getElementById('containerLavori').innerHTML = '';
+            document.getElementById('rapTipoLavoro').value = '';
             elencoOperai.forEach((_, idx) => {
                 let chk = document.getElementById(`op_${idx}`);
                 if(chk) chk.checked = false;
