@@ -275,13 +275,13 @@
                     </div>
 
                     <div>
-                        <label>📷 Foto Bolle</label>
-                        <input type="file" id="fotoBolleInput" accept="image/*" multiple>
+                        <label>📷 Foto Bolle <span id="statoAiBolle" style="font-size:0.7rem; color:var(--brand-orange);"></span></label>
+                        <input type="file" id="fotoBolleInput" accept="image/*" multiple onchange="gestisciCaricamentoFotoAI(this, 'bolle')">
                     </div>
 
                     <div>
-                        <label>📷 Foto Lavori</label>
-                        <input type="file" id="fotoLavoriInput" accept="image/*" multiple>
+                        <label>📷 Foto Lavori <span id="statoAiLavori" style="font-size:0.7rem; color:var(--brand-orange);"></span></label>
+                        <input type="file" id="fotoLavoriInput" accept="image/*" multiple onchange="gestisciCaricamentoFotoAI(this, 'lavori')">
                     </div>
 
                     <button class="action-btn btn-orange" onclick="salvaFoglioLavoroUtente()">Salva Foglio di Lavoro</button>
@@ -312,7 +312,7 @@
                     </div>
                 </div>
 
-                <!-- GESTIONE PASSWORD UTENTI (NUOVA SEZIONE) -->
+                <!-- GESTIONE PASSWORD UTENTI -->
                 <div>
                     <div class="accordion-header" onclick="toggleAccordion('contentGestionePassword', this)">
                         <span>🔑 Gestione Password Utenti</span>
@@ -440,6 +440,10 @@
     </div>
 
     <script>
+        // CONFIGURAZIONE GEMINI AI API KEY
+        const GEMINI_API_KEY = "INSERISCI_QUI_LA_TUA_API_KEY_DI_GOOGLE_AI_STUDIO";
+
+
         const elencoOperaiTotali = [
             "Assali Luca", "Bruno Nicola", "Comolli Alessandro", "Concato Filippo", 
             "Coriglione Alessandro", "De Bosio Marcello", "Denti Claudio", "Doda Enjo", 
@@ -447,13 +451,12 @@
             "Rosini Jean Paul", "Saleh Mohamed"
         ];
 
-        // Artigiani inseriti
         const elencoArtigianiTotali = [
             "SGL", "ARBO", "Clima Group Srl"
         ];
 
         let utenteCorrente = "";
-        let tipoUtenteCorrente = ""; // "operaio" o "artigiano"
+        let tipoUtenteCorrente = ""; 
         let cartellaCorrente = 'da_fare';
 
         window.onload = function() {
@@ -491,7 +494,6 @@
             }
         }
 
-        // LOGIN UFFICIO
         function effettuaLoginUfficio() {
             let passInserita = document.getElementById('inputPasswordUfficio').value.trim();
             let passAdminSalvata = localStorage.getItem('idra_password_ufficio') || "ufficio2026";
@@ -504,7 +506,6 @@
             }
         }
 
-        // GESTIONE LOGIN TENDINE
         function popolaTendineLogin() {
             let selectOp = document.getElementById('selectLoginOperaio');
             selectOp.innerHTML = '<option value="">-- Il mio nome --</option>';
@@ -547,7 +548,7 @@
                     document.getElementById('viewLoginArtigiano').classList.remove('active');
                     document.getElementById('viewCambioPassword').classList.add('active');
                 } else {
-                    alert("⚠️ Password errata! Al primo accesso usa il tuo nome tutto minuscolo (es. sgl oppure climagroupsrl).");
+                    alert("⚠️ Password errata! Al primo accesso usa il tuo nome tutto minuscolo.");
                 }
             } else {
                 if (passInserita === customPass) {
@@ -589,7 +590,6 @@
             mostraVista('selezione');
         }
 
-        // GESTIONE PASSWORD DALL'UFFICIO
         function popolaGestionePasswordUfficio() {
             let container = document.getElementById('listaGestionePasswordUfficio');
             container.innerHTML = '';
@@ -598,25 +598,25 @@
             let artPassDB = JSON.parse(localStorage.getItem('idra_password_artigiani')) || {};
 
             let tutti = [
-                ...elencoOperaiTotali.map(n => ({ nome: n, tipo: 'operaio', dbKey: 'idra_password_operai' })),
-                ...elencoArtigianiTotali.map(n => ({ nome: n, tipo: 'artigiano', dbKey: 'idra_password_artigiani' }))
+                ...elencoOperaiTotali.map(n => ({ nome: n, tipo: 'operaio' })),
+                ...elencoArtigianiTotali.map(n => ({ nome: n, tipo: 'artigiano' }))
             ];
 
             tutti.forEach(item => {
                 let db = item.tipo === 'operaio' ? opPassDB : artPassDB;
                 let haPersonalizzato = !!db[item.nome];
-                let statoTxt = haPersonalizzato ? "Personalizzata" : "Predefinita (Nome)";
+                let statoTxt = haPersonalizzato ? "Personalizzata" : "Predefinita";
                 let safeId = item.nome.replace(/\s+/g, '_');
 
                 container.innerHTML += `
                     <div class="collega-card-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
                         <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
                             <div><b>${item.nome}</b> <span style="font-size: 0.75rem; color: var(--text-light);">(${item.tipo})</span></div>
-                            <button class="action-btn btn-danger" style="padding: 4px 8px; font-size: 0.7rem;" onclick="resettaPasswordUtente('${item.nome}', '${item.tipo}')">Resetta a Predefinita</button>
+                            <button class="action-btn btn-danger" style="padding: 4px 8px; font-size: 0.7rem;" onclick="resettaPasswordUtente('${item.nome}', '${item.tipo}')">Resetta</button>
                         </div>
                         <div style="font-size: 0.75rem; color: ${haPersonalizzato ? 'var(--success)' : 'var(--text-light)'};">Stato: <b>${statoTxt}</b></div>
                         <div style="display: flex; gap: 6px; width: 100%;">
-                            <input type="text" id="new_pass_${safeId}" placeholder="Nuova password al volo..." style="padding: 6px 10px; font-size: 0.8rem;">
+                            <input type="text" id="new_pass_${safeId}" placeholder="Nuova password..." style="padding: 6px 10px; font-size: 0.8rem;">
                             <button class="action-btn btn-orange" style="width: auto; padding: 6px 12px; font-size: 0.8rem;" onclick="impostaPasswordAlVolo('${item.nome}', '${item.tipo}', '${safeId}')">Imposta</button>
                         </div>
                     </div>
@@ -625,35 +625,30 @@
         }
 
         function resettaPasswordUtente(nome, tipo) {
-            if (confirm(`Sei sicuro di voler azzerare la password di ${nome}?`)) {
+            if (confirm(`Azzerare la password di ${nome}?`)) {
                 let dbKey = tipo === 'operaio' ? 'idra_password_operai' : 'idra_password_artigiani';
                 let db = JSON.parse(localStorage.getItem(dbKey)) || {};
                 delete db[nome];
                 localStorage.setItem(dbKey, JSON.stringify(db));
-                alert(`✅ Password di ${nome} resettata con successo! Ora tornerà a usare il suo nome tutto minuscolo al primo accesso.`);
                 popolaGestionePasswordUfficio();
             }
         }
 
         function impostaPasswordAlVolo(nome, tipo, safeId) {
             let inputVal = document.getElementById(`new_pass_${safeId}`).value.trim();
-            if (inputVal.length < 4) return alert("⚠️ La password deve avere almeno 4 caratteri!");
-
+            if (inputVal.length < 4) return alert("⚠️ Minimo 4 caratteri!");
             let dbKey = tipo === 'operaio' ? 'idra_password_operai' : 'idra_password_artigiani';
             let db = JSON.parse(localStorage.getItem(dbKey)) || {};
             db[nome] = inputVal;
             localStorage.setItem(dbKey, JSON.stringify(db));
-
             document.getElementById(`new_pass_${safeId}`).value = '';
-            alert(`✅ Nuova password impostata con successo per ${nome}!`);
             popolaGestionePasswordUfficio();
         }
 
-        // FUNZIONE CREAZIONE CANTIERE AL VOLO
         function creaCantiereAlVoloUtente() {
             let cliente = document.getElementById('nuovoClienteUtente').value.trim();
             let indirizzo = document.getElementById('nuovoIndirizzoUtente').value.trim();
-            if (!cliente || !indirizzo) return alert("⚠️ Inserisci sia il cliente che l'indirizzo!");
+            if (!cliente || !indirizzo) return alert("⚠️ Inserisci cliente e indirizzo!");
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             cantieriDB.push({ cliente: cliente, indirizzo: indirizzo, completato: false, storico: [] });
@@ -661,12 +656,9 @@
 
             document.getElementById('nuovoClienteUtente').value = '';
             document.getElementById('nuovoIndirizzoUtente').value = '';
-            document.getElementById('inputRicercaCantiereUtente').value = '';
-
             popolaCantieriUtente();
             let selectCantiere = document.getElementById('selectCantiereUtente');
             selectCantiere.selectedIndex = selectCantiere.options.length - 1;
-            alert("✅ Cantiere creato e selezionato con successo!");
         }
 
         function popolaCantieriUtente() {
@@ -688,7 +680,6 @@
         function popolaColleghiUtente() {
             let container = document.getElementById('listaColleghiUtente');
             container.innerHTML = '';
-            
             let tuttiColleghi = [...elencoOperaiTotali, ...elencoArtigianiTotali];
             tuttiColleghi.forEach(op => {
                 if (op === utenteCorrente) return;
@@ -702,7 +693,6 @@
             });
         }
 
-        // COMPRESSIONE IMMAGINI
         function comprimiEConvertiImmagine(file) {
             return new Promise((resolve) => {
                 let reader = new FileReader();
@@ -722,6 +712,84 @@
                 };
             });
         }
+
+        // ================= INTEGRAZIONE GEMINI AI PER CONTROLLO FOTO =================
+        async function analizzaImmagineConGemini(base64Data) {
+            if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("INSERISCI")) {
+                console.warn("⚠️ Chiave API Gemini non configurata.");
+                return "SCONOSCIUTO";
+            }
+
+            try {
+                let cleanBase64 = base64Data.split(',')[1] || base64Data;
+                let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+                
+                let response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [
+                                { text: "Analizza questa immagine. Se è una bolla di consegna, un documento di trasporto o una fattura cartacea, rispondi tassativamente solo 'BOLLA'. Se è una foto di lavori edili, idraulici, operai o impianti installati, rispondi tassativamente solo 'LAVORO'. Non aggiungere altro." },
+                                { inline_data: { mime_type: "image/jpeg", data: cleanBase64 } }
+                            ]
+                        }]
+                    })
+                });
+
+                let data = await response.json();
+                if (data.candidates && data.candidates[0].content) {
+                    return data.candidates[0].content.parts[0].text.trim().toUpperCase();
+                }
+            } catch (err) {
+                console.error("Errore chiamata Gemini:", err);
+            }
+            return "SCONOSCIUTO";
+        }
+
+        async function gestisciCaricamentoFotoAI(inputElement, tipoSelezionato) {
+            let files = inputElement.files;
+            if (!files || files.length === 0) return;
+
+            let spanStato = tipoSelezionato === 'bolle' ? document.getElementById('statoAiBolle') : document.getElementById('statoAiLavori');
+            spanStato.innerText = "🔄 Controllo IA in corso...";
+
+            let altroInputId = tipoSelezionato === 'bolle' ? 'fotoLavoriInput' : 'fotoBolleInput';
+            let altroInput = document.getElementById(altroInputId);
+
+            for (let i = 0; i < files.length; i++) {
+                let base64 = await comprimiEConvertiImmagine(files[i]);
+                let verdetto = await analizzaImmagineConGemini(base64);
+
+                // Se l'utente ha messo una bolla nei lavori o viceversa
+                if (tipoSelezionato === 'bolle' && verdetto.includes("LAVORO")) {
+                    alert("⚠️ Attenzione! L'IA ha rilevato che questa foto è un LAVORO ESEGUITO, non una bolla. L'ho spostata automaticamente nella sezione corretta!");
+                    spostaFileTraInput(files[i], inputElement, altroInput);
+                } else if (tipoSelezionato === 'lavori' && verdetto.includes("BOLLA")) {
+                    alert("⚠️ Attenzione! L'IA ha rilevato che questa foto è una BOLLA DI CONSEGNA, non un lavoro. L'ho spostata automaticamente nella sezione corretta!");
+                    spostaFileTraInput(files[i], inputElement, altroInput);
+                }
+            }
+            spanStato.innerText = "✅ Verificato";
+            setTimeout(() => spanStato.innerText = "", 3000);
+        }
+
+        function spostaFileTraInput(fileDaSpostare, inputOrigine, inputDestinazione) {
+            // Crea un DataTransfer per gestire i file negli input file del browser
+            let dtOrigine = new DataTransfer();
+            for (let f of inputOrigine.files) {
+                if (f !== fileDaSpostare) dtOrigine.items.add(f);
+            }
+            inputOrigine.files = dtOrigine.files;
+
+            let dtDest = new DataTransfer();
+            for (let f of inputDestinazione.files) {
+                dtDest.items.add(f);
+            }
+            dtDest.items.add(fileDaSpostare);
+            inputDestinazione.files = dtDest.files;
+        }
+        // ===========================================================================
 
         async function elaboraListaFile(fileList) {
             let arr = [];
@@ -760,10 +828,11 @@
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             alert("✅ Salvato con successo!");
             document.getElementById('noteInterventoUtente').value = '';
+            document.getElementById('fotoBolleInput').value = '';
+            document.getElementById('fotoLavoriInput').value = '';
             popolaCantieriUtente();
         }
 
-        // GESTIONE UFFICIO
         function popolaSelectFiltroDipendenti() {
             let sel = document.getElementById('selectFiltroDipendente');
             sel.innerHTML = '<option value="">Tutti</option>';
