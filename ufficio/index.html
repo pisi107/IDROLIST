@@ -44,12 +44,21 @@
         .btn-green { background-color: var(--success); color: white; }
         .btn-orange { background: linear-gradient(135deg, #f28c1e, #d97712); color: white; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.05rem; }
 
+        /* Filtri Ufficio */
+        .container-filtri-stato { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 5px; }
+        .btn-filtro { padding: 10px 6px; border-radius: 10px; border: 2px solid var(--border); background: #f8fafc; font-size: 0.75rem; font-weight: 800; cursor: pointer; text-align: center; color: var(--text); }
+        .btn-filtro.active { background: var(--brand-dark); color: white; border-color: var(--brand-dark); }
+
         /* Card Cantieri Ufficio */
         .cantiere-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
         .cantiere-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .cantiere-title { font-size: 1.1rem; font-weight: 800; color: var(--text); margin: 0; }
         .cantiere-sub { font-size: 0.85rem; color: var(--text-light); margin-top: 2px; }
         
+        .badge-stato { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-top: 6px; }
+        .badge-ultimato { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .badge-terminare { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+
         .btn-elimina-cantiere { background: #fee2e2; color: var(--danger); border: none; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
 
         /* Storico Interventi dentro la card */
@@ -94,12 +103,22 @@
                     </div>
                 </div>
 
-                <button class="action-btn btn-orange" onclick="apriRegistroOre()" style="margin-top: 10px;">
+                <button class="action-btn btn-orange" onclick="apriRegistroOre()" style="margin-top: 5px;">
                     📅 Registro Ore & Calendario Lavori
                 </button>
 
-                <div style="font-size: 0.9rem; font-weight: 700; color: var(--text-light); margin-top: 10px; text-transform: uppercase;">Cartelle Cantieri Attivi / Storico</div>
-                <div id="listaCantieriUfficio" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                    <div style="font-size: 0.9rem; font-weight: 700; color: var(--text-light); text-transform: uppercase;">Lista Cantieri</div>
+                </div>
+
+                <!-- PULSANTI FILTRO STATO -->
+                <div class="container-filtri-stato">
+                    <button class="btn-filtro active" id="filtroTutti" onclick="impostaFiltroStato('Tutti')">📂 Tutti</button>
+                    <button class="btn-filtro" id="filtroTerminare" onclick="impostaFiltroStato('Da terminare')">⏳ Da Terminare</button>
+                    <button class="btn-filtro" id="filtroUltimato" onclick="impostaFiltroStato('Lavoro Ultimato')">✅ Ultimati</button>
+                </div>
+
+                <div id="listaCantieriUfficio" style="display: flex; flex-direction: column; gap: 12px; margin-top: 5px;"></div>
             </div>
 
             <!-- REGISTRO ORE & CALENDARIO -->
@@ -164,6 +183,7 @@
 
         let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
         let cacheInterventiUfficio = [];
+        let filtroStatoCorrente = 'Tutti';
 
         function salvaDB() {
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
@@ -178,7 +198,7 @@
             cantieriDB.push({
                 cliente: cliente,
                 indirizzo: indirizzo || 'Indirizzo non specificato',
-                stato: 'Attivo',
+                stato: 'Da terminare',
                 storico: []
             });
 
@@ -197,17 +217,40 @@
             }
         }
 
+        function impostaFiltroStato(stato) {
+            filtroStatoCorrente = stato;
+            document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('active'));
+            if(stato === 'Tutti') document.getElementById('filtroTutti').classList.add('active');
+            if(stato === 'Da terminare') document.getElementById('filtroTerminare').classList.add('active');
+            if(stato === 'Lavoro Ultimato') document.getElementById('filtroUltimato').classList.add('active');
+            caricaCantieriUfficio();
+        }
+
         function caricaCantieriUfficio() {
             cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             let container = document.getElementById('listaCantieriUfficio');
             container.innerHTML = '';
 
-            if (cantieriDB.length === 0) {
-                container.innerHTML = '<div style="text-align:center; color:var(--text-light); padding:20px;">Nessun cantiere presente.</div>';
+            let cantieriFiltrati = cantieriDB.map((c, idx) => ({ ...c, originalIndex: idx }));
+
+            if (filtroStatoCorrente !== 'Tutti') {
+                cantieriFiltrati = cantieriFiltrati.filter(c => c.stato === filtroStatoCorrente);
+            }
+
+            if (cantieriFiltrati.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:var(--text-light); padding:20px; background:white; border-radius:12px; border:1px solid var(--border);">Nessun cantiere trovato in questa categoria.</div>';
                 return;
             }
 
-            cantieriDB.forEach((c, index) => {
+            cantieriFiltrati.forEach((c) => {
+                let index = c.originalIndex;
+                let badgeStatoHtml = '';
+                if(c.stato === 'Lavoro Ultimato') {
+                    badgeStatoHtml = '<span class="badge-stato badge-ultimato">✅ Lavoro Ultimato</span>';
+                } else {
+                    badgeStatoHtml = '<span class="badge-stato badge-terminare">⏳ Da Terminare</span>';
+                }
+
                 let storicoHtml = '';
                 if(c.storico && c.storico.length > 0) {
                     c.storico.forEach(s => {
@@ -221,7 +264,7 @@
                             <div class="storico-box">
                                 <div class="storico-item-header">
                                     <span>📅 ${s.data} - ${s.tipo}</span>
-                                    <span>⏱️ ${s.ore}</span>
+                                    <span style="font-weight:800; color:${s.statoIntervento === 'Lavoro Ultimato' ? 'var(--success)' : 'var(--brand-orange)'};">${s.statoIntervento || ''}</span>
                                 </div>
                                 <div style="font-size: 0.85rem;"><b>Operai:</b> ${s.operai}</div>
                                 <div style="font-size: 0.85rem;"><b>Note:</b> ${s.note || 'Nessuna nota'}</div>
@@ -239,6 +282,7 @@
                             <div>
                                 <div class="cantiere-title">📁 ${c.cliente}</div>
                                 <div class="cantiere-sub">📍 ${c.indirizzo}</div>
+                                ${badgeStatoHtml}
                             </div>
                             <button class="btn-elimina-cantiere" onclick="eliminaCantiere(${index})">Elimina</button>
                         </div>
@@ -269,23 +313,24 @@
                              data: s.data || '',
                              tipo: s.tipo,
                              operai: s.operai || '',
-                             oreStr: s.ore,
-                             note: s.note
+                             note: s.note,
+                             statoIntervento: s.statoIntervento
                         });
-
-                        let oreNum = 0;
-                        if(s.ore) {
-                            let match = s.ore.match(/(\d+)/);
-                            if(match) oreNum = parseInt(match[1]);
-                        }
 
                         if(s.operai) {
                             let listaOp = s.operai.split(',');
                             listaOp.forEach(op => {
-                                let nomeOp = op.trim();
-                                if(nomeOp) {
-                                    if(!riepilogoOreOperai[nomeOp]) riepilogoOreOperai[nomeOp] = 0;
-                                    riepilogoOreOperai[nomeOp] += oreNum;
+                                let matchOre = op.match(/\((.*?)\)/);
+                                let oreNum = 4; // Default
+                                if(matchOre && matchOre[1]) {
+                                    let numParsed = parseFloat(matchOre[1]);
+                                    if(!isNaN(numParsed)) oreNum = numParsed;
+                                }
+
+                                let nomePulito = op.replace(/\(.*?\)/, '').trim();
+                                if(nomePulito) {
+                                    if(!riepilogoOreOperai[nomePulito]) riepilogoOreOperai[nomePulito] = 0;
+                                    riepilogoOreOperai[nomePulito] += oreNum;
                                 }
                             });
                         }
@@ -300,7 +345,7 @@
             } else {
                 let htmlTabella = `<table class="tabella-ore"><tr><th>Operaio</th><th style="text-align:right;">Ore Totali Svolte</th></tr>`;
                 for(let op in riepilogoOreOperai) {
-                    htmlTabella += `<tr><td><b>${op}</b></td><td style="text-align:right; color:var(--success); font-weight:800;">${riepilogoOreOperai[op]} Ore</td></tr>`;
+                    htmlTabella += `<tr><td><b>${op}</b></td><td style="text-align:right; color:var(--success); font-weight:800;">${riepilogoOreOperai[op]}h</td></tr>`;
                 }
                 htmlTabella += `</table>`;
                 divTabella.innerHTML = htmlTabella;
@@ -344,7 +389,7 @@
                     <div class="giorno-calendario-card">
                         <div class="giorno-data-title">
                             <span>📅 ${item.data}</span>
-                            <span style="color: var(--brand-orange);">${item.oreStr || ''}</span>
+                            <span style="color: ${item.statoIntervento === 'Lavoro Ultimato' ? 'var(--success)' : 'var(--brand-orange)'};">${item.statoIntervento || ''}</span>
                         </div>
                         <div style="font-size: 0.95rem; font-weight: 800; color: var(--text);">📁 Cliente: ${item.cliente}</div>
                         <div style="font-size: 0.85rem; color: var(--text-light);">📍 ${item.indirizzo}</div>
