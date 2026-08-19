@@ -1,1 +1,1020 @@
-ae5d9b310fed017786faf2a07159838e44b0e616
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Idrotech Varese - Pannello Ufficio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-orange: #f28c1e;
+            --brand-dark: #1e293b;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --bg: #0b0f19;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --text-light: #64748b;
+            --border: #cbd5e1;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; justify-content: center; min-height: 100vh; }
+        
+        .app-container { width: 100%; max-width: 500px; background: var(--card-bg); min-height: 100vh; display: flex; flex-direction: column; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
+        
+        .header-app { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 25px 20px 20px 20px; text-align: center; border-bottom: 4px solid var(--brand-orange); }
+        .header-app h1 { font-size: 1.5rem; font-weight: 800; margin: 0; }
+        .header-app h1 span { color: var(--brand-orange); }
+        .header-app p { font-size: 0.75rem; color: #94a3b8; margin: 5px 0 0 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+
+        .content-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 16px; }
+
+        label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        input, select, textarea { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; background-color: #f8fafc; color: var(--text); font-family: 'Inter', sans-serif; outline: none; }
+        input[type="date"] { appearance: none; -webkit-appearance: none; }
+
+        .action-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
+        .btn-green { background-color: var(--success); color: white; }
+        .btn-orange { background: linear-gradient(135deg, #f28c1e, #d97712); color: white; }
+        .btn-danger { background-color: var(--danger); color: white; padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; box-shadow: none; width: auto; }
+        
+        .btn-print { background-color: #64748b; color: white; border: none; padding: 6px 12px; font-size: 0.75rem; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .btn-print:hover { background-color: #475569; }
+        .badge-stampato { background: #3b82f6; color: white; }
+
+        .card-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        
+        .accordion-header { background: #1e293b; color: white; padding: 16px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .accordion-content { display: none; flex-direction: column; gap: 12px; margin-top: 10px; padding-top: 5px; }
+        .accordion-content.open { display: flex; }
+
+        .cantiere-card { background: #fff; border: 2px solid var(--border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+        .cantiere-card.terminato { border-color: var(--success); background: #f0fdf4; }
+        
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .badge-da-fare { background: #fef3c7; color: #b45309; }
+        .badge-fatto { background: #dcfce7; color: #15803d; }
+        .badge-alert { background: #fee2e2; color: #b91c1c; }
+        .badge-assenza { background: #e0f2fe; color: #0369a1; }
+
+        .tabs-container { display: flex; gap: 8px; margin-bottom: 8px; }
+        .tab-btn { flex: 1; padding: 12px; border: 2px solid var(--border); background: #f1f5f9; font-weight: 700; font-size: 0.85rem; border-radius: 10px; cursor: pointer; color: var(--text-light); text-align: center; }
+        .tab-btn.active-da-fare { background: #fef3c7; border-color: #f59e0b; color: #b45309; }
+        .tab-btn.active-terminati { background: #dcfce7; border-color: var(--success); color: #15803d; }
+
+        .collega-card-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+        .collega-card-item label { margin: 0; font-size: 0.9rem; color: var(--text); text-transform: none; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .collega-card-item input[type="checkbox"] { width: 18px; height: 18px; }
+        .collega-card-item select { width: 110px; padding: 8px; font-size: 0.9rem; }
+        .container-colleghi-scroll { max-height: 220px; overflow-y: auto; background: #fff; padding: 8px; border: 1px solid var(--border); border-radius: 10px; }
+
+        .riepilogo-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+        .riepilogo-table th, .riepilogo-table td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+        .riepilogo-table th { background: #1e293b; color: white; font-size: 0.75rem; text-transform: uppercase; }
+        .riepilogo-table tr:last-child td { border-bottom: none; }
+        
+        .presenza-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px; }
+
+        .foto-thumb-container { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+        .foto-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s; }
+        .foto-thumb:hover { transform: scale(1.05); }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 999; justify-content: center; align-items: center; padding: 15px; }
+        .modal-overlay.open { display: flex; }
+        .modal-card { background: #fff; width: 100%; max-width: 480px; max-height: 90vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .modal-header { background: #1e293b; color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 1.1rem; }
+        .modal-body { padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+        .close-modal-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header-app">
+            <h1>IDROTECH <span>VARESE</span></h1>
+            <p>Pannello Gestione Ufficio</p>
+        </div>
+
+        <div class="content-body">
+            
+            <div class="card-box" style="border-color: #ef4444; background: #fff5f5;">
+                <div style="font-size: 1.05rem; font-weight: 800; color: #b91c1c;">🚨 Controllo Ufficio: Mancati Fogli Lavoro (Ultimi 2 Giorni)</div>
+                <div style="font-size: 0.8rem; color: #7f1d1d; line-height: 1.4;">Elenco dipendenti che negli ultimi 2 giorni non hanno raggiunto le 8 ore o non hanno compilato il report (esclusi assenti giustificati):</div>
+                <div style="overflow-x: auto;">
+                    <table class="riepilogo-table" id="tabellaControlloMancanti">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Dipendente</th>
+                                <th>Ore Registrate</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoTabellaControlloMancanti"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                <div class="accordion-header" onclick="toggleAccordion('contentPresenze', this)">
+                    <span>📋 Gestione Presenze / Assenze Dipendenti</span>
+                    <span id="arrowPresenze">▼</span>
+                </div>
+                <div id="contentPresenze" class="accordion-content card-box" style="border-color: var(--brand-orange);">
+                    <div style="font-size: 0.85rem; color: var(--text-light);">Imposta qui sotto se un dipendente è assente (Ferie, Malattia, Permesso), specificando la data di fine assenza.</div>
+                    <div class="container-colleghi-scroll" id="listaPresenzeUfficio" style="max-height: 300px;"></div>
+                    <button class="action-btn btn-orange" onclick="salvaPresenzeUfficio()">Salva Stato Assenze</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="accordion-header" onclick="toggleAccordion('contentRegistrazione', this)">
+                    <span>✏️ Registrazione per conto Dipendenti</span>
+                    <span id="arrowRegistrazione">▼</span>
+                </div>
+                <div id="contentRegistrazione" class="accordion-content card-box" style="border-color: var(--brand-orange);">
+                    <div>
+                        <label>Cerca Cantiere Aperto</label>
+                        <input type="text" id="inputRicercaCantiereUfficio" placeholder="Scrivi per filtrare i cantieri..." oninput="filtraSelectCantieriUfficio()">
+                    </div>
+
+                    <div>
+                        <label>Seleziona Cantiere</label>
+                        <select id="selectCantiereUfficio"></select>
+                    </div>
+
+                    <div>
+                        <label>Data Intervento</label>
+                        <input type="date" id="dataInterventoUfficio">
+                    </div>
+
+                    <div>
+                        <label>Seleziona Dipendenti e Relative Ore</label>
+                        <div class="container-colleghi-scroll" id="listaDipendentiUfficioMultiplo"></div>
+                    </div>
+
+                    <div>
+                        <label>Note / Lavori Eseguiti / Materiali</label>
+                        <textarea id="noteUfficio" rows="2" placeholder="Inserisci dettagli..."></textarea>
+                    </div>
+                    <button class="action-btn btn-orange" onclick="registraUfficioMultiplo()">Registra per conto dei Dipendenti</button>
+                </div>
+            </div>
+
+            <div class="card-box">
+                <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Inserisci Nuovo Cantiere</div>
+                <div>
+                    <label>Nome Cliente</label>
+                    <input type="text" id="nuovoCliente" placeholder="Es. Mario Rossi">
+                </div>
+                <div>
+                    <label>Indirizzo Cantiere</label>
+                    <input type="text" id="nuovoIndirizzo" placeholder="Es. Via Roma 10, Varese">
+                </div>
+                <button class="action-btn btn-green" onclick="creaCantiereUfficio()">Crea Cantiere</button>
+            </div>
+
+            <div class="card-box">
+                <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Archivio Cantieri</div>
+                
+                <div class="tabs-container">
+                    <button id="btnTabDaFare" class="tab-btn active-da-fare" onclick="cambiaCartella('da_fare')">📁 Da Terminare</button>
+                    <button id="btnTabTerminati" class="tab-btn" onclick="cambiaCartella('terminati')">📁 Lavori Terminati</button>
+                </div>
+
+                <div id="listaCantieriUfficio"></div>
+            </div>
+
+            <div class="card-box">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">📊 Tabella Riepilogo Ore</div>
+                    <button class="action-btn btn-orange" style="width: auto; padding: 10px 14px; font-size: 0.85rem;" onclick="apriModaleFiltri()">📁 Apri Archivio Completo / Filtri</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="riepilogo-table" id="tabellaRiepilogoOre">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Dipendente</th>
+                                <th>Cantiere / Stato</th>
+                                <th>Ore</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoTabellaRiepilogo"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalFiltri">
+        <div class="modal-card">
+            <div class="modal-header">
+                <span>📁 Archivio e Filtri Avanzati</span>
+                <button class="close-modal-btn" onclick="chiudiModaleFiltri()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <label>Filtra per Dipendente</label>
+                    <select id="selectFiltroDipendente" onchange="filtraArchivioModale()">
+                        <option value="">Tutti i dipendenti</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Filtra per Data Specifica</label>
+                    <input type="date" id="inputFiltroData" onchange="filtraArchivioModale()">
+                </div>
+
+                <div>
+                    <label>Cerca Cantiere / Cliente</label>
+                    <div style="display: flex; gap: 6px;">
+                        <input type="text" id="inputFiltroCantiere" placeholder="Es. Mario..." oninput="filtraArchivioModale()">
+                        <button class="action-btn btn-danger" style="padding: 0 12px; font-size: 0.8rem;" onclick="azzeraFiltriModale()">Reset</button>
+                    </div>
+                </div>
+
+                <div style="font-size: 0.8rem; color: var(--text-light); margin-top: -4px;" id="infoTotaleOreFiltro"></div>
+                
+                <div style="overflow-x: auto;">
+                    <table class="riepilogo-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Dipendente</th>
+                                <th>Cantiere / Stato</th>
+                                <th>Ore</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoTabellaModaleFiltri"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalFotoZoom" onclick="chiudiZoomFoto()">
+        <div style="max-width: 90%; max-height: 90%; display: flex; justify-content: center; align-items: center;" onclick="event.stopPropagation()">
+            <img id="imgZoomFull" src="" style="max-width: 100%; max-height: 85vh; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        </div>
+    </div>
+
+    <script>
+        const elencoOperaiTotali = [
+            "Assali Luca", "Bruno Nicola", "Comolli Alessandro", "Concato Filippo", 
+            "Coriglione Alessandro", "De Bosio Marcello", "Denti Claudio", "Doda Enjo", 
+            "Giaccone Federico", "Gjyly Moris", "Marinoni Alessandro", "Rocchetto Fabio", 
+            "Rosini Jean Paul", "Saleh Mohamed"
+        ];
+
+        let cartellaCorrente = 'da_fare';
+
+        window.onload = function() {
+            document.getElementById('dataInterventoUfficio').value = new Date().toISOString().split('T')[0];
+            popolaDipendentiUfficioMultiplo();
+            popolaTabellaPresenzeUfficio();
+            popolaSelectFiltroDipendenti();
+            aggiornaVistaUfficio();
+            eseguiControlloMancantiUfficio();
+        };
+
+        function popolaSelectFiltroDipendenti() {
+            let sel = document.getElementById('selectFiltroDipendente');
+            sel.innerHTML = '<option value="">Tutti i dipendenti</option>';
+            elencoOperaiTotali.forEach(op => {
+                sel.innerHTML += `<option value="${op}">${op}</option>`;
+            });
+        }
+
+        function apriModaleFiltri() {
+            document.getElementById('modalFiltri').classList.add('open');
+            filtraArchivioModale();
+        }
+
+        function chiudiModaleFiltri() {
+            document.getElementById('modalFiltri').classList.remove('open');
+        }
+
+        function azzeraFiltriModale() {
+            document.getElementById('selectFiltroDipendente').value = "";
+            document.getElementById('inputFiltroData').value = "";
+            document.getElementById('inputFiltroCantiere').value = "";
+            filtraArchivioModale();
+        }
+
+        function apriZoomFoto(srcBase64) {
+            document.getElementById('imgZoomFull').src = srcBase64;
+            document.getElementById('modalFotoZoom').classList.add('open');
+        }
+
+        function chiudiZoomFoto() {
+            document.getElementById('modalFotoZoom').classList.remove('open');
+        }
+
+        function toggleAccordion(contentId, headerEl) {
+            let content = document.getElementById(contentId);
+            let isOpen = content.classList.contains('open');
+            content.classList.toggle('open', !isOpen);
+            let arrowSpan = headerEl.querySelector('span:last-child');
+            if (arrowSpan) {
+                arrowSpan.innerText = isOpen ? '▼' : '▲';
+            }
+        }
+
+        function popolaDipendentiUfficioMultiplo() {
+            let container = document.getElementById('listaDipendentiUfficioMultiplo');
+            container.innerHTML = '';
+
+            elencoOperaiTotali.forEach(op => {
+                let idSelect = `ore_uff_op_${op.replace(/\s+/g, '_')}`;
+                let optionsHtml = '';
+                for (let i = 0.5; i <= 10; i += 0.5) {
+                    let sel = (i === 8) ? 'selected' : '';
+                    optionsHtml += `<option value="${i}" ${sel}>${i} ${i === 1 ? 'Ora' : 'Ore'}</option>`;
+                }
+
+                container.innerHTML += `
+                    <div class="collega-card-item">
+                        <label>
+                            <input type="checkbox" name="dipendenteUfficioCheckbox" value="${op}" onchange="toggleSelectDipUfficio('${idSelect}', this)">
+                            ${op}
+                        </label>
+                        <select id="${idSelect}" disabled>
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                `;
+            });
+        }
+
+        function toggleSelectDipUfficio(idSelect, checkbox) {
+            let selectEl = document.getElementById(idSelect);
+            if (selectEl) {
+                selectEl.disabled = !checkbox.checked;
+            }
+        }
+
+        function popolaTabellaPresenzeUfficio() {
+            let container = document.getElementById('listaPresenzeUfficio');
+            container.innerHTML = '';
+
+            let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
+            let oggiStr = new Date().toISOString().split('T')[0];
+
+            elencoOperaiTotali.forEach(op => {
+                let safeId = op.replace(/\s+/g, '_');
+                let datiOp = assenzeDB[op] || { stato: 'Presente', finoA: oggiStr, tipo: 'Ferie' };
+                let isAssente = datiOp.stato === 'Assente';
+
+                container.innerHTML += `
+                    <div class="presenza-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <b>${op}</b>
+                            <select id="stato_op_${safeId}" onchange="cambiaStatoPresenzaUI('${safeId}')" style="width: 130px; padding: 6px; font-size: 0.85rem;">
+                                <option value="Presente" ${!isAssente ? 'selected' : ''}>🟢 Presente</option>
+                                <option value="Assente" ${isAssente ? 'selected' : ''}>🔴 Assente</option>
+                            </select>
+                        </div>
+                        <div id="dettagli_assenza_${safeId}" style="display: ${isAssente ? 'flex' : 'none'}; gap: 8px; margin-top: 4px;">
+                            <select id="tipo_op_${safeId}" style="flex: 1; padding: 6px; font-size: 0.8rem;">
+                                <option value="Ferie" ${datiOp.tipo === 'Ferie' ? 'selected' : ''}>Ferie</option>
+                                <option value="Malattia" ${datiOp.tipo === 'Malattia' ? 'selected' : ''}>Malattia</option>
+                                <option value="Permesso" ${datiOp.tipo === 'Permesso' ? 'selected' : ''}>Permesso</option>
+                            </select>
+                            <input type="date" id="fino_a_op_${safeId}" value="${datiOp.finoA || oggiStr}" style="flex: 1; padding: 6px; font-size: 0.8rem;">
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function cambiaStatoPresenzaUI(safeId) {
+            let val = document.getElementById(`stato_op_${safeId}`).value;
+            let dettDiv = document.getElementById(`dettagli_assenza_${safeId}`);
+            if (val === 'Assente') {
+                dettDiv.style.display = 'flex';
+            } else {
+                dettDiv.style.display = 'none';
+            }
+        }
+
+        function salvaPresenzeUfficio() {
+            let assenzeDB = {};
+            elencoOperaiTotali.forEach(op => {
+                let safeId = op.replace(/\s+/g, '_');
+                let stato = document.getElementById(`stato_op_${safeId}`).value;
+                let tipo = document.getElementById(`tipo_op_${safeId}`).value;
+                let finoA = document.getElementById(`fino_a_op_${safeId}`).value;
+
+                assenzeDB[op] = { stato: stato, tipo: tipo, finoA: finoA };
+            });
+
+            localStorage.setItem('idra_assenze_dettaglio_db', JSON.stringify(assenzeDB));
+            alert("✅ Stato presenze e assenze salvato con successo!");
+            aggiornaVistaUfficio();
+            eseguiControlloMancantiUfficio();
+        }
+
+        function isOperaioAssenteInData(nomeOp, dataStr) {
+            let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
+            let datiOp = assenzeDB[nomeOp];
+            if (!datiOp || datiOp.stato !== 'Assente') return false;
+
+            let dataVerifica = new Date(dataStr);
+            let dataFineAssenza = new Date(datiOp.finoA);
+
+            if (dataVerifica <= dataFineAssenza) {
+                return true;
+            }
+            return false;
+        }
+
+        function cambiaCartella(tipo) {
+            cartellaCorrente = tipo;
+            let btnDaFare = document.getElementById('btnTabDaFare');
+            let btnTerminati = document.getElementById('btnTabTerminati');
+
+            if (tipo === 'da_fare') {
+                btnDaFare.className = "tab-btn active-da-fare";
+                btnTerminati.className = "tab-btn";
+            } else {
+                btnDaFare.className = "tab-btn";
+                btnTerminati.className = "tab-btn active-terminati";
+            }
+            aggiornaVistaUfficio();
+        }
+
+        function creaCantiereUfficio() {
+            let cliente = document.getElementById('nuovoCliente').value.trim();
+            let indirizzo = document.getElementById('nuovoIndirizzo').value.trim();
+
+            if(!cliente || !indirizzo) return alert("Inserisci nome cliente e indirizzo!");
+
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            cantieriDB.push({
+                cliente: cliente,
+                indirizzo: indirizzo,
+                completato: false,
+                storico: []
+            });
+
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+            document.getElementById('nuovoCliente').value = '';
+            document.getElementById('nuovoIndirizzo').value = '';
+            
+            aggiornaVistaUfficio();
+            alert("✅ Cantiere creato con successo!");
+        }
+
+        function eseguiControlloMancantiUfficio() {
+            let corpoTabella = document.getElementById('corpoTabellaControlloMancanti');
+            corpoTabella.innerHTML = '';
+
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            let oggi = new Date();
+            let righeTrovate = 0;
+
+            for (let i = 1; i <= 2; i++) {
+                let d = new Date();
+                d.setDate(oggi.getDate() - i);
+                let dataStr = d.toISOString().split('T')[0];
+
+                elencoOperaiTotali.forEach(nomeOp => {
+                    let eAssente = isOperaioAssenteInData(nomeOp, dataStr);
+
+                    if (!eAssente) {
+                        let oreTotData = 0;
+                        cantieriDB.forEach(c => {
+                            if (c.storico) {
+                                c.storico.forEach(s => {
+                                    if (s.data === dataStr && s.operai && s.operai.includes(nomeOp)) {
+                                        let matchOre = s.operai.match(new RegExp(`${nomeOp} \\(([^)]+h)\\)`));
+                                        if (matchOre && matchOre[1]) {
+                                            let val = parseFloat(matchOre[1]);
+                                            if (!isNaN(val)) oreTotData += val;
+                                        } else {
+                                            oreTotData += 8;
+                                        }
+                                    }
+                                });
+                            }
+                        });
+
+                        if (oreTotData < 8) {
+                            righeTrovate++;
+                            let oreMancanti = 8 - oreTotData;
+                            corpoTabella.innerHTML += `
+                                <tr>
+                                    <td><b>${dataStr}</b></td>
+                                    <td>${nomeOp}</td>
+                                    <td><span class="badge badge-alert">${oreTotData}h (Mancano ${oreMancanti}h)</span></td>
+                                </tr>
+                            `;
+                        }
+                    }
+                });
+            }
+
+            if (righeTrovate === 0) {
+                corpoTabella.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--success); font-weight: 700;">Tutti i dipendenti presenti sono in regola negli ultimi 2 giorni! 🎉</td></tr>`;
+            }
+        }
+
+        function aggiornaVistaUfficio() {
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            let containerLista = document.getElementById('listaCantieriUfficio');
+
+            containerLista.innerHTML = '';
+            popolaSelectCantieriUfficio();
+
+            if (cantieriDB.length === 0) {
+                containerLista.innerHTML = '<div style="font-size: 0.85rem; color: var(--text-light); text-align: center; padding: 10px;">Nessun cantiere inserito nel database.</div>';
+                aggiornaTabellaRiepilogo(cantieriDB);
+                return;
+            }
+
+            let cantieriFiltratiCount = 0;
+
+            cantieriDB.forEach((c, idx) => {
+                let isCompletato = c.completato === true;
+                if ((cartellaCorrente === 'da_fare' && !isCompletato) || (cartellaCorrente === 'terminati' && isCompletato)) {
+                    cantieriFiltratiCount++;
+
+                    let storicoHtml = '';
+                    if (c.storico && c.storico.length > 0) {
+                        c.storico.forEach((s, sIdx) => {
+                            let isStampato = s.stampato === true;
+
+                            let fotoBolleHtml = '';
+                            if (s.fotoBolle && s.fotoBolle.length > 0) {
+                                fotoBolleHtml += `<div style="margin-top: 4px; font-size: 0.75rem; font-weight: 700; color: var(--text-light);">Bolle:</div><div class="foto-thumb-container">`;
+                                s.fotoBolle.forEach(imgBase64 => {
+                                    fotoBolleHtml += `<img src="${imgBase64}" class="foto-thumb" onclick="apriZoomFoto('${imgBase64}')">`;
+                                });
+                                fotoBolleHtml += `</div>`;
+                            }
+
+                            let fotoLavoriHtml = '';
+                            if (s.fotoLavori && s.fotoLavori.length > 0) {
+                                fotoLavoriHtml += `<div style="margin-top: 6px; font-size: 0.75rem; font-weight: 700; color: var(--text-light);">Lavori / Installazioni:</div><div class="foto-thumb-container">`;
+                                s.fotoLavori.forEach(imgBase64 => {
+                                    fotoLavoriHtml += `<img src="${imgBase64}" class="foto-thumb" onclick="apriZoomFoto('${imgBase64}')">`;
+                                });
+                                fotoLavoriHtml += `</div>`;
+                            }
+
+                            storicoHtml += `
+                                <div style="font-size: 0.8rem; background: #f1f5f9; padding: 10px; border-radius: 8px; margin-top: 6px; border-left: 4px solid ${isStampato ? '#3b82f6' : '#cbd5e1'};">
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                        <div><b>${s.data}</b> - ${s.operai}</div>
+                                        ${isStampato ? '<span class="badge badge-stampato">Stampato</span>' : 
+                                         `<button class="btn-print" onclick="stampaRapportino(${idx}, ${sIdx})">🖨️ Stampa</button>`}
+                                    </div>
+                                    <div style="margin-top: 4px;"><i>Note: ${s.note}</i></div>
+                                    ${fotoBolleHtml}
+                                    ${fotoLavoriHtml}
+                                </div>
+                            `;
+                        });
+                    } else {
+                        storicoHtml = '<div style="font-size: 0.75rem; color: var(--text-light);">Nessun intervento registrato.</div>';
+                    }
+
+                    let badgeStato = isCompletato ? '<span class="badge badge-fatto">Terminato</span>' : '<span class="badge badge-da-fare">Da terminare</span>';
+                    let btnStatoTesto = isCompletato ? 'Segna come Da Terminare' : 'Segna come Terminato';
+                    let classeCard = isCompletato ? 'cantiere-card terminato' : 'cantiere-card';
+                    let btnStatoClasse = isCompletato ? 'action-btn btn-green' : 'action-btn btn-orange';
+
+                    containerLista.innerHTML += `
+                        <div class="${classeCard}">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div>
+                                    <div style="font-weight: 800; font-size: 1rem; color: var(--brand-dark);">${c.cliente}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-light);">${c.indirizzo}</div>
+                                </div>
+                                ${badgeStato}
+                            </div>
+                            <div style="font-size: 0.8rem; font-weight: 700; color: var(--brand-orange);">Totale Interventi Registrati: ${c.storico ? c.storico.length : 0}</div>
+                            <div style="margin-top: 5px;">
+                                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-bottom: 4px;">Storico Rapportini:</div>
+                                ${storicoHtml}
+                            </div>
+                            <div style="display: flex; gap: 8px; margin-top: 10px;">
+                                <button class="${btnStatoClasse}" style="padding: 8px; font-size: 0.8rem;" onclick="cambiaStatoCantiere(${idx})">${btnStatoTesto}</button>
+                                <button class="action-btn btn-danger" onclick="eliminaCantiere(${idx})">Elimina</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            if (cantieriFiltratiCount === 0) {
+                containerLista.innerHTML = `<div style="font-size: 0.85rem; color: var(--text-light); text-align: center; padding: 15px;">Nessun cantiere in questa cartella.</div>`;
+            }
+
+            aggiornaTabellaRiepilogo(cantieriDB);
+        }
+
+        function stampaRapportino(cantiereIdx, storicoIdx) {
+            if (!confirm("Vuoi procedere con la stampa di questo rapportino?")) {
+                return; 
+            }
+
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            let report = cantieriDB[cantiereIdx].storico[storicoIdx];
+            let cantiere = cantieriDB[cantiereIdx];
+
+            let fotoHtml = '';
+            if ((report.fotoLavori && report.fotoLavori.length > 0) || (report.fotoBolle && report.fotoBolle.length > 0)) {
+                fotoHtml += `
+                    <div class="section-box" style="margin-top: 20px;">
+                        <div class="section-title">📷 Documentazione Fotografica & Allegati</div>
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px;">`;
+                
+                if (report.fotoLavori) {
+                    report.fotoLavori.forEach(img => {
+                        fotoHtml += `<img src="${img}" style="width: 140px; height: 140px; object-fit: cover; border: 2px solid #cbd5e1; border-radius: 6px;">`;
+                    });
+                }
+                if (report.fotoBolle) {
+                    report.fotoBolle.forEach(img => {
+                        fotoHtml += `<img src="${img}" style="width: 140px; height: 140px; object-fit: cover; border: 2px solid #cbd5e1; border-radius: 6px;">`;
+                    });
+                }
+                fotoHtml += `</div></div>`;
+            }
+
+            let printWindow = window.open('', '_blank', 'width=850,height=1100');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Rapportino Intervento - Idrotech Varese</title>
+                        <style>
+                            body { 
+                                font-family: 'Inter', Arial, sans-serif; 
+                                color: #1e293b; 
+                                margin: 0; 
+                                padding: 30px; 
+                                font-size: 13px; 
+                                display: flex;
+                                flex-direction: column;
+                                min-height: 92vh;
+                            }
+                            .header { 
+                                display: flex; 
+                                justify-content: space-between; 
+                                border-bottom: 3px solid #f28c1e; 
+                                padding-bottom: 20px; 
+                                margin-bottom: 25px; 
+                            }
+                            .logo h1 { margin: 0; font-size: 26px; color: #1e293b; text-transform: uppercase; font-weight: 800; }
+                            .logo h1 span { color: #f28c1e; }
+                            .logo p { margin: 4px 0 0 0; font-size: 12px; color: #64748b; letter-spacing: 1.5px; }
+                            .meta-info { text-align: right; font-size: 13px; color: #334155; line-height: 1.5; }
+                            
+                            .main-content {
+                                flex: 1;
+                                display: flex;
+                                flex-direction: column;
+                                gap: 15px;
+                            }
+
+                            .section-box { 
+                                border: 1.5px solid #cbd5e1; 
+                                border-radius: 10px; 
+                                padding: 16px 20px; 
+                                background: #f8fafc; 
+                            }
+                            .section-title { 
+                                font-weight: 800; 
+                                font-size: 13px; 
+                                text-transform: uppercase; 
+                                color: #1e293b; 
+                                margin-bottom: 10px; 
+                                border-bottom: 2px solid #e2e8f0; 
+                                padding-bottom: 6px; 
+                                letter-spacing: 0.5px;
+                            }
+                            .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+                            
+                            .notes-box { 
+                                min-height: 140px; 
+                                white-space: pre-wrap; 
+                                background: #ffffff;
+                                border: 1px solid #e2e8f0;
+                                padding: 12px;
+                                border-radius: 6px;
+                                font-size: 14px;
+                                line-height: 1.6;
+                            }
+
+                            .firme-container { 
+                                display: flex; 
+                                justify-content: space-between; 
+                                margin-top: 40px; 
+                                padding-top: 20px;
+                            }
+                            .firma-box { 
+                                width: 42%; 
+                                border-top: 2px solid #1e293b; 
+                                padding-top: 8px; 
+                                text-align: center; 
+                                font-size: 13px; 
+                                font-weight: 600;
+                                color: #1e293b; 
+                            }
+
+                            .footer-note {
+                                text-align: center;
+                                font-size: 11px;
+                                color: #94a3b8;
+                                margin-top: 20px;
+                                border-top: 1px solid #e2e8f0;
+                                padding-top: 10px;
+                            }
+
+                            @media print {
+                                body { padding: 10px; height: 100vh; }
+                                button { display: none; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <div class="logo">
+                                <h1>IDROTECH <span>VARESE</span></h1>
+                                <p>IMPIANTI TERMOIDRAULICI & SERVIZI TECNICI</p>
+                            </div>
+                            <div class="meta-info">
+                                <div><b>Data Intervento:</b> ${report.data}</div>
+                                <div><b>Rapportino N°:</b> ${storicoIdx + 1}</div>
+                                <div><b>Stato:</b> Confermato da Ufficio</div>
+                            </div>
+                        </div>
+
+                        <div class="main-content">
+                            <div class="section-box">
+                                <div class="section-title">📍 Dati Cantiere / Cliente</div>
+                                <div class="grid-2">
+                                    <div><b>Cliente:</b> ${cantiere.cliente}</div>
+                                    <div><b>Indirizzo Cantiere:</b> ${cantiere.indirizzo}</div>
+                                </div>
+                            </div>
+
+                            <div class="section-box">
+                                <div class="section-title">👷 Personale Tecnico Coinvolto</div>
+                                <div style="font-size: 14px; font-weight: 500;">${report.operai}</div>
+                            </div>
+
+                            <div class="section-box" style="flex: 1;">
+                                <div class="section-title">📝 Descrizione Lavori Eseguiti / Materiali Utilizzati</div>
+                                <div class="notes-box">${report.note || 'Nessuna nota aggiuntiva inserita per questo intervento.'}</div>
+                            </div>
+
+                            ${fotoHtml}
+                        </div>
+
+                        <div>
+                            <div class="firme-container">
+                                <div class="firma-box">Firma del Tecnico / Operatore</div>
+                                <div class="firma-box">Firma per Accettazione Cliente</div>
+                            </div>
+                            <div class="footer-note">
+                                Idrotech Varese — Documento ufficiale generato per uso interno e rendicontazione cantieri.
+                            </div>
+                        </div>
+
+                        <script>
+                            window.onload = function() {
+                                window.print();
+                            }
+                        </script>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+
+            cantieriDB[cantiereIdx].storico[storicoIdx].stampato = true;
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+            aggiornaVistaUfficio();
+        }
+
+        function popolaSelectCantieriUfficio() {
+            let selectCantiere = document.getElementById('selectCantiereUfficio');
+            let inputRicerca = document.getElementById('inputRicercaCantiereUfficio');
+            let query = inputRicerca ? inputRicerca.value.toLowerCase().trim() : '';
+
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            selectCantiere.innerHTML = '';
+
+            let countAperti = 0;
+            cantieriDB.forEach((c, idx) => {
+                if (!c.completato) {
+                    let testoCompleto = `${c.cliente} - ${c.indirizzo}`.toLowerCase();
+                    if (query === '' || testoCompleto.includes(query)) {
+                        selectCantiere.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo}</option>`;
+                        countAperti++;
+                    }
+                }
+            });
+
+            if (countAperti === 0) {
+                selectCantiere.innerHTML = '<option value="">Nessun cantiere aperto trovato</option>';
+            }
+        }
+
+        function filtraSelectCantieriUfficio() {
+            popolaSelectCantieriUfficio();
+        }
+
+        function raccogliTutteLeRigheRiepilogo(cantieriDB) {
+            let listaRigheRiepilogo = [];
+
+            cantieriDB.forEach(c => {
+                if (c.storico) {
+                    c.storico.forEach(s => {
+                        if (s.operai) {
+                            let parti = s.operai.split(',');
+                            parti.forEach(p => {
+                                let match = p.trim().match(/^(.*?)\s*\(([\d.]+)h\)$/);
+                                if (match) {
+                                    let nomeOp = match[1].trim();
+                                    let oreOp = parseFloat(match[2]) || 0;
+                                    
+                                    listaRigheRiepilogo.push({
+                                        data: s.data || 'N/D',
+                                        dipendente: nomeOp,
+                                        cantiere: c.cliente,
+                                        oreNum: oreOp,
+                                        ore: `${oreOp} Ore`
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+            let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
+            let oggiStr = new Date().toISOString().split('T')[0];
+
+            elencoOperaiTotali.forEach(op => {
+                let datiOp = assenzeDB[op];
+                if (datiOp && datiOp.stato === 'Assente') {
+                    let dataFineAssenza = new Date(datiOp.finoA);
+                    let oggiDate = new Date(oggiStr);
+                    
+                    if (oggiDate <= dataFineAssenza) {
+                        listaRigheRiepilogo.push({
+                            data: `Oggi / Fino al ${datiOp.finoA}`,
+                            dipendente: op,
+                            cantiere: `<span class="badge badge-assenza">🔴 ${datiOp.tipo}</span>`,
+                            oreNum: 0,
+                            ore: `0 Ore`
+                        });
+                    }
+                }
+            });
+
+            listaRigheRiepilogo.sort((a, b) => new Date(b.data) - new Date(a.data));
+            return listaRigheRiepilogo;
+        }
+
+        function aggiornaTabellaRiepilogo(cantieriDB) {
+            let corpoTabella = document.getElementById('corpoTabellaRiepilogo');
+            corpoTabella.innerHTML = '';
+
+            let listaRigheRiepilogo = raccogliTutteLeRigheRiepilogo(cantieriDB);
+
+            if (listaRigheRiepilogo.length === 0) {
+                corpoTabella.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-light);">Nessuna ora registrata finora.</td></tr>`;
+                return;
+            }
+
+            let ultimeRighe = listaRigheRiepilogo.slice(0, 5);
+
+            ultimeRighe.forEach(item => {
+                corpoTabella.innerHTML += `
+                    <tr>
+                        <td><b>${item.data}</b></td>
+                        <td><b>${item.dipendente}</b></td>
+                        <td>${item.cantiere}</td>
+                        <td><b>${item.ore}</b></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function filtraArchivioModale() {
+            let dipendenteFiltro = document.getElementById('selectFiltroDipendente').value;
+            let dataFiltro = document.getElementById('inputFiltroData').value;
+            let cantiereFiltro = document.getElementById('inputFiltroCantiere').value.toLowerCase().trim();
+
+            let corpoModale = document.getElementById('corpoTabellaModaleFiltri');
+            let infoOre = document.getElementById('infoTotaleOreFiltro');
+            corpoModale.innerHTML = '';
+
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            let tutteLeRighe = raccogliTutteLeRigheRiepilogo(cantieriDB);
+
+            let righeFiltrate = tutteLeRighe.filter(r => {
+                let matchDip = (dipendenteFiltro === "" || r.dipendente === dipendenteFiltro);
+                let matchData = (dataFiltro === "" || r.data.includes(dataFiltro));
+                let matchCantiere = (cantiereFiltro === "" || r.cantiere.toLowerCase().includes(cantiereFiltro));
+                return matchDip && matchData && matchCantiere;
+            });
+
+            let sommaOreTotale = 0;
+            righeFiltrate.forEach(r => {
+                sommaOreTotale += (r.oreNum || 0);
+            });
+
+            infoOre.innerHTML = `<b>Risultati Trovati:</b> ${righeFiltrate.length} | <b>Totale Ore:</b> ${sommaOreTotale} Ore`;
+
+            if (righeFiltrate.length === 0) {
+                corpoModale.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-light);">Nessun record trovato per i filtri selezionati.</td></tr>`;
+                return;
+            }
+
+            righeFiltrate.forEach(item => {
+                corpoModale.innerHTML += `
+                    <tr>
+                        <td><b>${item.data}</b></td>
+                        <td><b>${item.dipendente}</b></td>
+                        <td>${item.cantiere}</td>
+                        <td><b>${item.ore}</b></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function registraUfficioMultiplo() {
+            let cantiereIdx = document.getElementById('selectCantiereUfficio').value;
+            let data = document.getElementById('dataInterventoUfficio').value;
+            let note = document.getElementById('noteUfficio').value.trim();
+
+            if (cantiereIdx === '') return alert("Seleziona un cantiere valido!");
+            if (!data) return alert("Inserisci una data!");
+
+            let checkboxSelezionati = document.querySelectorAll('input[name="dipendenteUfficioCheckbox"]:checked');
+            if (checkboxSelezionati.length === 0) return alert("Seleziona almeno un dipendente!");
+
+            let stringaOperaiArray = [];
+            checkboxSelezionati.forEach(cb => {
+                let nomeOp = cb.value;
+                let idSelect = `ore_uff_op_${nomeOp.replace(/\s+/g, '_')}`;
+                let selectOre = document.getElementById(idSelect);
+                let oreOp = selectOre ? parseFloat(selectOre.value) || 8 : 8;
+                stringaOperaiArray.push(`${nomeOp} (${oreOp}h)`);
+            });
+
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+
+            if (!cantieriDB[cantiereIdx].storico) {
+                cantieriDB[cantiereIdx].storico = [];
+            }
+
+            cantieriDB[cantiereIdx].storico.push({
+                data: data,
+                tipo: "Inserito da Ufficio",
+                operai: stringaOperaiArray.join(', '),
+                note: note ? note : "Inserito dall'ufficio",
+                statoIntervento: cantieriDB[cantiereIdx].completato ? "Terminato" : "Da terminare",
+                fotoBolle: [],
+                fotoLavori: [],
+                stampato: false
+            });
+
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+            document.getElementById('noteUfficio').value = '';
+            document.getElementById('inputRicercaCantiereUfficio').value = '';
+            
+            document.querySelectorAll('input[name="dipendenteUfficioCheckbox"]').forEach(cb => {
+                cb.checked = false;
+                let idSelect = `ore_uff_op_${cb.value.replace(/\s+/g, '_')}`;
+                let sel = document.getElementById(idSelect);
+                if(sel) sel.disabled = true;
+            });
+
+            aggiornaVistaUfficio();
+            eseguiControlloMancantiUfficio();
+            alert("✅ Intervento registrato con successo per i dipendenti selezionati!");
+        }
+
+        function cambiaStatoCantiere(idx) {
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            cantieriDB[idx].completato = !cantieriDB[idx].completato;
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+            aggiornaVistaUfficio();
+        }
+
+        function eliminaCantiere(idx) {
+            if(confirm("Sei sicuro di voler eliminare questo cantiere?")) {
+                let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+                cantieriDB.splice(idx, 1);
+                localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+                aggiornaVistaUfficio();
+                eseguiControlloMancantiUfficio();
+            }
+        }
+    </script>
+</body>
+</html>
