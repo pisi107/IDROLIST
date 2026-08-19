@@ -3,153 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Idrotech Varese - Pannello Ufficio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Idrotech Varese - Gestione Ufficio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --brand-orange: #f28c1e;
-            --brand-orange-hover: #d97712;
-            --brand-dark: #2d3748;
-            --danger: #dc2626;
-            --bg: #0f172a;
-            --card-bg: #ffffff;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --border: #e2e8f0;
-        }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 15px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; box-sizing: border-box; }
-        .container { width: 100%; max-width: 520px; background: var(--card-bg); padding: 24px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); box-sizing: border-box; }
-        .brand-header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f1f5f9; }
-        .brand-logo-text { font-size: 1.6rem; font-weight: 800; color: var(--brand-dark); margin: 0; }
-        .brand-logo-text span { color: var(--brand-orange); }
-        .brand-subtitle { font-size: 0.8rem; color: var(--text-light); font-style: italic; margin-top: 4px; }
-        
-        h2 { margin: 0 0 12px 0; font-size: 1.15rem; color: #0f172a; font-weight: 700; }
-        label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-light); margin-bottom: 6px; margin-top: 12px; text-transform: uppercase; }
-        input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; background-color: #f8fafc; color: var(--text); box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        
-        button { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 12px; box-sizing: border-box; }
-        .btn-primary { background-color: var(--brand-orange); color: white; }
-        .btn-primary:hover { background-color: var(--brand-orange-hover); }
-        
-        hr { border: 0; border-top: 1px solid var(--border); margin: 20px 0; }
-        
-        .folder-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px; padding: 14px; box-sizing: border-box; }
-        .folder-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-        .folder-info { display: flex; flex-direction: column; gap: 3px; }
-        .folder-title { font-size: 1rem; font-weight: 700; color: var(--brand-dark); }
-        .folder-sub { font-size: 0.8rem; color: var(--text-light); }
-        
-        .badge { background: #ffedd5; color: #c2410c; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; width: fit-content; margin-top: 4px; }
-        .badge-concluso { background: #dcfce7; color: #16a34a; }
-        
-        .delete-btn { background: #fee2e2; color: var(--danger); border: none; width: 32px; height: 32px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        
-        .storico-box { margin-top: 10px; background: #ffffff; border: 1px dashed var(--border); border-radius: 8px; padding: 10px; }
-        .storico-title { font-size: 0.75rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-bottom: 6px; }
-        .rapportino-item { font-size: 0.85rem; padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
-        .rapportino-item:last-child { border-bottom: none; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; padding: 20px; color: #1e293b; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { font-size: 1.4rem; text-align: center; color: #2d3748; }
+        label { display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; margin-top: 15px; text-transform: uppercase; }
+        input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #e2e8f0; border-radius: 8px; }
+        button { width: 100%; padding: 12px; background: #f28c1e; color: white; border: none; border-radius: 8px; font-weight: 700; margin-top: 15px; cursor: pointer; }
+        .cantiere-card { background: #fff; border: 1px solid #e2e8f0; padding: 15px; border-radius: 10px; margin-top: 15px; }
+        .concluso { background: #f0fdf4; border-color: #bbf7d0; }
+        .badge { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; background: #dcfce7; color: #166534; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="brand-header">
-            <h1 class="brand-logo-text">IDROTECH <span>VARESE</span></h1>
-            <div class="brand-subtitle">Pannello Gestione Ufficio & Storico</div>
-        </div>
+        <h1>IDROTECH VARESE</h1>
+        <p style="text-align:center; font-size:0.8rem; color:#64748b;">Pannello Gestione Ufficio & Storico</p>
 
-        <h2>Aggiungi Nuovo Cantiere</h2>
         <label>Nome Cliente</label>
-        <input type="text" id="nuovoCliente" placeholder="Es. Mario Rossi">
-
+        <input type="text" id="nomeCliente" placeholder="Es. Mario Rossi">
         <label>Indirizzo Cantiere</label>
-        <input type="text" id="nuovoIndirizzo" placeholder="Via Roma 10, Varese">
+        <input type="text" id="indirizzoCantiere" placeholder="Via Roma 10, Varese">
+        <button onclick="creaCantiere()">+ Crea Cartella Cantiere</button>
 
-        <button class="btn-primary" onclick="aggiungiCantiere()">+ Crea Cartella Cantiere</button>
-
-        <hr>
-
-        <h2>Cartelle Cantieri e Storico</h2>
-        <div id="listaCartelleUfficio"></div>
+        <div id="listaCantieri"></div>
     </div>
 
     <script>
         let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
 
-        function aggiungiCantiere() {
-            const cliente = document.getElementById('nuovoCliente').value.trim();
-            const indirizzo = document.getElementById('nuovoIndirizzo').value.trim();
-
-            if (!cliente || !indirizzo) return alert("Inserisci cliente e indirizzo!");
-
-            cantieriDB.push({ 
-                cliente, 
-                indirizzo, 
-                stato: 'Attivo',
-                storico: [] 
-            });
+        function creaCantiere() {
+            let cliente = document.getElementById('nomeCliente').value;
+            let indirizzo = document.getElementById('indirizzoCantiere').value;
+            if(!cliente) return alert("Inserisci nome cliente");
+            
+            cantieriDB.push({ cliente, indirizzo, stato: 'Attivo', storico: [] });
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-
-            document.getElementById('nuovoCliente').value = '';
-            document.getElementById('nuovoIndirizzo').value = '';
-            renderCantieri();
+            render();
         }
 
-        function renderCantieri() {
-            const container = document.getElementById('listaCartelleUfficio');
-            if (cantieriDB.length === 0) {
-                container.innerHTML = '<div style="text-align:center; color:var(--text-light); padding: 15px;">Nessuna cartella cantiere presente.</div>';
-                return;
-            }
+        function render() {
+            const container = document.getElementById('listaCantieri');
+            container.innerHTML = '<h2>Cartelle Cantieri</h2>';
+            
+            cantieriDB.forEach((c, index) => {
+                let storicoHtml = c.storico.map(item => {
+                    let fotoLink = item.foto ? `<br><a href="${item.foto}" target="_blank" style="display:inline-block; margin-top:6px; padding:4px 10px; background:#e0f2fe; color:#0369a1; border-radius:6px; font-size:0.8rem; text-decoration:none; font-weight:600;">📎 Visualizza Foto Bolla / Documento</a>` : '';
+                    return `<div style="margin-top:10px; padding:10px; border-left:3px solid #f28c1e; background:#f9fafb;">
+                        📅 <b>${item.data}</b> (${item.tipo})<br>
+                        👨‍🔧 Operai: ${item.operai} | ⏱️ Ore: ${item.ore}<br>
+                        📝 ${item.note}
+                        ${fotoLink}
+                    </div>`;
+                }).join('');
 
-            container.innerHTML = cantieriDB.map((c, i) => {
-                // Se il cantiere non ha la proprietà storico (perché creato prima), gliela creiamo al volo
-                if (!c.storico) c.storico = [];
-
-                let storicoHtml = '';
-                if (c.storico.length > 0) {
-                    storicoHtml = `
-                        <div class="storico-box">
-                            <div class="storico-title">📁 Storico Lavori Eseguiti:</div>
-                            ${c.storico.map(r => `
-                                <div class="rapportino-item">
-                                    <strong>📅 ${r.data}</strong> (${r.tipo})<br>
-                                    👷 Operai: ${r.operai} | ⏱️ Ore: ${r.ore}<br>
-                                    📝 <em>${r.note || 'Nessuna nota'}</em>
-                                </div>
-                            `).join('')}
+                container.innerHTML += `
+                    <div class="cantiere-card ${c.stato === 'Concluso' ? 'concluso' : ''}">
+                        <div style="display:flex; justify-content:space-between;">
+                            <b>📂 ${c.cliente}</b>
+                            <button style="width:auto; padding:2px 8px; background:#fee2e2; color:#dc2626;" onclick="rimuovi(${index})">✕</button>
                         </div>
-                    `;
-                } else {
-                    storicoHtml = `<div style="font-size:0.8rem; color:var(--text-light); margin-top:8px; font-style:italic;">Nessun rapportino inviato finora.</div>`;
-                }
-
-                const isConcluso = c.stato === 'Concluso';
-                return `
-                    <div class="folder-card">
-                        <div class="folder-header">
-                            <div class="folder-info">
-                                <span class="folder-title">📁 ${c.cliente}</span>
-                                <span class="folder-sub">📍 ${c.indirizzo}</span>
-                                <span class="badge ${isConcluso ? 'badge-concluso' : ''}">${c.stato}</span>
-                            </div>
-                            <button class="delete-btn" onclick="rimuovi(${i})" title="Elimina cantiere">✕</button>
+                        <p style="margin:5px 0; font-size:0.9rem;">📍 ${c.indirizzo}</p>
+                        ${c.stato === 'Concluso' ? '<span class="badge">Concluso</span>' : ''}
+                        <div style="margin-top:10px;">
+                            <small><b>STORICO LAVORI ESEGUITI:</b></small>
+                            ${storicoHtml || '<p style="font-size:0.8rem;">Nessun lavoro registrato.</p>'}
                         </div>
-                        ${storicoHtml}
                     </div>
                 `;
-            }).join('');
+            });
         }
 
-        function rimuovi(i) {
-            if(confirm("Vuoi eliminare definitivamente questa cartella e il suo storico?")) {
-                cantieriDB.splice(i, 1);
+        function rimuovi(index) {
+            if(confirm("Eliminare questa cartella?")) {
+                cantieriDB.splice(index, 1);
                 localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-                renderCantieri();
+                render();
             }
         }
 
-        window.onload = renderCantieri;
+        render();
     </script>
 </body>
 </html>
