@@ -55,7 +55,7 @@
         .btn-blue-light { background-color: #e0f2fe; color: #0369a1; border: 2px dashed #38bdf8; }
         .btn-gray { background-color: #e2e8f0; color: #334155; }
         
-        .preview-box { background: #f0fdf4; border: 2px solid #bbf7d0; padding: 12px; border-radius: 10px; font-size: 0.85rem; color: #166534; font-weight: 600; text-align: center; }
+        .preview-box { background: #f0fdf4; border: 2px solid #bbf7d0; padding: 8px; border-radius: 8px; font-size: 0.75rem; color: #166534; font-weight: 600; text-align: center; }
 
         ul { list-style: none; padding: 0; margin: 0; max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
         li { background: #f8fafc; border: 1px solid var(--border); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; border-radius: 10px; font-size: 0.95rem; }
@@ -147,10 +147,19 @@
                 </div>
 
                 <div>
-                    <label>Foto Bolla / Documento</label>
-                    <input type="file" id="fotoBolla" accept="image/*" capture="environment" style="display:none;" onchange="mostraStatoFoto()">
-                    <button class="action-btn btn-blue-light" onclick="document.getElementById('fotoBolla').click()" style="margin-top:0;">📷 Allega Foto Bolla / Documento</button>
-                    <div id="statoFoto" class="preview-box" style="display:none; margin-top: 8px;"></div>
+                    <label>Allegati Fotografici</label>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <input type="file" id="fotoBolla" accept="image/*" capture="environment" style="display:none;" onchange="mostraStatoFoto('fotoBolla', 'statoBolla')">
+                            <button class="action-btn btn-blue-light" onclick="document.getElementById('fotoBolla').click()" style="margin:0; font-size:0.8rem;">📷 Foto Bolla</button>
+                        </div>
+                        <div>
+                            <input type="file" id="fotoLavoro" accept="image/*" capture="environment" style="display:none;" onchange="mostraStatoFoto('fotoLavoro', 'statoLavoro')">
+                            <button class="action-btn btn-blue-light" onclick="document.getElementById('fotoLavoro').click()" style="margin:0; font-size:0.8rem;">📸 Foto Lavoro</button>
+                        </div>
+                    </div>
+                    <div id="statoBolla" class="preview-box" style="display:none; margin-top: 5px;"></div>
+                    <div id="statoLavoro" class="preview-box" style="display:none; margin-top: 5px;"></div>
                 </div>
 
                 <button class="action-btn btn-green" onclick="salvaEConcludiCantiere()">✅ Salva e Segna Cantiere Concluso</button>
@@ -222,12 +231,12 @@
             });
         }
 
-        function mostraStatoFoto() {
-            const input = document.getElementById('fotoBolla');
-            const stato = document.getElementById('statoFoto');
+        function mostraStatoFoto(inputId, statoId) {
+            const input = document.getElementById(inputId);
+            const stato = document.getElementById(statoId);
             if(input.files && input.files[0]) {
                 stato.style.display = 'block';
-                stato.innerHTML = `✅ Foto allegata: ${input.files[0].name}`;
+                stato.innerHTML = `✅ ${input.files[0].name}`;
             }
         }
 
@@ -289,20 +298,34 @@
             let indexCantiere = document.getElementById('selezionaCantiere').value;
             if(indexCantiere === "") return alert("Seleziona un cantiere dalla lista!");
             
-            let fotoInput = document.getElementById('fotoBolla');
+            let fotoBolla = document.getElementById('fotoBolla');
+            let fotoLavoro = document.getElementById('fotoLavoro');
 
-            if(fotoInput.files && fotoInput.files[0]) {
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    salvaDatiNelDb(e.target.result);
-                };
-                reader.readAsDataURL(fotoInput.files[0]);
+            const reader1 = new FileReader();
+            const reader2 = new FileReader();
+
+            reader1.onload = function(e1) {
+                if(fotoLavoro.files && fotoLavoro.files[0]) {
+                    reader2.onload = function(e2) {
+                        salvaDatiNelDb(e1.target.result, e2.target.result);
+                    };
+                    reader2.readAsDataURL(fotoLavoro.files[0]);
+                } else {
+                    salvaDatiNelDb(e1.target.result, null);
+                }
+            };
+
+            if(fotoBolla.files && fotoBolla.files[0]) {
+                reader1.readAsDataURL(fotoBolla.files[0]);
+            } else if(fotoLavoro.files && fotoLavoro.files[0]) {
+                reader2.onload = function(e2) { salvaDatiNelDb(null, e2.target.result); };
+                reader2.readAsDataURL(fotoLavoro.files[0]);
             } else {
-                salvaDatiNelDb(null);
+                salvaDatiNelDb(null, null);
             }
         }
 
-        function salvaDatiNelDb(fotoBase64) {
+        function salvaDatiNelDb(fotoBollaBase64, fotoLavoroBase64) {
             let indexCantiere = document.getElementById('selezionaCantiere').value;
             
             if(!cantieriDB[indexCantiere].storico) {
@@ -315,7 +338,8 @@
                 operai: document.getElementById('rapOperai').value || 'Non specificato',
                 ore: document.getElementById('rapOre').value || 'Non specificate',
                 note: document.getElementById('rapNote').value,
-                foto: fotoBase64
+                foto: fotoBollaBase64,
+                fotoLavoro: fotoLavoroBase64
             });
             
             cantieriDB[indexCantiere].stato = 'Concluso';
@@ -324,11 +348,13 @@
             alert("✅ Rapportino, foto e chiusura cantiere inviati all'ufficio!");
             cambiaSezione('home');
             
-            // Pulisci i campi
+            // Pulisci campi
             document.getElementById('rapOperai').value = '';
             document.getElementById('rapNote').value = '';
             document.getElementById('fotoBolla').value = '';
-            document.getElementById('statoFoto').style.display = 'none';
+            document.getElementById('fotoLavoro').value = '';
+            document.getElementById('statoBolla').style.display = 'none';
+            document.getElementById('statoLavoro').style.display = 'none';
         }
     </script>
 </body>
