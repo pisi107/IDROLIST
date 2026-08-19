@@ -179,13 +179,13 @@
                     </div>
 
                     <div>
-                        <label>📷 Foto Bolla</label>
-                        <input type="file" id="fotoBollaInput" accept="image/*" capture="environment">
+                        <label>📷 Foto Bolle (Puoi selezionare più foto)</label>
+                        <input type="file" id="fotoBolleInput" accept="image/*" multiple>
                     </div>
 
                     <div>
-                        <label>📷 Foto Lavoro / Installazione</label>
-                        <input type="file" id="fotoLavoroInput" accept="image/*" capture="environment">
+                        <label>📷 Foto Lavori / Installazioni (Puoi selezionare più foto)</label>
+                        <input type="file" id="fotoLavoriInput" accept="image/*" multiple>
                     </div>
 
                     <button class="action-btn btn-orange" onclick="salvaFoglioLavoroOperaio()">Salva Foglio di Lavoro</button>
@@ -359,15 +359,21 @@
 
         function convertiFileInBase64(file) {
             return new Promise((resolve, reject) => {
-                if (!file) {
-                    resolve(null);
-                    return;
-                }
                 let reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onload = () => resolve(reader.result);
                 reader.onerror = error => reject(error);
             });
+        }
+
+        async function elaboraListaFile(fileList) {
+            let arrayBase64 = [];
+            if (!fileList || fileList.length === 0) return arrayBase64;
+            for (let i = 0; i < fileList.length; i++) {
+                let base64 = await convertiFileInBase64(fileList[i]);
+                if (base64) arrayBase64.push(base64);
+            }
+            return arrayBase64;
         }
 
         async function salvaFoglioLavoroOperaio() {
@@ -405,12 +411,12 @@
                 participantiArray.push(`${nomeCollega} (${oreCollega}h)`);
             });
 
-            // Gestione Foto
-            let fotoBollaFile = document.getElementById('fotoBollaInput').files[0];
-            let fotoLavoroFile = document.getElementById('fotoLavoroInput').files[0];
+            // Gestione Foto Multiple
+            let fileBolle = document.getElementById('fotoBolleInput').files;
+            let fileLavori = document.getElementById('fotoLavoriInput').files;
 
-            let fotoBollaBase64 = await convertiFileInBase64(fotoBollaFile);
-            let fotoLavoroBase64 = await convertiFileInBase64(fotoLavoroFile);
+            let bolleBase64Array = await elaboraListaFile(fileBolle);
+            let lavoriBase64Array = await elaboraListaFile(fileLavori);
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             if (!cantieriDB[cantiereIdx].storico) cantieriDB[cantiereIdx].storico = [];
@@ -421,8 +427,8 @@
                 operai: partecipantiArray.join(', '),
                 note: note,
                 statoIntervento: statoCantiereIntervento,
-                fotoBolla: fotoBollaBase64,
-                fotoLavoro: fotoLavoroBase64
+                fotoBolle: bolleBase64Array,     // Array di immagini bolle
+                fotoLavori: lavoriBase64Array   // Array di immagini lavori
             });
 
             if (statoCantiereIntervento === "Terminato") {
@@ -432,14 +438,14 @@
             }
 
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            alert("✅ Foglio di lavoro salvato con successo!");
+            alert("✅ Foglio di lavoro e foto salvati con successo!");
 
             // Reset form
             document.getElementById('noteInterventoOperaio').value = '';
             document.getElementById('selectStatoCantiereIntervento').value = '';
             document.getElementById('mieOreLavorate').value = '8';
-            document.getElementById('fotoBollaInput').value = '';
-            document.getElementById('fotoLavoroInput').value = '';
+            document.getElementById('fotoBolleInput').value = '';
+            document.getElementById('fotoLavoriInput').value = '';
             document.querySelectorAll('input[name="collegaCheckbox"]').forEach(cb => {
                 cb.checked = false;
                 let idSelect = `ore_collega_${cb.value.replace(/\s+/g, '_')}`;
