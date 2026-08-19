@@ -40,7 +40,6 @@
 
         .card-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
         
-        /* Stile pulsante a fisarmonica (Accordion) */
         .accordion-header { background: #1e293b; color: white; padding: 16px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .accordion-content { display: none; flex-direction: column; gap: 12px; margin-top: 10px; padding-top: 5px; }
         .accordion-content.open { display: flex; }
@@ -54,20 +53,17 @@
         .badge-alert { background: #fee2e2; color: #b91c1c; }
         .badge-assenza { background: #e0f2fe; color: #0369a1; }
 
-        /* Stili per le cartelle / tab */
         .tabs-container { display: flex; gap: 8px; margin-bottom: 8px; }
         .tab-btn { flex: 1; padding: 12px; border: 2px solid var(--border); background: #f1f5f9; font-weight: 700; font-size: 0.85rem; border-radius: 10px; cursor: pointer; color: var(--text-light); text-align: center; }
         .tab-btn.active-da-fare { background: #fef3c7; border-color: #f59e0b; color: #b45309; }
         .tab-btn.active-terminati { background: #dcfce7; border-color: var(--success); color: #15803d; }
 
-        /* Stili gestione colleghi multipli */
         .collega-card-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
         .collega-card-item label { margin: 0; font-size: 0.9rem; color: var(--text); text-transform: none; display: flex; align-items: center; gap: 8px; cursor: pointer; }
         .collega-card-item input[type="checkbox"] { width: 18px; height: 18px; }
         .collega-card-item select { width: 110px; padding: 8px; font-size: 0.9rem; }
         .container-colleghi-scroll { max-height: 220px; overflow-y: auto; background: #fff; padding: 8px; border: 1px solid var(--border); border-radius: 10px; }
 
-        /* Tabelle riepilogo */
         .riepilogo-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
         .riepilogo-table th, .riepilogo-table td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
         .riepilogo-table th { background: #1e293b; color: white; font-size: 0.75rem; text-transform: uppercase; }
@@ -112,7 +108,7 @@
                     <span id="arrowPresenze">▼</span>
                 </div>
                 <div id="contentPresenze" class="accordion-content card-box" style="border-color: var(--brand-orange);">
-                    <div style="font-size: 0.85rem; color: var(--text-light);">Di base tutti i dipendenti sono considerati <b>Presenti</b>. Imposta qui sotto se un dipendente è assente, specificando il motivo e fino a quale data.</div>
+                    <div style="font-size: 0.85rem; color: var(--text-light);">Imposta qui sotto se un dipendente è assente (Ferie, Malattia, Permesso), specificando la data di fine assenza.</div>
                     <div class="container-colleghi-scroll" id="listaPresenzeUfficio" style="max-height: 300px;">
                         <!-- Popolato via JS -->
                     </div>
@@ -324,10 +320,13 @@
             let datiOp = assenzeDB[nomeOp];
             if (!datiOp || datiOp.stato !== 'Assente') return false;
 
-            let dataIntervento = new Date(dataStr);
+            // Confronta la data del giorno passato con l'intervallo di assenza impostato (fino alla data 'finoA')
+            let dataVerifica = new Date(dataStr);
             let dataFineAssenza = new Date(datiOp.finoA);
 
-            if (dataIntervento <= dataFineAssenza) {
+            // Per sicurezza consideriamo l'assenza valida dal giorno impostato indietro fino a 30 giorni o direttamente se la data è <= finoA
+            // Qui verifichiamo se la data da controllare non supera la data di fine assenza inserita dall'ufficio
+            if (dataVerifica <= dataFineAssenza) {
                 return true;
             }
             return false;
@@ -378,6 +377,7 @@
             let oggi = new Date();
             let righeTrovate = 0;
 
+            // Controlla gli ultimi 2 giorni precedenti
             for (let i = 1; i <= 2; i++) {
                 let d = new Date();
                 d.setDate(oggi.getDate() - i);
@@ -386,6 +386,7 @@
                 elencoOperaiTotali.forEach(nomeOp => {
                     let eAssente = isOperaioAssenteInData(nomeOp, dataStr);
 
+                    // Se NON è assente in quella data, verifichiamo se ha registrato le ore
                     if (!eAssente) {
                         let oreTotData = 0;
                         cantieriDB.forEach(c => {
@@ -420,7 +421,7 @@
             }
 
             if (righeTrovate === 0) {
-                corpoTabella.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--success); font-weight: 700;">Tutti i dipendenti sono in regola negli ultimi 2 giorni! 🎉</td></tr>`;
+                corpoTabella.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--success); font-weight: 700;">Tutti i dipendenti presenti sono in regola negli ultimi 2 giorni! 🎉</td></tr>`;
             }
         }
 
@@ -503,7 +504,6 @@
 
             let mappaAggregata = {};
 
-            // 1. Aggiunge i cantieri lavorati
             cantieriDB.forEach(c => {
                 if (c.storico) {
                     c.storico.forEach(s => {
@@ -527,14 +527,12 @@
                 }
             });
 
-            // 2. Aggiunge gli operai in Ferie, Malattia o Permesso attivi
             let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
             let oggiStr = new Date().toISOString().split('T')[0];
 
             elencoOperaiTotali.forEach(op => {
                 let datiOp = assenzeDB[op];
                 if (datiOp && datiOp.stato === 'Assente') {
-                    // Controlla se la data odierna o impostata rientra nella validità
                     let dataFineAssenza = new Date(datiOp.finoA);
                     let oggiDate = new Date(oggiStr);
                     
