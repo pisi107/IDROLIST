@@ -73,12 +73,20 @@
         .presenza-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px; }
 
         .foto-thumb-container { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
-        .foto-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s; }
+        .foto-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s; }
         .foto-thumb:hover { transform: scale(1.05); }
+
+        /* Stili specifici per Cartella Clienti a struttura ad albero */
+        .folder-cliente-box { background: #fff; border: 2px solid var(--border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+        .folder-cliente-header { background: #1e293b; color: white; padding: 12px 16px; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .folder-cliente-body { display: none; padding: 12px; background: #f8fafc; flex-direction: column; gap: 10px; }
+        .folder-cliente-body.open { display: flex; }
+        
+        .folder-intervento-box { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
 
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 999; justify-content: center; align-items: center; padding: 15px; }
         .modal-overlay.open { display: flex; }
-        .modal-card { background: #fff; width: 100%; max-width: 480px; max-height: 90vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .modal-card { background: #fff; width: 100%; max-width: 520px; max-height: 90vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .modal-header { background: #1e293b; color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 1.1rem; }
         .modal-body { padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
         .close-modal-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
@@ -93,6 +101,9 @@
 
         <div class="content-body">
             
+            <!-- PULSANTE APERTURA CARTELLA CLIENTI FOTO -->
+            <button class="action-btn btn-orange" style="font-size: 1.05rem; padding: 18px;" onclick="apriModaleCartellaClienti()">📁 Apri Archivio Cartella Clienti & Foto Lavori</button>
+
             <!-- SEZIONE CONTROLLO MANCATI FOGLI -->
             <div class="card-box" style="border-color: #ef4444; background: #fff5f5;">
                 <div style="font-size: 1.05rem; font-weight: 800; color: #b91c1c;">🚨 Controllo Ufficio: Mancati Fogli Lavoro (Ultimi 2 Giorni)</div>
@@ -207,6 +218,25 @@
         </div>
     </div>
 
+    <!-- MODALE CARTELLA CLIENTI & FOTO LAVORI -->
+    <div class="modal-overlay" id="modalCartellaClienti">
+        <div class="modal-card" style="max-width: 580px;">
+            <div class="modal-header">
+                <span>📁 Cartella Clienti e Foto Lavori</span>
+                <button class="close-modal-btn" onclick="chiudiModaleCartellaClienti()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <label>Cerca Cliente / Cantiere</label>
+                    <input type="text" id="inputCercaCartellaCliente" placeholder="Filtra per nome cliente o indirizzo..." oninput="renderizzaAlberoCartellaClienti()">
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-light);">Clicca su un cliente per aprire la sua cartella ed esplorare i lavori con le relative foto dei lavori eseguite.</div>
+                
+                <div id="contenitoreAlberoClienti" style="display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto;"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODALE ARCHIVIO E FILTRI AVANZATI -->
     <div class="modal-overlay" id="modalFiltri">
         <div class="modal-card">
@@ -284,6 +314,96 @@
                 console.error("Errore nell'avvio:", e);
             }
         };
+
+        function apriModaleCartellaClienti() {
+            let m = document.getElementById('modalCartellaClienti');
+            if(m) m.classList.add('open');
+            renderizzaAlberoCartellaClienti();
+        }
+
+        function chiudiModaleCartellaClienti() {
+            let m = document.getElementById('modalCartellaClienti');
+            if(m) m.classList.remove('open');
+        }
+
+        function renderizzaAlberoCartellaClienti() {
+            let container = document.getElementById('contenitoreAlberoClienti');
+            let query = document.getElementById('inputCercaCartellaCliente').value.toLowerCase().trim();
+            if(!container) return;
+            container.innerHTML = '';
+
+            let cantieriDB = ottieniCantieriAggiornati();
+            let trovati = 0;
+
+            cantieriDB.forEach((c, cIdx) => {
+                let nomeClienteTesto = `${c.cliente} - ${c.indirizzo}`.toLowerCase();
+                if (query === '' || nomeClienteTesto.includes(query)) {
+                    trovati++;
+                    let idCorpo = `folder_body_${cIdx}`;
+
+                    let interventiHtml = '';
+                    if (c.storico && Array.isArray(c.storico) && c.storico.length > 0) {
+                        c.storico.forEach((s, sIdx) => {
+                            // PRENDIAMO SOLO LE FOTO LAVORI ED ESCLUDIAMO LE BOLLE
+                            let lavoriArr = s.fotoLavori || s.lavori || [];
+                            if(!Array.isArray(lavoriArr)) lavoriArr = [];
+
+                            let fotoHtml = '';
+                            if (lavoriArr.length > 0) {
+                                fotoHtml = `<div class="foto-thumb-container">`;
+                                lavoriArr.forEach(imgB64 => {
+                                    fotoHtml += `<img src="${imgB64}" class="foto-thumb" onclick="apriZoomFoto('${imgB64}')">`;
+                                });
+                                fotoHtml += `</div>`;
+                            } else {
+                                fotoHtml = `<div style="font-size: 0.75rem; color: var(--text-light); font-style: italic;">Nessuna foto lavori allegata in questo intervento.</div>`;
+                            }
+
+                            interventiHtml += `
+                                <div class="folder-intervento-box">
+                                    <div style="font-size: 0.85rem; font-weight: 700; color: var(--brand-dark);">📅 Data: ${s.data || 'N/D'}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-light);"><b>Lavoro / Operai:</b> ${s.operai || s.dipendente || 'N/D'}</div>
+                                    <div style="font-size: 0.8rem;"><b>Note:</b> ${s.note || 'Nessuna nota'}</div>
+                                    <div style="margin-top: 4px;">
+                                        <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-light); margin-bottom: 2px;">Foto Lavori:</div>
+                                        ${fotoHtml}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        interventiHtml = `<div style="font-size: 0.8rem; color: var(--text-light); font-style: italic; padding: 5px;">Nessuna cartella di lavoro registrata per questo cliente.</div>`;
+                    }
+
+                    container.innerHTML += `
+                        <div class="folder-cliente-box">
+                            <div class="folder-cliente-header" onclick="toggleFolderCliente('${idCorpo}', this)">
+                                <span>📁 ${c.cliente} <span style="font-size:0.75rem; font-weight:400; color:#94a3b8;">(${c.indirizzo})</span></span>
+                                <span id="arrow_folder_${cIdx}">▼</span>
+                            </div>
+                            <div id="${idCorpo}" class="folder-cliente-body">
+                                ${interventiHtml}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            if (trovati === 0) {
+                container.innerHTML = `<div style="text-align: center; color: var(--text-light); padding: 20px; font-size: 0.9rem;">Nessun cliente trovato.</div>`;
+            }
+        }
+
+        function toggleFolderCliente(idCorpo, headerEl) {
+            let bodyEl = document.getElementById(idCorpo);
+            if(!bodyEl) return;
+            let isOpen = bodyEl.classList.contains('open');
+            bodyEl.classList.toggle('open', !isOpen);
+            let arrowSpan = headerEl.querySelector('span:last-child');
+            if(arrowSpan) {
+                arrowSpan.innerText = isOpen ? '▼' : '▲';
+            }
+        }
 
         function popolaSelectFiltroDipendenti() {
             let sel = document.getElementById('selectFiltroDipendente');
