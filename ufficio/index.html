@@ -40,6 +40,11 @@
 
         .card-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
         
+        /* Stile pulsante a fisarmonica (Accordion) */
+        .accordion-header { background: #1e293b; color: white; padding: 16px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .accordion-content { display: none; flex-direction: column; gap: 12px; margin-top: 10px; padding-top: 5px; }
+        .accordion-content.open { display: flex; }
+
         .cantiere-card { background: #fff; border: 2px solid var(--border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
         .cantiere-card.terminato { border-color: var(--success); background: #f0fdf4; }
         
@@ -66,6 +71,8 @@
         .riepilogo-table th, .riepilogo-table td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
         .riepilogo-table th { background: #1e293b; color: white; font-size: 0.75rem; text-transform: uppercase; }
         .riepilogo-table tr:last-child td { border-bottom: none; }
+        
+        .presenza-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px; }
     </style>
 </head>
 <body>
@@ -80,7 +87,7 @@
             <!-- SEZIONE NOTIFICHE / CONTROLLO DIPENDENTI SENZA ORE (ULTIMI 2 GIORNI) -->
             <div class="card-box" style="border-color: #ef4444; background: #fff5f5;">
                 <div style="font-size: 1.05rem; font-weight: 800; color: #b91c1c;">🚨 Controllo Ufficio: Mancati Fogli Lavoro (Ultimi 2 Giorni)</div>
-                <div style="font-size: 0.8rem; color: #7f1d1d; line-height: 1.4;">Elenco dipendenti che negli ultimi 2 giorni non hanno raggiunto le 8 ore o non hanno compilato il report (esclusi assenti giustificati/esenti):</div>
+                <div style="font-size: 0.8rem; color: #7f1d1d; line-height: 1.4;">Elenco dipendenti che negli ultimi 2 giorni non hanno raggiunto le 8 ore o non hanno compilato il report (esclusi assenti giustificati):</div>
                 <div style="overflow-x: auto;">
                     <table class="riepilogo-table" id="tabellaControlloMancanti">
                         <thead>
@@ -97,30 +104,49 @@
                 </div>
             </div>
 
-            <!-- SEZIONE INSERIMENTO UFFICIO CON DIPENDENTI MULTIPLI -->
-            <div class="card-box" style="border-color: var(--brand-orange);">
-                <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Registrazione per conto Dipendenti</div>
-                
-                <div>
-                    <label>Seleziona Cantiere</label>
-                    <select id="selectCantiereUfficio"></select>
+            <!-- FISARMONICA 1: GESTIONE PRESENZE / ASSENZE -->
+            <div>
+                <div class="accordion-header" onclick="toggleAccordion('contentPresenze', this)">
+                    <span>📋 Gestione Presenze / Assenze Dipendenti</span>
+                    <span id="arrowPresenze">▼</span>
                 </div>
+                <div id="contentPresenze" class="accordion-content card-box" style="border-color: var(--brand-orange);">
+                    <div style="font-size: 0.85rem; color: var(--text-light);">Di base tutti i dipendenti sono considerati <b>Presenti</b>. Imposta qui sotto se un dipendente è assente, specificando il motivo e fino a quale data.</div>
+                    <div class="container-colleghi-scroll" id="listaPresenzeUfficio" style="max-height: 300px;">
+                        <!-- Popolato via JS -->
+                    </div>
+                    <button class="action-btn btn-orange" onclick="salvaPresenzeUfficio()">Salva Stato Assenze</button>
+                </div>
+            </div>
 
-                <div>
-                    <label>Data Intervento</label>
-                    <input type="date" id="dataInterventoUfficio">
+            <!-- FISARMONICA 2: REGISTRAZIONE PER CONTO DIPENDENTI -->
+            <div>
+                <div class="accordion-header" onclick="toggleAccordion('contentRegistrazione', this)">
+                    <span>✏️ Registrazione per conto Dipendenti</span>
+                    <span id="arrowRegistrazione">▼</span>
                 </div>
+                <div id="contentRegistrazione" class="accordion-content card-box" style="border-color: var(--brand-orange);">
+                    <div>
+                        <label>Seleziona Cantiere</label>
+                        <select id="selectCantiereUfficio"></select>
+                    </div>
 
-                <div>
-                    <label>Seleziona Dipendenti e Relative Ore</label>
-                    <div class="container-colleghi-scroll" id="listaDipendentiUfficioMultiplo"></div>
-                </div>
+                    <div>
+                        <label>Data Intervento</label>
+                        <input type="date" id="dataInterventoUfficio">
+                    </div>
 
-                <div>
-                    <label>Note / Lavori Eseguiti / Materiali</label>
-                    <textarea id="noteUfficio" rows="2" placeholder="Inserisci dettagli..."></textarea>
+                    <div>
+                        <label>Seleziona Dipendenti e Relative Ore</label>
+                        <div class="container-colleghi-scroll" id="listaDipendentiUfficioMultiplo"></div>
+                    </div>
+
+                    <div>
+                        <label>Note / Lavori Eseguiti / Materiali</label>
+                        <textarea id="noteUfficio" rows="2" placeholder="Inserisci dettagli..."></textarea>
+                    </div>
+                    <button class="action-btn btn-orange" onclick="registraUfficioMultiplo()">Registra per conto dei Dipendenti</button>
                 </div>
-                <button class="action-btn btn-orange" onclick="registraUfficioMultiplo()">Registra per conto dei Dipendenti</button>
             </div>
 
             <!-- SEZIONE CREA NUOVO CANTIERE -->
@@ -178,17 +204,25 @@
             "Rosini Jean Paul", "Saleh Mohamed"
         ];
 
-        // Dipendenti esenti dai controlli mancanti (se necessario)
-        const dipendentiSenzaNotifiche = ["Bruno Nicola", "Coriglione Alessandro", "Marinoni Alessandro"];
-
         let cartellaCorrente = 'da_fare';
 
         window.onload = function() {
             document.getElementById('dataInterventoUfficio').value = new Date().toISOString().split('T')[0];
             popolaDipendentiUfficioMultiplo();
+            popolaTabellaPresenzeUfficio();
             aggiornaVistaUfficio();
             eseguiControlloMancantiUfficio();
         };
+
+        function toggleAccordion(contentId, headerEl) {
+            let content = document.getElementById(contentId);
+            let isOpen = content.classList.contains('open');
+            content.classList.toggle('open', !isOpen);
+            let arrowSpan = headerEl.querySelector('span:last-child');
+            if (arrowSpan) {
+                arrowSpan.innerText = isOpen ? '▼' : '▲';
+            }
+        }
 
         function popolaDipendentiUfficioMultiplo() {
             let container = document.getElementById('listaDipendentiUfficioMultiplo');
@@ -221,6 +255,82 @@
             if (selectEl) {
                 selectEl.disabled = !checkbox.checked;
             }
+        }
+
+        function popolaTabellaPresenzeUfficio() {
+            let container = document.getElementById('listaPresenzeUfficio');
+            container.innerHTML = '';
+
+            let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
+            let oggiStr = new Date().toISOString().split('T')[0];
+
+            elencoOperaiTotali.forEach(op => {
+                let safeId = op.replace(/\s+/g, '_');
+                let datiOp = assenzeDB[op] || { stato: 'Presente', finoA: oggiStr, tipo: 'Ferie' };
+                let isAssente = datiOp.stato === 'Assente';
+
+                container.innerHTML += `
+                    <div class="presenza-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <b>${op}</b>
+                            <select id="stato_op_${safeId}" onchange="cambiaStatoPresenzaUI('${safeId}')" style="width: 130px; padding: 6px; font-size: 0.85rem;">
+                                <option value="Presente" ${!isAssente ? 'selected' : ''}>🟢 Presente</option>
+                                <option value="Assente" ${isAssente ? 'selected' : ''}>🔴 Assente</option>
+                            </select>
+                        </div>
+                        <div id="dettagli_assenza_${safeId}" style="display: ${isAssente ? 'flex' : 'none'}; gap: 8px; margin-top: 4px;">
+                            <select id="tipo_op_${safeId}" style="flex: 1; padding: 6px; font-size: 0.8rem;">
+                                <option value="Ferie" ${datiOp.tipo === 'Ferie' ? 'selected' : ''}>Ferie</option>
+                                <option value="Malattia" ${datiOp.tipo === 'Malattia' ? 'selected' : ''}>Malattia</option>
+                                <option value="Permesso" ${datiOp.tipo === 'Permesso' ? 'selected' : ''}>Permesso</option>
+                            </select>
+                            <input type="date" id="fino_a_op_${safeId}" value="${datiOp.finoA || oggiStr}" style="flex: 1; padding: 6px; font-size: 0.8rem;">
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function cambiaStatoPresenzaUI(safeId) {
+            let val = document.getElementById(`stato_op_${safeId}`).value;
+            let dettDiv = document.getElementById(`dettagli_assenza_${safeId}`);
+            if (val === 'Assente') {
+                dettDiv.style.display = 'flex';
+            } else {
+                dettDiv.style.display = 'none';
+            }
+        }
+
+        function salvaPresenzeUfficio() {
+            let assenzeDB = {};
+            elencoOperaiTotali.forEach(op => {
+                let safeId = op.replace(/\s+/g, '_');
+                let stato = document.getElementById(`stato_op_${safeId}`).value;
+                let tipo = document.getElementById(`tipo_op_${safeId}`).value;
+                let finoA = document.getElementById(`fino_a_op_${safeId}`).value;
+
+                assenzeDB[op] = { stato: stato, tipo: tipo, finoA: finoA };
+            });
+
+            localStorage.setItem('idra_assenze_dettaglio_db', JSON.stringify(assenzeDB));
+            alert("✅ Stato presenze e assenze salvato con successo!");
+            eseguiControlloMancantiUfficio();
+        }
+
+        function isOperaioAssenteInData(nomeOp, dataStr) {
+            let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
+            let datiOp = assenzeDB[nomeOp];
+            if (!datiOp || datiOp.stato !== 'Assente') return false;
+
+            // Controlla se la data è compresa tra oggi e la data "finoA" impostata dall'ufficio
+            let dataIntervento = new Date(dataStr);
+            let dataInizioAssenza = new Date(); // di solito registrata di recente
+            let dataFineAssenza = new Date(datiOp.finoA);
+
+            if (dataIntervento <= dataFineAssenza) {
+                return true;
+            }
+            return false;
         }
 
         function cambiaCartella(tipo) {
@@ -265,7 +375,6 @@
             corpoTabella.innerHTML = '';
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_db')) || {};
             let oggi = new Date();
             let righeTrovate = 0;
 
@@ -276,39 +385,36 @@
                 let dataStr = d.toISOString().split('T')[0];
 
                 elencoOperaiTotali.forEach(nomeOp => {
-                    if (!dipendentiSenzaNotifiche.includes(nomeOp)) {
-                        let chiaveAssenza = `${nomeOp}_${dataStr}`;
-                        let eAssente = assenzeDB[chiaveAssenza] === true;
+                    let eAssente = isOperaioAssenteInData(nomeOp, dataStr);
 
-                        if (!eAssente) {
-                            let oreTotData = 0;
-                            cantieriDB.forEach(c => {
-                                if (c.storico) {
-                                    c.storico.forEach(s => {
-                                        if (s.data === dataStr && s.operai && s.operai.includes(nomeOp)) {
-                                            let matchOre = s.operai.match(new RegExp(`${nomeOp} \\(([^)]+h)\\)`));
-                                            if (matchOre && matchOre[1]) {
-                                                let val = parseFloat(matchOre[1]);
-                                                if (!isNaN(val)) oreTotData += val;
-                                            } else {
-                                                oreTotData += 8;
-                                            }
+                    if (!eAssente) {
+                        let oreTotData = 0;
+                        cantieriDB.forEach(c => {
+                            if (c.storico) {
+                                c.storico.forEach(s => {
+                                    if (s.data === dataStr && s.operai && s.operai.includes(nomeOp)) {
+                                        let matchOre = s.operai.match(new RegExp(`${nomeOp} \\(([^)]+h)\\)`));
+                                        if (matchOre && matchOre[1]) {
+                                            let val = parseFloat(matchOre[1]);
+                                            if (!isNaN(val)) oreTotData += val;
+                                        } else {
+                                            oreTotData += 8;
                                         }
-                                    });
-                                }
-                            });
-
-                            if (oreTotData < 8) {
-                                righeTrovate++;
-                                let oreMancanti = 8 - oreTotData;
-                                corpoTabella.innerHTML += `
-                                    <tr>
-                                        <td><b>${dataStr}</b></td>
-                                        <td>${nomeOp}</td>
-                                        <td><span class="badge badge-alert">${oreTotData}h (Mancano ${oreMancanti}h)</span></td>
-                                    </tr>
-                                `;
+                                    }
+                                });
                             }
+                        });
+
+                        if (oreTotData < 8) {
+                            righeTrovate++;
+                            let oreMancanti = 8 - oreTotData;
+                            corpoTabella.innerHTML += `
+                                <tr>
+                                    <td><b>${dataStr}</b></td>
+                                    <td>${nomeOp}</td>
+                                    <td><span class="badge badge-alert">${oreTotData}h (Mancano ${oreMancanti}h)</span></td>
+                                </tr>
+                            `;
                         }
                     }
                 });
