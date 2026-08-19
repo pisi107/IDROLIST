@@ -148,7 +148,7 @@
                 <!-- SEZIONE FOTO BOLLA MULTIPLE -->
                 <div>
                     <label>Foto Bolla / Documento (Aggiungi quante ne vuoi)</label>
-                    <input type="file" id="inputFotoBolla" accept="image/*" style="display:none;" onchange="aggiungiFoto('bolla')">
+                    <input type="file" id="inputFotoBolla" accept="image/*" style="display:none;" onchange="comprimiEggiungiFoto(this, 'bolla')">
                     <button class="action-btn btn-blue-light" onclick="document.getElementById('inputFotoBolla').click()" style="margin:0; font-size:0.9rem;">📎 + Aggiungi Foto Bolla</button>
                     <div id="containerBolle" class="grid-anteprime"></div>
                 </div>
@@ -156,7 +156,7 @@
                 <!-- SEZIONE FOTO LAVORO MULTIPLE -->
                 <div style="margin-top: 5px;">
                     <label>Foto Lavoro Eseguito (Aggiungi quante ne vuoi)</label>
-                    <input type="file" id="inputFotoLavoro" accept="image/*" style="display:none;" onchange="aggiungiFoto('lavoro')">
+                    <input type="file" id="inputFotoLavoro" accept="image/*" style="display:none;" onchange="comprimiEggiungiFoto(this, 'lavoro')">
                     <button class="action-btn btn-blue-light" onclick="document.getElementById('inputFotoLavoro').click()" style="margin:0; font-size:0.9rem;">📸 + Aggiungi Foto Lavoro</button>
                     <div id="containerLavori" class="grid-anteprime"></div>
                 </div>
@@ -232,21 +232,35 @@
             });
         }
 
-        function aggiungiFoto(tipo) {
-            let inputId = tipo === 'bolla' ? 'inputFotoBolla' : 'inputFotoLavoro';
-            let input = document.getElementById(inputId);
-
+        // Funzione di compressione automatica immagini per evitare blocchi su iOS
+        function comprimiEggiungiFoto(input, tipo) {
             if (input.files && input.files[0]) {
                 let reader = new FileReader();
                 reader.onload = function(e) {
-                    if (tipo === 'bolla') {
-                        fotoBolleArray.push(e.target.result);
-                        renderizzaMiniature('bolla');
-                    } else {
-                        fotoLavoriArray.push(e.target.result);
-                        renderizzaMiniature('lavoro');
-                    }
-                    input.value = '';
+                    let img = new Image();
+                    img.onload = function() {
+                        let canvas = document.createElement('canvas');
+                        let ctx = canvas.getContext('2d');
+                        
+                        // Imposta larghezza massima ridotta per alleggerire il file
+                        let maxWidth = 900;
+                        let scaleSize = maxWidth / img.width;
+                        canvas.width = maxWidth;
+                        canvas.height = img.height * scaleSize;
+                        
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        let compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7); // Compressione al 70%
+                        
+                        if (tipo === 'bolla') {
+                            fotoBolleArray.push(compressedDataUrl);
+                            renderizzaMiniature('bolla');
+                        } else {
+                            fotoLavoriArray.push(compressedDataUrl);
+                            renderizzaMiniature('lavoro');
+                        }
+                        input.value = '';
+                    };
+                    img.src = e.target.result;
                 };
                 reader.readAsDataURL(input.files[0]);
             }
