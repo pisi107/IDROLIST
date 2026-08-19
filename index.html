@@ -52,10 +52,7 @@
         .cantiere-card.terminato { border-color: var(--success); background: #f0fdf4; }
         
         .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
-        .badge-da-fare { background: #fef3c7; color: #b45309; }
-        .badge-fatto { background: #dcfce7; color: #15803d; }
         .badge-alert { background: #fee2e2; color: #b91c1c; }
-        .badge-assenza { background: #e0f2fe; color: #0369a1; }
 
         .tabs-container { display: flex; gap: 8px; margin-bottom: 8px; }
         .tab-btn { flex: 1; padding: 12px; border: 2px solid var(--border); background: #f1f5f9; font-weight: 700; font-size: 0.85rem; border-radius: 10px; cursor: pointer; color: var(--text-light); text-align: center; }
@@ -103,8 +100,24 @@
                     <div style="font-size: 1.2rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 10px;">👋 Benvenuto</div>
                     <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 25px;">Seleziona come desideri accedere:</div>
                     
-                    <button class="action-btn btn-orange" style="margin-bottom: 12px;" onclick="mostraVista('ufficio')">Accesso Ufficio / Admin</button>
+                    <button class="action-btn btn-orange" style="margin-bottom: 12px;" onclick="mostraVista('login_ufficio')">Accesso Ufficio / Admin</button>
                     <button class="action-btn btn-dark" onclick="mostraVista('login_operaio')">Accesso Operai</button>
+                </div>
+            </div>
+
+            <!-- ================= VISTA LOGIN UFFICIO ================= -->
+            <div id="viewLoginUfficio" class="view-section">
+                <div class="card-box" style="border-color: var(--brand-orange); text-align: center; padding: 25px 15px;">
+                    <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 8px;">📊 Accesso Ufficio / Admin</div>
+                    <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 15px;">Inserisci la password di amministrazione (Predefinita: <b>ufficio2026</b>)</div>
+
+                    <div style="text-align: left; margin-bottom: 15px;">
+                        <label>Password Admin *</label>
+                        <input type="password" id="inputPasswordUfficio" placeholder="Password ufficio...">
+                    </div>
+
+                    <button class="action-btn btn-orange" style="margin-bottom: 8px;" onclick="effettuaLoginUfficio()">Accedi all'Ufficio</button>
+                    <button class="action-btn btn-dark" style="background: #64748b;" onclick="mostraVista('selezione')">← Indietro</button>
                 </div>
             </div>
 
@@ -247,7 +260,7 @@
             <div id="viewUfficio" class="view-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; background: #e2e8f0; padding: 10px 14px; border-radius: 10px; font-weight: 700; font-size: 0.9rem;">
                     <span>📊 Pannello Amministrazione</span>
-                    <button class="action-btn btn-dark" style="width: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="mostraVista('selezione')">Cambia Vista</button>
+                    <button class="action-btn btn-dark" style="width: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="mostraVista('selezione')">Esci Ufficio</button>
                 </div>
 
                 <!-- CONTROLLO MANCATI FOGLI -->
@@ -407,6 +420,9 @@
             if (vista === 'selezione') {
                 document.getElementById('viewSelezioneRuolo').classList.add('active');
                 sub.innerText = "Portale Unificato";
+            } else if (vista === 'login_ufficio') {
+                document.getElementById('viewLoginUfficio').classList.add('active');
+                sub.innerText = "Accesso Ufficio";
             } else if (vista === 'login_operaio') {
                 document.getElementById('viewLoginOperaio').classList.add('active');
                 sub.innerText = "Accesso Operai";
@@ -418,6 +434,20 @@
                 popolaSelectFiltroDipendenti();
                 aggiornaVistaUfficio();
                 eseguiControlloMancantiUfficio();
+            }
+        }
+
+        // LOGIN UFFICIO
+        function effettuaLoginUfficio() {
+            let passInserita = document.getElementById('inputPasswordUfficio').value.trim();
+            // Password predefinita ufficio: "ufficio2026" (puoi cambiarla qui sotto o salvarla nel localStorage se preferisci)
+            let passAdminSalvata = localStorage.getItem('idra_password_ufficio') || "ufficio2026";
+
+            if (passInserita === passAdminSalvata) {
+                document.getElementById('inputPasswordUfficio').value = '';
+                mostraVista('ufficio');
+            } else {
+                alert("⚠️ Password Ufficio non corretta! (La predefinita è: ufficio2026)");
             }
         }
 
@@ -614,7 +644,7 @@
             c.innerHTML = '';
             elencoOperaiTotali.forEach(op => {
                 let id = `ore_uff_${op.replace(/\s+/g, '_')}`;
-                c.innerHTML += `<div class="collega-card-item"><label><input type="checkbox" name="dipUffChk" value="${op}" onchange="document.getElementById('${id}').disabled = !this.checked"> ${op}</label><select id="${id}" disabled><option value="8">8h</option><option value="7">7h</option><option value="6">6h</option></select></div>`;
+                c.innerHTML += `<div class="collega-card-item"><label><input type="checkbox" name="dipUffChk" value="${op}" onchange="document.getElementById('${id}').disabled = !this.checked"> ${op}</label><select id="${id}" disabled><option value="8">8h</option><option value="7">7h</option><option value="6">6h</option><option value="5">5h</option><option value="4">4h</option></select></div>`;
             });
         }
 
@@ -760,7 +790,7 @@
             tb.innerHTML = '';
             let righe = raccogliRighe(JSON.parse(localStorage.getItem('idra_cantieri_db')) || []).filter(r => (dF === "" || r.dipendente === dF) && (dtF === "" || r.data.includes(dtF)) && (cF === "" || r.cantiere.toLowerCase().includes(cF)));
             let tot = 0;
-            righe.forEach(r => { tot += r.oreNum; tb.innerHTML += `<tr><td><b>${r.data}</b></td><td><b>${r.dipendente}</b></td><td>${r.cantiere}</td><td><b>${r.ore}</b></td></tr>`; });
+            righe.exec = righe.forEach(r => { tot += r.oreNum; tb.innerHTML += `<tr><td><b>${r.data}</b></td><td><b>${r.dipendente}</b></td><td>${r.cantiere}</td><td><b>${r.ore}</b></td></tr>`; });
             document.getElementById('infoTotaleOreFiltro').innerHTML = `<b>Totale Ore:</b> ${tot}h`;
         }
 
