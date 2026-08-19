@@ -251,38 +251,38 @@
             let cliente = document.getElementById('rapCliente').value;
             if(!cliente) return alert("Seleziona un cantiere!");
             
-            let dataLavoro = document.getElementById('rapData').value;
-            let tipoLavoro = document.getElementById('rapTipoLavoro').value;
-            let operai = document.getElementById('rapOperai').value || 'Non specificato';
-            let ore = document.getElementById('rapOre').value;
-            let note = document.getElementById('rapNote').value;
             let fotoInput = document.getElementById('fotoBolla');
-            let haFoto = (fotoInput.files && fotoInput.files.length > 0);
-
             let indexCantiere = document.getElementById('selezionaCantiere').value;
+
             if(indexCantiere !== "") {
                 if(!cantieriDB[indexCantiere].storico) cantieriDB[indexCantiere].storico = [];
-                // Aggiunge il rapportino allo storico dell'ufficio
-                cantieriDB[indexCantiere].storico.push({
-                    data: dataLavoro,
-                    tipo: tipoLavoro,
-                    operai: operai,
-                    ore: ore,
-                    note: note,
-                    bolla: haFoto ? "📎 Bolla allegata" : "Nessuna bolla"
-                });
-                // Segna il cantiere come concluso
-                cantieriDB[indexCantiere].stato = 'Concluso';
-                localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            }
 
-            alert("✅ Rapportino salvato e cantiere chiuso con successo nell'app!");
-            
-            // Pulisci e torna alla home
-            document.getElementById('rapOperai').value = '';
-            document.getElementById('rapNote').value = '';
-            document.getElementById('fotoBolla').value = '';
-            document.getElementById('statoFoto').style.display = 'none';
+                if(fotoInput.files && fotoInput.files[0]) {
+                    let reader = new FileReader();
+                    reader.onload = function(e) {
+                        salvaDatiNelDb(e.target.result);
+                    };
+                    reader.readAsDataURL(fotoInput.files[0]);
+                } else {
+                    salvaDatiNelDb(null);
+                }
+            }
+        }
+
+        function salvaDatiNelDb(fotoBase64) {
+            let indexCantiere = document.getElementById('selezionaCantiere').value;
+            cantieriDB[indexCantiere].storico.push({
+                data: document.getElementById('rapData').value,
+                tipo: document.getElementById('rapTipoLavoro').value,
+                operai: document.getElementById('rapOperai').value || 'Non specificato',
+                ore: document.getElementById('rapOre').value,
+                note: document.getElementById('rapNote').value,
+                foto: fotoBase64
+            });
+            cantieriDB[indexCantiere].stato = 'Concluso';
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+
+            alert("✅ Rapportino, foto e chiusura cantiere inviati all'ufficio!");
             cambiaSezione('home');
         }
     </script>
