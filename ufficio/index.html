@@ -94,17 +94,16 @@
 
         <div class="content-body">
             
-            <!-- SEZIONE CONTROLLO MANCATI FOGLI -->
+            <!-- SEZIONE CONTROLLO MANCATI FOGLI (RAGGRUPPATI PER OPERAIO) -->
             <div class="card-box" style="border-color: #ef4444; background: #fff5f5;">
                 <div style="font-size: 1.05rem; font-weight: 800; color: #b91c1c;">🚨 Controllo Ufficio: Mancati Fogli Lavoro (Ultimi 2 Giorni)</div>
-                <div style="font-size: 0.8rem; color: #7f1d1d; line-height: 1.4;">Elenco dipendenti che negli ultimi 2 giorni non hanno raggiunto le 8 ore o non hanno compilato il report (esclusi assenti giustificati):</div>
+                <div style="font-size: 0.8rem; color: #7f1d1d; line-height: 1.4;">Elenco dipendenti che negli ultimi 2 giorni non hanno completato le ore o il report (raggruppati per operaio):</div>
                 <div style="overflow-x: auto;">
                     <table class="riepilogo-table" id="tabellaControlloMancanti">
                         <thead>
                             <tr>
-                                <th>Data</th>
                                 <th>Dipendente</th>
-                                <th>Ore Registrate</th>
+                                <th>Giorni Mancanti / Dettaglio</th>
                             </tr>
                         </thead>
                         <tbody id="corpoTabellaControlloMancanti"></tbody>
@@ -476,7 +475,7 @@
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             let oggi = new Date();
-            let righeTrovate = 0;
+            let mappaMancanti = {}; // Raggruppamento per operaio
 
             for (let i = 1; i <= 2; i++) {
                 let d = new Date();
@@ -505,22 +504,29 @@
                         });
 
                         if (oreTotData < 8) {
-                            righeTrovate++;
+                            if (!mappaMancanti[nomeOp]) {
+                                mappaMancanti[nomeOp] = [];
+                            }
                             let oreMancanti = 8 - oreTotData;
-                            corpoTabella.innerHTML += `
-                                <tr>
-                                    <td><b>${dataStr}</b></td>
-                                    <td>${nomeOp}</td>
-                                    <td><span class="badge badge-alert">${oreTotData}h (Mancano ${oreMancanti}h)</span></td>
-                                </tr>
-                            `;
+                            mappaMancanti[nomeOp].push(`${dataStr} (${oreTotData}h)`);
                         }
                     }
                 });
             }
 
-            if (righeTrovate === 0) {
-                corpoTabella.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--success); font-weight: 700;">Tutti i dipendenti presenti sono in regola negli ultimi 2 giorni! 🎉</td></tr>`;
+            let operaiKeys = Object.keys(mappaMancanti);
+            if (operaiKeys.length === 0) {
+                corpoTabella.innerHTML = `<tr><td colspan="2" style="text-align: center; color: var(--success); font-weight: 700;">Tutti i dipendenti presenti sono in regola negli ultimi 2 giorni! 🎉</td></tr>`;
+            } else {
+                operaiKeys.forEach(nomeOp => {
+                    let dettagliGiorni = mappaMancanti[nomeOp].join(', ');
+                    corpoTabella.innerHTML += `
+                        <tr>
+                            <td><b>${nomeOp}</b></td>
+                            <td><span class="badge badge-alert">${dettagliGiorni}</span></td>
+                        </tr>
+                    `;
+                });
             }
         }
 
@@ -547,7 +553,6 @@
                     let storicoHtml = '';
                     if (c.storico && c.storico.length > 0) {
                         c.storico.forEach((s) => {
-                            // Genera miniature foto bolle
                             let fotoBolleHtml = '';
                             if (s.fotoBolle && s.fotoBolle.length > 0) {
                                 fotoBolleHtml += `<div style="margin-top: 4px; font-size: 0.75rem; font-weight: 700; color: var(--text-light);">Bolle:</div><div class="foto-thumb-container">`;
@@ -557,7 +562,6 @@
                                 fotoBolleHtml += `</div>`;
                             }
 
-                            // Genera miniature foto lavori
                             let fotoLavoriHtml = '';
                             if (s.fotoLavori && s.fotoLavori.length > 0) {
                                 fotoLavoriHtml += `<div style="margin-top: 6px; font-size: 0.75rem; font-weight: 700; color: var(--text-light);">Lavori / Installazioni:</div><div class="foto-thumb-container">`;
