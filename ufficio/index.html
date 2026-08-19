@@ -72,12 +72,10 @@
         
         .presenza-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px; }
 
-        /* MINIATURE FOTO */
         .foto-thumb-container { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
         .foto-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s; }
         .foto-thumb:hover { transform: scale(1.05); }
 
-        /* MODALE IMMAGINE FULLSCREEN */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 999; justify-content: center; align-items: center; padding: 15px; }
         .modal-overlay.open { display: flex; }
         .modal-card { background: #fff; width: 100%; max-width: 480px; max-height: 90vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
@@ -274,16 +272,22 @@
         let cartellaCorrente = 'da_fare';
 
         window.onload = function() {
-            document.getElementById('dataInterventoUfficio').value = new Date().toISOString().split('T')[0];
-            popolaDipendentiUfficioMultiplo();
-            popolaTabellaPresenzeUfficio();
-            popolaSelectFiltroDipendenti();
-            aggiornaVistaUfficio();
-            eseguiControlloMancantiUfficio();
+            try {
+                let oggiInput = document.getElementById('dataInterventoUfficio');
+                if(oggiInput) oggiInput.value = new Date().toISOString().split('T')[0];
+                popolaDipendentiUfficioMultiplo();
+                popolaTabellaPresenzeUfficio();
+                popolaSelectFiltroDipendenti();
+                aggiornaVistaUfficio();
+                eseguiControlloMancantiUfficio();
+            } catch (e) {
+                console.error("Errore nell'avvio:", e);
+            }
         };
 
         function popolaSelectFiltroDipendenti() {
             let sel = document.getElementById('selectFiltroDipendente');
+            if(!sel) return;
             sel.innerHTML = '<option value="">Tutti i dipendenti</option>';
             elencoOperaiTotali.forEach(op => {
                 sel.innerHTML += `<option value="${op}">${op}</option>`;
@@ -291,12 +295,14 @@
         }
 
         function apriModaleFiltri() {
-            document.getElementById('modalFiltri').classList.add('open');
+            let m = document.getElementById('modalFiltri');
+            if(m) m.classList.add('open');
             filtraArchivioModale();
         }
 
         function chiudiModaleFiltri() {
-            document.getElementById('modalFiltri').classList.remove('open');
+            let m = document.getElementById('modalFiltri');
+            if(m) m.classList.remove('open');
         }
 
         function azzeraFiltriModale() {
@@ -307,16 +313,22 @@
         }
 
         function apriZoomFoto(srcBase64) {
-            document.getElementById('imgZoomFull').src = srcBase64;
-            document.getElementById('modalFotoZoom').classList.add('open');
+            let img = document.getElementById('imgZoomFull');
+            let m = document.getElementById('modalFotoZoom');
+            if(img && m) {
+                img.src = srcBase64;
+                m.classList.add('open');
+            }
         }
 
         function chiudiZoomFoto() {
-            document.getElementById('modalFotoZoom').classList.remove('open');
+            let m = document.getElementById('modalFotoZoom');
+            if(m) m.classList.remove('open');
         }
 
         function toggleAccordion(contentId, headerEl) {
             let content = document.getElementById(contentId);
+            if(!content) return;
             let isOpen = content.classList.contains('open');
             content.classList.toggle('open', !isOpen);
             let arrowSpan = headerEl.querySelector('span:last-child');
@@ -327,6 +339,7 @@
 
         function popolaDipendentiUfficioMultiplo() {
             let container = document.getElementById('listaDipendentiUfficioMultiplo');
+            if(!container) return;
             container.innerHTML = '';
 
             elencoOperaiTotali.forEach(op => {
@@ -360,9 +373,14 @@
 
         function popolaTabellaPresenzeUfficio() {
             let container = document.getElementById('listaPresenzeUfficio');
+            if(!container) return;
             container.innerHTML = '';
 
-            let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
+            let assenzeDB = {};
+            try {
+                assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
+            } catch(e) { assenzeDB = {}; }
+
             let oggiStr = new Date().toISOString().split('T')[0];
 
             elencoOperaiTotali.forEach(op => {
@@ -395,10 +413,8 @@
         function cambiaStatoPresenzaUI(safeId) {
             let val = document.getElementById(`stato_op_${safeId}`).value;
             let dettDiv = document.getElementById(`dettagli_assenza_${safeId}`);
-            if (val === 'Assente') {
-                dettDiv.style.display = 'flex';
-            } else {
-                dettDiv.style.display = 'none';
+            if(dettDiv) {
+                dettDiv.style.display = (val === 'Assente') ? 'flex' : 'none';
             }
         }
 
@@ -406,11 +422,13 @@
             let assenzeDB = {};
             elencoOperaiTotali.forEach(op => {
                 let safeId = op.replace(/\s+/g, '_');
-                let stato = document.getElementById(`stato_op_${safeId}`).value;
-                let tipo = document.getElementById(`tipo_op_${safeId}`).value;
-                let finoA = document.getElementById(`fino_a_op_${safeId}`).value;
+                let stEl = document.getElementById(`stato_op_${safeId}`);
+                let tpEl = document.getElementById(`tipo_op_${safeId}`);
+                let fnEl = document.getElementById(`fino_a_op_${safeId}`);
 
-                assenzeDB[op] = { stato: stato, tipo: tipo, finoA: finoA };
+                if(stEl && tpEl && fnEl) {
+                    assenzeDB[op] = { stato: stEl.value, tipo: tpEl.value, finoA: fnEl.value };
+                }
             });
 
             localStorage.setItem('idra_assenze_dettaglio_db', JSON.stringify(assenzeDB));
@@ -420,17 +438,17 @@
         }
 
         function isOperaioAssenteInData(nomeOp, dataStr) {
-            let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
-            let datiOp = assenzeDB[nomeOp];
-            if (!datiOp || datiOp.stato !== 'Assente') return false;
+            try {
+                let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
+                let datiOp = assenzeDB[nomeOp];
+                if (!datiOp || datiOp.stato !== 'Assente') return false;
 
-            let dataVerifica = new Date(dataStr);
-            let dataFineAssenza = new Date(datiOp.finoA);
-
-            if (dataVerifica <= dataFineAssenza) {
-                return true;
+                let dataVerifica = new Date(dataStr);
+                let dataFineAssenza = new Date(datiOp.finoA);
+                return dataVerifica <= dataFineAssenza;
+            } catch(e) {
+                return false;
             }
-            return false;
         }
 
         function cambiaCartella(tipo) {
@@ -439,22 +457,35 @@
             let btnTerminati = document.getElementById('btnTabTerminati');
 
             if (tipo === 'da_fare') {
-                btnDaFare.className = "tab-btn active-da-fare";
-                btnTerminati.className = "tab-btn";
+                if(btnDaFare) btnDaFare.className = "tab-btn active-da-fare";
+                if(btnTerminati) btnTerminati.className = "tab-btn";
             } else {
-                btnDaFare.className = "tab-btn";
-                btnTerminati.className = "tab-btn active-terminati";
+                if(btnDaFare) btnDaFare.className = "tab-btn";
+                if(btnTerminati) btnTerminati.className = "tab-btn active-terminati";
             }
             aggiornaVistaUfficio();
         }
 
         function creaCantiereUfficio() {
-            let cliente = document.getElementById('nuovoCliente').value.trim();
-            let indirizzo = document.getElementById('nuovoIndirizzo').value.trim();
+            let clienteEl = document.getElementById('nuovoCliente');
+            let indirizzoEl = document.getElementById('nuovoIndirizzo');
 
-            if(!cliente || !indirizzo) return alert("Inserisci nome cliente e indirizzo!");
+            if(!clienteEl || !indirizzoEl) return;
+            let cliente = clienteEl.value.trim();
+            let indirizzo = indirizzoEl.value.trim();
 
-            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            if(!cliente || !indirizzo) {
+                alert("Inserisci nome cliente e indirizzo!");
+                return;
+            }
+
+            let cantieriDB = [];
+            try {
+                cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            } catch(e) {
+                cantieriDB = [];
+            }
+
             cantieriDB.push({
                 cliente: cliente,
                 indirizzo: indirizzo,
@@ -463,8 +494,8 @@
             });
 
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            document.getElementById('nuovoCliente').value = '';
-            document.getElementById('nuovoIndirizzo').value = '';
+            clienteEl.value = '';
+            indirizzoEl.value = '';
             
             aggiornaVistaUfficio();
             alert("✅ Cantiere creato con successo!");
@@ -472,11 +503,11 @@
 
         function eseguiControlloMancantiUfficio() {
             let corpoTabella = document.getElementById('corpoTabellaControlloMancanti');
+            if(!corpoTabella) return;
             corpoTabella.innerHTML = '';
 
             const operaiEsclusi = ["Bruno Nicola", "Coriglione Alessandro", "Marinoni Alessandro"];
-
-            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            let cantieriDB = ottieniCantieriAggiornati();
             let oggi = new Date();
             let mappaMancanti = {}; 
 
@@ -487,13 +518,12 @@
 
                 elencoOperaiTotali.forEach(nomeOp => {
                     if (operaiEsclusi.includes(nomeOp)) return;
-
                     let eAssente = isOperaioAssenteInData(nomeOp, dataStr);
 
                     if (!eAssente) {
                         let oreTotData = 0;
                         cantieriDB.forEach(c => {
-                            if (c.storico) {
+                            if (c.storico && Array.isArray(c.storico)) {
                                 c.storico.forEach(s => {
                                     if (s.data === dataStr && s.operai && s.operai.includes(nomeOp)) {
                                         let matchOre = s.operai.match(new RegExp(`${nomeOp} \\(([^)]+h)\\)`));
@@ -509,9 +539,7 @@
                         });
 
                         if (oreTotData < 8) {
-                            if (!mappaMancanti[nomeOp]) {
-                                mappaMancanti[nomeOp] = [];
-                            }
+                            if (!mappaMancanti[nomeOp]) mappaMancanti[nomeOp] = [];
                             mappaMancanti[nomeOp].push(`${dataStr} (${oreTotData}h)`);
                         }
                     }
@@ -534,9 +562,21 @@
             }
         }
 
+        function ottieniCantieriAggiornati() {
+            let cantieriDB = [];
+            try {
+                cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+                if(!Array.isArray(cantieriDB)) cantieriDB = [];
+            } catch(e) {
+                cantieriDB = [];
+            }
+            return cantieriDB;
+        }
+
         function aggiornaVistaUfficio() {
-            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            let cantieriDB = ottieniCantieriAggiornati();
             let containerLista = document.getElementById('listaCantieriUfficio');
+            if(!containerLista) return;
 
             containerLista.innerHTML = '';
             popolaSelectCantieriUfficio();
@@ -555,21 +595,23 @@
                     cantieriFiltratiCount++;
 
                     let storicoHtml = '';
-                    if (c.storico && c.storico.length > 0) {
+                    if (c.storico && Array.isArray(c.storico) && c.storico.length > 0) {
                         c.storico.forEach((s, sIdx) => {
                             let fotoBolleHtml = '';
-                            if (s.fotoBolle && s.fotoBolle.length > 0) {
+                            let fotoBolleArr = s.fotoBolle || s.bolle || [];
+                            if (Array.isArray(fotoBolleArr) && fotoBolleArr.length > 0) {
                                 fotoBolleHtml += `<div style="margin-top: 4px; font-size: 0.75rem; font-weight: 700; color: var(--text-light);">Bolle:</div><div class="foto-thumb-container">`;
-                                s.fotoBolle.forEach(imgBase64 => {
+                                fotoBolleArr.forEach(imgBase64 => {
                                     fotoBolleHtml += `<img src="${imgBase64}" class="foto-thumb" onclick="apriZoomFoto('${imgBase64}')">`;
                                 });
                                 fotoBolleHtml += `</div>`;
                             }
 
                             let fotoLavoriHtml = '';
-                            if (s.fotoLavori && s.fotoLavori.length > 0) {
+                            let fotoLavoriArr = s.fotoLavori || s.lavori || [];
+                            if (Array.isArray(fotoLavoriArr) && fotoLavoriArr.length > 0) {
                                 fotoLavoriHtml += `<div style="margin-top: 6px; font-size: 0.75rem; font-weight: 700; color: var(--text-light);">Lavori / Installazioni:</div><div class="foto-thumb-container">`;
-                                s.fotoLavori.forEach(imgBase64 => {
+                                fotoLavoriArr.forEach(imgBase64 => {
                                     fotoLavoriHtml += `<img src="${imgBase64}" class="foto-thumb" onclick="apriZoomFoto('${imgBase64}')">`;
                                 });
                                 fotoLavoriHtml += `</div>`;
@@ -580,10 +622,10 @@
                             storicoHtml += `
                                 <div style="font-size: 0.8rem; background: #f1f5f9; padding: 10px; border-radius: 8px; margin-top: 6px;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                                        <div><b>${s.data}</b> - ${s.operai} ${badgeStampato}</div>
+                                        <div><b>${s.data || 'Data N/D'}</b> - ${s.operai || s.dipendente || ''} ${badgeStampato}</div>
                                         <button class="action-btn btn-orange" style="width: auto; padding: 4px 10px; font-size: 0.75rem;" onclick="stampaSingoloFoglio(${cIdx}, ${sIdx})">🖨️ Stampa</button>
                                     </div>
-                                    <div><i>Note: ${s.note}</i></div>
+                                    <div><i>Note: ${s.note || ''}</i></div>
                                     ${fotoBolleHtml}
                                     ${fotoLavoriHtml}
                                 </div>
@@ -613,8 +655,8 @@
                                 ${storicoHtml}
                             </div>
                             <div style="display: flex; gap: 8px; margin-top: 10px;">
-                                <button class="${btnStatoClasse}" style="padding: 8px; font-size: 0.8rem;" onclick="cambiaStatoCantiere(${idx})">${btnStatoTesto}</button>
-                                <button class="action-btn btn-danger" onclick="eliminaCantiere(${idx})">Elimina</button>
+                                <button class="${btnStatoClasse}" style="padding: 8px; font-size: 0.8rem;" onclick="cambiaStatoCantiere(${cIdx})">${btnStatoTesto}</button>
+                                <button class="action-btn btn-danger" onclick="eliminaCantiere(${cIdx})">Elimina</button>
                             </div>
                         </div>
                     `;
@@ -629,7 +671,7 @@
         }
 
         function stampaSingoloFoglio(cIdx, sIdx) {
-            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            let cantieriDB = ottieniCantieriAggiornati();
             let c = cantieriDB[cIdx];
             let s = c.storico[sIdx];
 
@@ -641,9 +683,10 @@
 
             let finestraStampa = window.open('', '_blank');
             let bolleHtml = "";
-            if (s.fotoBolle && s.fotoBolle.length > 0) {
+            let fotoBolleArr = s.fotoBolle || s.bolle || [];
+            if (fotoBolleArr.length > 0) {
                 bolleHtml = `<div style="margin-top:15px;"><b>Foto Bolle Allega:</b><div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;">` + 
-                    s.fotoBolle.map(img => `<img src="${img}" style="width:180px; height:180px; object-fit:cover; border:1px solid #999; border-radius:4px;">`).join('') + 
+                    fotoBolleArr.map(img => `<img src="${img}" style="width:180px; height:180px; object-fit:cover; border:1px solid #999; border-radius:4px;">`).join('') + 
                     `</div></div>`;
             } else {
                 bolleHtml = `<div style="margin-top:10px; font-size:13px; color:#666;"><i>Nessuna foto bolla allegata.</i></div>`;
@@ -675,9 +718,9 @@
                         <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">🏢 Cliente: ${c.cliente}</div>
                         <div style="font-size: 15px; margin-bottom: 12px; color: #444;">📍 Indirizzo Cantiere: ${c.indirizzo}</div>
                         <hr style="border:0; border-top:1px solid #ddd; margin:12px 0;">
-                        <div style="margin-bottom: 8px;"><b>Data Intervento:</b> ${s.data}</div>
-                        <div style="margin-bottom: 8px;"><b>Personale e Ore:</b> ${s.operai}</div>
-                        <div style="margin-bottom: 12px;"><b>Note / Lavori Eseguiti:</b><br><div style="background:#f9f9f9; padding:10px; border:1px solid #ccc; margin-top:4px; border-radius:4px;">${s.note}</div></div>
+                        <div style="margin-bottom: 8px;"><b>Data Intervento:</b> ${s.data || 'N/D'}</div>
+                        <div style="margin-bottom: 8px;"><b>Personale e Ore:</b> ${s.operai || s.dipendente || ''}</div>
+                        <div style="margin-bottom: 12px;"><b>Note / Lavori Eseguiti:</b><br><div style="background:#f9f9f9; padding:10px; border:1px solid #ccc; margin-top:4px; border-radius:4px;">${s.note || ''}</div></div>
                         ${bolleHtml}
                     </div>
                 </body>
@@ -690,9 +733,10 @@
         function popolaSelectCantieriUfficio() {
             let selectCantiere = document.getElementById('selectCantiereUfficio');
             let inputRicerca = document.getElementById('inputRicercaCantiereUfficio');
-            let query = inputRicerca ? inputRicerca.value.toLowerCase().trim() : '';
+            if(!selectCantiere) return;
 
-            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            let query = inputRicerca ? inputRicerca.value.toLowerCase().trim() : '';
+            let cantieriDB = ottieniCantieriAggiornati();
             selectCantiere.innerHTML = '';
 
             let countAperti = 0;
@@ -719,31 +763,45 @@
             let listaRigheRiepilogo = [];
 
             cantieriDB.forEach(c => {
-                if (c.storico) {
+                if (c.storico && Array.isArray(c.storico)) {
                     c.storico.forEach(s => {
-                        if (s.operai) {
-                            let parti = s.operai.split(',');
-                            parti.forEach(p => {
-                                let match = p.trim().match(/^(.*?)\s*\(([\d.]+)h\)$/);
-                                if (match) {
-                                    let nomeOp = match[1].trim();
-                                    let oreOp = parseFloat(match[2]) || 0;
-                                    
-                                    listaRigheRiepilogo.push({
-                                        data: s.data || 'N/D',
-                                        dipendente: nomeOp,
-                                        cantiere: c.cliente,
-                                        oreNum: oreOp,
-                                        ore: `${oreOp} Ore`
-                                    });
-                                }
-                            });
+                        let operaiString = s.operai || s.dipendente || "";
+                        if (operaiString) {
+                            if (operaiString.includes('(')) {
+                                let parti = operaiString.split(',');
+                                parti.forEach(p => {
+                                    let match = p.trim().match(/^(.*?)\s*\(([\d.]+)h\)$/);
+                                    if (match) {
+                                        let nomeOp = match[1].trim();
+                                        let oreOp = parseFloat(match[2]) || 0;
+                                        listaRigheRiepilogo.push({
+                                            data: s.data || 'N/D',
+                                            dipendente: nomeOp,
+                                            cantiere: c.cliente,
+                                            oreNum: oreOp,
+                                            ore: `${oreOp} Ore`
+                                        });
+                                    }
+                                });
+                            } else {
+                                listaRigheRiepilogo.push({
+                                    data: s.data || 'N/D',
+                                    dipendente: operaiString,
+                                    cantiere: c.cliente,
+                                    oreNum: 8,
+                                    ore: `8 Ore`
+                                });
+                            }
                         }
                     });
                 }
             });
 
-            let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
+            let assenzeDB = {};
+            try {
+                assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
+            } catch(e) { assenzeDB = {}; }
+
             let oggiStr = new Date().toISOString().split('T')[0];
 
             elencoOperaiTotali.forEach(op => {
@@ -770,6 +828,7 @@
 
         function aggiornaTabellaRiepilogo(cantieriDB) {
             let corpoTabella = document.getElementById('corpoTabellaRiepilogo');
+            if(!corpoTabella) return;
             corpoTabella.innerHTML = '';
 
             let listaRigheRiepilogo = raccogliTutteLeRigheRiepilogo(cantieriDB);
@@ -780,7 +839,6 @@
             }
 
             let ultimeRighe = listaRigheRiepilogo.slice(0, 5);
-
             ultimeRighe.forEach(item => {
                 corpoTabella.innerHTML += `
                     <tr>
@@ -800,9 +858,10 @@
 
             let corpoModale = document.getElementById('corpoTabellaModaleFiltri');
             let infoOre = document.getElementById('infoTotaleOreFiltro');
+            if(!corpoModale) return;
             corpoModale.innerHTML = '';
 
-            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            let cantieriDB = ottieniCantieriAggiornati();
             let tutteLeRighe = raccogliTutteLeRigheRiepilogo(cantieriDB);
 
             let righeFiltrate = tutteLeRighe.filter(r => {
@@ -813,11 +872,9 @@
             });
 
             let sommaOreTotale = 0;
-            righeFiltrate.forEach(r => {
-                sommaOreTotale += (r.oreNum || 0);
-            });
+            righeFiltrate.forEach(r => { sommaOreTotale += (r.oreNum || 0); });
 
-            infoOre.innerHTML = `<b>Risultati Trovati:</b> ${righeFiltrate.length} | <b>Totale Ore:</b> ${sommaOreTotale} Ore`;
+            if(infoOre) infoOre.innerHTML = `<b>Risultati Trovati:</b> ${righeFiltrate.length} | <b>Totale Ore:</b> ${sommaOreTotale} Ore`;
 
             if (righeFiltrate.length === 0) {
                 corpoModale.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-light);">Nessun record trovato per i filtri selezionati.</td></tr>`;
@@ -837,15 +894,28 @@
         }
 
         function registraUfficioMultiplo() {
-            let cantiereIdx = document.getElementById('selectCantiereUfficio').value;
-            let data = document.getElementById('dataInterventoUfficio').value;
-            let note = document.getElementById('noteUfficio').value.trim();
+            let selectCantiere = document.getElementById('selectCantiereUfficio');
+            let dataIntervento = document.getElementById('dataInterventoUfficio');
+            let noteUfficio = document.getElementById('noteUfficio');
 
-            if (cantiereIdx === '') return alert("Seleziona un cantiere valido!");
-            if (!data) return alert("Inserisci una data!");
+            if(!selectCantiere || selectCantiere.value === '') {
+                alert("Seleziona un cantiere valido!");
+                return;
+            }
+            if(!dataIntervento || !dataIntervento.value) {
+                alert("Inserisci una data!");
+                return;
+            }
+
+            let cantiereIdx = selectCantiere.value;
+            let data = dataIntervento.value;
+            let note = noteUfficio ? noteUfficio.value.trim() : "";
 
             let checkboxSelezionati = document.querySelectorAll('input[name="dipendenteUfficioCheckbox"]:checked');
-            if (checkboxSelezionati.length === 0) return alert("Seleziona almeno un dipendente!");
+            if (checkboxSelezionati.length === 0) {
+                alert("Seleziona almeno un dipendente!");
+                return;
+            }
 
             let stringaOperaiArray = [];
             checkboxSelezionati.forEach(cb => {
@@ -856,9 +926,10 @@
                 stringaOperaiArray.push(`${nomeOp} (${oreOp}h)`);
             });
 
-            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            let cantieriDB = ottieniCantieriAggiornati();
+            if(!cantieriDB[cantiereIdx]) return;
 
-            if (!cantieriDB[cantiereIdx].storico) {
+            if (!cantieriDB[cantiereIdx].storico || !Array.isArray(cantieriDB[cantiereIdx].storico)) {
                 cantieriDB[cantiereIdx].storico = [];
             }
 
@@ -875,8 +946,10 @@
             });
 
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            document.getElementById('noteUfficio').value = '';
-            document.getElementById('inputRicercaCantiereUfficio').value = '';
+            if(noteUfficio) noteUfficio.value = '';
+            
+            let inputRicerca = document.getElementById('inputRicercaCantiereUfficio');
+            if(inputRicerca) inputRicerca.value = '';
             
             document.querySelectorAll('input[name="dipendenteUfficioCheckbox"]').forEach(cb => {
                 cb.checked = false;
@@ -887,23 +960,27 @@
 
             aggiornaVistaUfficio();
             eseguiControlloMancantiUfficio();
-            alert("✅ Intervento registrato con successo per i dipendenti selezionati!");
+            alert("✅ Intervento registrato con successo!");
         }
 
         function cambiaStatoCantiere(idx) {
-            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            cantieriDB[idx].completato = !cantieriDB[idx].completato;
-            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            aggiornaVistaUfficio();
+            let cantieriDB = ottieniCantieriAggiornati();
+            if(cantieriDB[idx]) {
+                cantieriDB[idx].completato = !cantieriDB[idx].completato;
+                localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+                aggiornaVistaUfficio();
+            }
         }
 
         function eliminaCantiere(idx) {
             if(confirm("Sei sicuro di voler eliminare questo cantiere?")) {
-                let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-                cantieriDB.splice(idx, 1);
-                localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-                aggiornaVistaUfficio();
-                eseguiControlloMancantiUfficio();
+                let cantieriDB = ottieniCantieriAggiornati();
+                if(cantieriDB[idx]) {
+                    cantieriDB.splice(idx, 1);
+                    localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+                    aggiornaVistaUfficio();
+                    eseguiControlloMancantiUfficio();
+                }
             }
         }
     </script>
