@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Idrotech Varese - Area Operai</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-orange: #f28c1e;
+            --brand-orange-hover: #d97712;
+            --brand-dark: #2d3748;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --bg: #0f172a;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 15px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
+        .container { width: 100%; max-width: 480px; background: var(--card-bg); padding: 24px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); box-sizing: border-box; }
+        .brand-header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f1f5f9; }
+        .brand-logo-text { font-size: 1.6rem; font-weight: 800; color: var(--brand-dark); margin: 0; }
+        .brand-logo-text span { color: var(--brand-orange); }
+        .brand-subtitle { font-size: 0.8rem; color: var(--text-light); font-style: italic; margin-top: 4px; }
+        
+        .home-screen { text-align: center; padding: 10px 0; }
+        .home-menu-title { font-size: 0.9rem; font-weight: 600; color: var(--text-light); margin-bottom: 15px; text-transform: uppercase; }
+        .home-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 16px; font-size: 1.05rem; font-weight: 600; border-radius: 12px; border: none; cursor: pointer; margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .btn-lavoro { background-color: var(--brand-orange); color: white; }
+        .btn-lista { background-color: var(--brand-dark); color: white; }
+
+        .app-section { display: none; }
+        .app-section.active { display: block; }
+        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .back-btn { background: #f1f5f9; color: var(--text); border: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; }
+        
+        h2 { margin: 0; font-size: 1.2rem; color: #0f172a; }
+        label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-light); margin-bottom: 4px; margin-top: 10px; text-transform: uppercase; }
+        input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; background-color: #f8fafc; color: var(--text); box-sizing: border-box; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .btn-whatsapp { background-color: var(--success); color: white; }
+        .btn-secondary { background-color: #e2e8f0; color: var(--text); }
+        hr { border: 0; border-top: 1px solid var(--border); margin: 15px 0; }
+        ul { list-style: none; padding: 0; margin: 0; max-height: 180px; overflow-y: auto; }
+        li { background: #f8fafc; border: 1px solid var(--border); margin-bottom: 6px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; font-size: 0.9rem; }
+        .badge { background: #ffedd5; color: #c2410c; padding: 2px 6px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
+        .delete-btn { background: #fee2e2; color: var(--danger); border: none; width: 26px; height: 26px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HOME OPERAI -->
+        <div id="sezione-home" class="app-section active">
+            <div class="brand-header">
+                <h1 class="brand-logo-text">IDROTECH <span>VARESE</span></h1>
+                <div class="brand-subtitle">Area Operai - Cantiere</div>
+            </div>
+            <div class="home-screen">
+                <div class="home-menu-title">Seleziona Operazione</div>
+                <button class="home-btn btn-lavoro" onclick="cambiaSezione('rapportino')">📝 Compila Foglio di Lavoro</button>
+                <button class="home-btn btn-lista" onclick="cambiaSezione('lista')">📋 Lista Materiali</button>
+            </div>
+        </div>
+
+        <!-- FOGLIO DI LAVORO -->
+        <div id="sezione-rapportino" class="app-section">
+            <div class="top-nav">
+                <button class="back-btn" onclick="cambiaSezione('home')">🏠 Home</button>
+                <h2>Foglio Lavoro</h2>
+            </div>
+            <label>Data</label>
+            <input type="date" id="rapData">
+            
+            <label>Seleziona Cantiere</label>
+            <select id="selezionaCantiere" onchange="caricaDatiCantiere()">
+                <option value="">-- Seleziona cantiere --</option>
+            </select>
+            <input type="hidden" id="rapCliente">
+            <input type="hidden" id="rapIndirizzo">
+
+            <label>Tipo di Lavoro</label>
+            <select id="rapTipoLavoro">
+                <option value="Nuovo Lavoro">Nuovo Lavoro / Installazione</option>
+                <option value="Continuazione">Continuazione Lavoro</option>
+                <option value="Riparazione / Urgenza">Riparazione / Urgenza</option>
+                <option value="Manutenzione">Manutenzione</option>
+            </select>
+
+            <label>Operai Presenti</label>
+            <input type="text" id="rapOperai" placeholder="Es. Mario, Luca">
+
+            <label>Ore Lavoro</label>
+            <select id="rapOre">
+                <option value="">Seleziona ore...</option>
+                <option value="4 Ore">4 Ore</option>
+                <option value="8 Ore">8 Ore</option>
+            </select>
+
+            <label>Note / Lavori Eseguiti</label>
+            <textarea id="rapNote" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea>
+
+            <button class="btn-whatsapp" onclick="inviaRapportinoWhatsApp()">Invia Rapportino su WhatsApp</button>
+            <button class="btn-secondary" onclick="segnalaConcluso()">✅ Segna Cantiere Concluso</button>
+        </div>
+
+        <!-- LISTA MATERIALI -->
+        <div id="sezione-lista" class="app-section">
+            <div class="top-nav">
+                <button class="back-btn" onclick="cambiaSezione('home')">🏠 Home</button>
+                <h2>Lista Materiali</h2>
+            </div>
+            <label>Riferimento Cantiere</label>
+            <input type="text" id="nomeCantiere" placeholder="Nome cantiere">
+
+            <label>Categoria</label>
+            <select id="categoriaSelect" onchange="aggiornaMateriali()">
+                <option value="">Seleziona categoria...</option>
+            </select>
+
+            <label>Articolo</label>
+            <select id="materialeSelect">
+                <option value="">Prima seleziona categoria...</option>
+            </select>
+
+            <label>Quantità</label>
+            <input type="number" id="quantitaInput" value="1" min="1">
+
+            <button class="btn-primary" onclick="aggiungiMateriale()" style="background:var(--brand-orange); color:white; border:none; padding:12px; border-radius:8px; font-weight:600; width:100%; margin-top:10px;">Aggiungi alla Lista</button>
+            <hr>
+            <ul id="listaSpesa"></ul>
+            <button class="btn-whatsapp" onclick="inviaListaWhatsApp()">Invia Lista su WhatsApp</button>
+            <button class="btn-secondary" onclick="pulisciLista()">Svuota</button>
+        </div>
+    </div>
+
+    <script>
+        function cambiaSezione(id) {
+            document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
+            document.getElementById('sezione-' + id).classList.add('active');
+            if(id === 'rapportino') aggiornaTendinaCantieri();
+        }
+
+        let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+
+        function aggiornaTendinaCantieri() {
+            const select = document.getElementById('selezionaCantiere');
+            select.innerHTML = '<option value="">-- Seleziona cantiere --</option>';
+            cantieriDB.forEach((c, index) => {
+                if(c.stato !== 'Concluso') {
+                    let opt = document.createElement('option');
+                    opt.value = index;
+                    opt.textContent = `${c.cliente} - ${c.indirizzo}`;
+                    select.appendChild(opt);
+                }
+            });
+        }
+
+        function caricaDatiCantiere() {
+            const index = document.getElementById('selezionaCantiere').value;
+            if(index !== "") {
+                document.getElementById('rapCliente').value = cantieriDB[index].cliente;
+                document.getElementById('rapIndirizzo').value = cantieriDB[index].indirizzo;
+            }
+        }
+
+        function segnalaConcluso() {
+            const index = document.getElementById('selezionaCantiere').value;
+            if(index === "") return alert("Seleziona un cantiere!");
+            if(confirm("Segnare come concluso?")) {
+                cantieriDB[index].stato = 'Concluso';
+                localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+                window.open(`https://wa.me/?text=` + encodeURIComponent(`✅ Cantiere concluso: ${cantieriDB[index].cliente} (${cantieriDB[index].indirizzo})`));
+                cambiaSezione('home');
+            }
+        }
+
+        const database = {
+            "Tubi Multistrato": ["Tubo 16x2", "Tubo 20x2", "Tubo 26x3"],
+            "Raccordi": ["Raccordo 16x1/2\"", "Gomito 16x1/2\"", "Tee 16-16-16"]
+        };
+
+        const catSelect = document.getElementById('categoriaSelect');
+        const matSelect = document.getElementById('materialeSelect');
+        let lista = [];
+
+        window.onload = function() {
+            document.getElementById('rapData').valueAsDate = new Date();
+            for (const cat in database) {
+                let opt = document.createElement('option'); 
+                opt.value = cat; 
+                opt.innerHTML = cat;
+                catSelect.appendChild(opt);
+            }
+        };
+
+        function aggiornaMateriali() {
+            matSelect.innerHTML = '<option value="">Seleziona...</option>';
+            if(database[catSelect.value]) {
+                database[catSelect.value].forEach(m => {
+                    let opt = document.createElement('option'); 
+                    opt.value = m; 
+                    opt.innerHTML = m;
+                    matSelect.appendChild(opt);
+                });
+            }
+        }
+
+        function aggiungiMateriale() {
+            if(matSelect.value) {
+                lista.push({nome: matSelect.value, qta: document.getElementById('quantitaInput').value});
+                document.getElementById('listaSpesa').innerHTML = lista.map((i, idx) => `
+                    <li>
+                        <span><span class='badge'>${i.qta}x</span> ${i.nome}</span> 
+                        <button class='delete-btn' onclick='lista.splice(${idx},1);this.parentNode.remove()'>✕</button>
+                    </li>
+                `).join('');
+            }
+        }
+
+        function pulisciLista() {
+            lista = [];
+            document.getElementById('listaSpesa').innerHTML = '';
+        }
+
+        function inviaListaWhatsApp() {
+            if(lista.length === 0) return alert("Lista vuota");
+            let text = `📋 Lista Materiali (${document.getElementById('nomeCantiere').value || 'Cantiere'})\n` + lista.map(i => `• ${i.qta}x ${i.nome}`).join('\n');
+            window.open(`https://wa.me/?text=` + encodeURIComponent(text));
+        }
+
+        function inviaRapportinoWhatsApp() {
+            let cliente = document.getElementById('rapCliente').value;
+            if(!cliente) return alert("Seleziona cantiere");
+            let text = `🛠️ Rapportino Lavoro\n👤 Cliente: ${cliente}\n📍 Indirizzo: ${document.getElementById('rapIndirizzo').value}\n⚙️ Tipo: ${document.getElementById('rapTipoLavoro').value}\n👷 Operai: ${document.getElementById('rapOperai').value || 'Non specificato'}\n⏱️ Ore: ${document.getElementById('rapOre').value}\n📝 Note: ${document.getElementById('rapNote').value}`;
+            window.open(`https://wa.me/?text=` + encodeURIComponent(text));
+        }
+    </script>
+</body>
+</html>
