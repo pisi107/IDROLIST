@@ -115,11 +115,11 @@
                     <div style="display: flex; gap: 8px;">
                         <div style="flex: 1;">
                             <label>Data</label>
-                            <input type="date" id="filtroDataRicerca" oninput="filtraPerDataDipendente()">
+                            <input type="date" id="filtroDataRicerca" oninput="filtraPerDataDipendente()" onchange="filtraPerDataDipendente()">
                         </div>
                         <div style="flex: 1;">
                             <label>Dipendente</label>
-                            <input type="text" id="filtroDipendenteRicerca" placeholder="Es. Moris" oninput="filtraPerDataDipendente()">
+                            <input type="text" id="filtroDipendenteRicerca" placeholder="Es. Moris" oninput="filtraPerDataDipendente()" onkeyup="filtraPerDataDipendente()">
                         </div>
                     </div>
                     <button class="action-btn" onclick="azzeraFiltriRicerca()" style="background:#e2e8f0; color:var(--text); padding:10px; font-size:0.85rem; margin-top:2px;">Mostra Tutti / Pulisci Ricerca</button>
@@ -313,7 +313,6 @@
         }
 
         function mostraCalendarioFiltrato(listaInterventi) {
-            // Copiamo l'array per non alterare l'ordine originale della cache
             let listaDaMostrare = [...listaInterventi];
             listaDaMostrare.sort((a, b) => new Date(b.data) - new Date(a.data));
 
