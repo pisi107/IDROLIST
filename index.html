@@ -80,7 +80,7 @@
                         </select>
                     </div>
                     <div>
-                        <label>Password (Iniziale = il tuo nome, es: assaliluca)</label>
+                        <label>Password (Iniziale = il tuo nome, es: brunonicola)</label>
                         <input type="password" id="inputPassword" placeholder="Inserisci la password">
                     </div>
                     <button class="action-btn btn-orange" onclick="effettuaLogin()" style="margin-top: 5px;">Accedi</button>
@@ -91,7 +91,7 @@
             <div id="sezione-cambio-password" class="app-section">
                 <div class="card-box" style="margin-top: 10px; border-color: var(--brand-orange);">
                     <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); text-align: center;">Modifica Password Obbligatoria</div>
-                    <div style="font-size: 0.85rem; color: var(--text-light); line-height: 1.4;">È il tuo primo accesso o è stata richiesta una modifica. Per motivi di sicurezza, devi impostare una nuova password personale prima di procedere.</div>
+                    <div style="font-size: 0.85rem; color: var(--text-light); line-height: 1.4;">È il tuo primo accesso. Per motivi di sicurezza, devi impostare una nuova password personale prima di procedere.</div>
                     <div>
                         <label>Nuova Password Personale</label>
                         <input type="password" id="nuovaPassword1" placeholder="Inserisci la nuova password">
@@ -150,7 +150,6 @@
         window.onload = function() {
             document.getElementById('dataIntervento').value = new Date().toISOString().split('T')[0];
             if (utenteCorrente) {
-                // Se c'è un utente salvato, verifichiamo che non debba cambiare la password
                 let dbPassword = JSON.parse(localStorage.getItem('idra_db_password')) || {};
                 if (dbPassword[utenteCorrente] && dbPassword[utenteCorrente].deveCambiare) {
                     mostraCambioPassword(utenteCorrente);
@@ -160,7 +159,6 @@
             }
         };
 
-        // Genera la password predefinita iniziale (es. "Assali Luca" diventa "assaliluca")
         function getPasswordIniziale(nome) {
             return nome.toLowerCase().replace(/\s+/g, '');
         }
@@ -183,10 +181,8 @@
                 document.getElementById('inputPassword').value = '';
                 
                 if (deveCambiare) {
-                    // Primo accesso o cambio obbligato: reindirizza alla schermata di cambio password
                     mostraCambioPassword(nome);
                 } else {
-                    // Login regolare
                     localStorage.setItem('idra_utente_corrente', nome);
                     utenteCorrente = nome;
                     avviaDashboard(nome);
@@ -219,7 +215,7 @@
             let dbPassword = JSON.parse(localStorage.getItem('idra_db_password')) || {};
             dbPassword[nome] = {
                 password: p1,
-                deveCambiare: false // password aggiornata con successo
+                deveCambiare: false
             };
             localStorage.setItem('idra_db_password', JSON.stringify(dbPassword));
 
@@ -264,6 +260,18 @@
         }
 
         function verificaOreMancantiPersonali(nomeOperaio) {
+            // Dipendenti esclusi dalle notifiche di ore mancanti
+            const dipendentiSenzaNotifiche = [
+                "Bruno Nicola",
+                "Coriglione Alessandro",
+                "Marinoni Alessandro"
+            ];
+
+            if (dipendentiSenzaNotifiche.includes(nomeOperaio)) {
+                document.getElementById('boxNotificaOrePersonale').innerHTML = '';
+                return;
+            }
+
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_db')) || {};
             let oggi = new Date();
