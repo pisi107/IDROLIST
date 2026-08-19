@@ -427,8 +427,10 @@
             "Rosini Jean Paul", "Saleh Mohamed"
         ];
 
-        // Elenco artigiani vuoto (verrà popolato con i nomi che mi dirai)
-        const elencoArtigianiTotali = [];
+        // Artigiani inseriti
+        const elencoArtigianiTotali = [
+            "SGL", "ARBO", "Clima Group Srl"
+        ];
 
         let utenteCorrente = "";
         let tipoUtenteCorrente = ""; // "operaio" o "artigiano"
@@ -524,7 +526,7 @@
                     document.getElementById('viewLoginArtigiano').classList.remove('active');
                     document.getElementById('viewCambioPassword').classList.add('active');
                 } else {
-                    alert("⚠️ Password errata! Al primo accesso usa il tuo nome tutto minuscolo.");
+                    alert("⚠️ Password errata! Al primo accesso usa il tuo nome tutto minuscolo (es. sgl oppure climagroupsrl).");
                 }
             } else {
                 if (passInserita === customPass) {
@@ -606,7 +608,6 @@
             let container = document.getElementById('listaColleghiUtente');
             container.innerHTML = '';
             
-            // Uniamo operai e artigiani come possibili colleghi (escludendo l'utente loggato)
             let tuttiColleghi = [...elencoOperaiTotali, ...elencoArtigianiTotali];
             tuttiColleghi.forEach(op => {
                 if (op === utenteCorrente) return;
