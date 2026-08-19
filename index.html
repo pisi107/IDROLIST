@@ -334,7 +334,6 @@
 
             let countAperti = 0;
             cantieriDB.forEach((c, idx) => {
-                // Filtra SOLO i cantieri aperti (non completati)
                 if (!c.completato) {
                     let testoCompleto = `${c.cliente} - ${c.indirizzo}`.toLowerCase();
                     if (query === '' || testoCompleto.includes(query)) {
@@ -382,12 +381,48 @@
             if (selectEl) selectEl.disabled = !checkbox.checked;
         }
 
-        function convertiFileInBase64(file) {
-            return new Promise((resolve, reject) => {
+        // Funzione ottimizzata per comprimere e convertire le immagini in Base64 (evita il blocco di memoria)
+        function comprimiEConvertiImmagine(file) {
+            return new Promise((resolve) => {
                 let reader = new FileReader();
                 reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
+                reader.onload = function(event) {
+                    let img = new Image();
+                    img.src = event.target.result;
+                    img.onload = function() {
+                        let canvas = document.createElement('canvas');
+                        let maxDim = 1000; // Imposta la dimensione massima a 1000px per alleggerire il file
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > maxDim) {
+                                height *= maxDim / width;
+                                width = maxDim;
+                            }
+                        } else {
+                            if (height > maxDim) {
+                                width *= maxDim / height;
+                                height = maxDim;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        let ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Converte in formato JPEG compresso al 75%
+                        let dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+                        resolve(dataUrl);
+                    };
+                    img.onerror = function() {
+                        resolve(null);
+                    };
+                };
+                reader.onerror = function() {
+                    resolve(null);
+                };
             });
         }
 
@@ -395,7 +430,7 @@
             let arrayBase64 = [];
             if (!fileList || fileList.length === 0) return arrayBase64;
             for (let i = 0; i < fileList.length; i++) {
-                let base64 = await convertiFileInBase64(fileList[i]);
+                let base64 = await comprimiEConvertiImmagine(fileList[i]);
                 if (base64) arrayBase64.push(base64);
             }
             return arrayBase64;
@@ -461,8 +496,13 @@
                 cantieriDB[cantiereIdx].completato = false;
             }
 
-            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            alert("✅ Foglio di lavoro e foto salvati con successo!");
+            try {
+                localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+                alert("✅ Foglio di lavoro e foto salvati con successo!");
+            } catch (e) {
+                alert("⚠️ Memoria del browser quasi piena. Prova a caricare meno foto o immagini più leggere.");
+                return;
+            }
 
             // Reset form
             document.getElementById('noteInterventoOperaio').value = '';
