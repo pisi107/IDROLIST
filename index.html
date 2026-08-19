@@ -41,6 +41,7 @@
         .btn-orange { background: linear-gradient(135deg, #f28c1e, #d97712); color: white; }
         .btn-danger { background-color: var(--danger); color: white; padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; box-shadow: none; width: auto; }
         .btn-dark { background: var(--brand-dark); color: white; }
+        .btn-artigiani { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; }
 
         .card-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
         
@@ -94,14 +95,15 @@
 
         <div class="content-body">
             
-            <!-- SELETTORE MODALITA' (UFFICIO / OPERAIO) -->
+            <!-- SELETTORE MODALITA' (UFFICIO / OPERAIO / ARTIGIANO) -->
             <div id="viewSelezioneRuolo" class="view-section active">
                 <div class="card-box" style="border-color: var(--brand-orange); text-align: center; padding: 30px 20px;">
                     <div style="font-size: 1.2rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 10px;">👋 Benvenuto</div>
                     <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 25px;">Seleziona come desideri accedere:</div>
                     
                     <button class="action-btn btn-orange" style="margin-bottom: 12px;" onclick="mostraVista('login_ufficio')">Accesso Ufficio / Admin</button>
-                    <button class="action-btn btn-dark" onclick="mostraVista('login_operaio')">Accesso Operai</button>
+                    <button class="action-btn btn-dark" style="margin-bottom: 12px;" onclick="mostraVista('login_operaio')">Accesso Operai</button>
+                    <button class="action-btn btn-artigiani" onclick="mostraVista('login_artigiano')">Accesso Artigiani</button>
                 </div>
             </div>
 
@@ -121,7 +123,7 @@
                 </div>
             </div>
 
-            <!-- ================= 1. VISTA LOGIN OPERAIO ================= -->
+            <!-- ================= VISTA LOGIN OPERAIO ================= -->
             <div id="viewLoginOperaio" class="view-section">
                 <div class="card-box" style="border-color: var(--brand-orange); text-align: center; padding: 25px 15px;">
                     <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 8px;">🔐 Accesso Operai</div>
@@ -135,7 +137,7 @@
 
                     <div style="text-align: left; margin-bottom: 15px;">
                         <label>Password *</label>
-                        <input type="password" id="inputPasswordLogin" placeholder="Inserisci password...">
+                        <input type="password" id="inputPasswordLoginOperaio" placeholder="Inserisci password...">
                     </div>
 
                     <button class="action-btn btn-orange" style="margin-bottom: 8px;" onclick="effettuaLoginOperaio()">Accedi</button>
@@ -143,7 +145,29 @@
                 </div>
             </div>
 
-            <!-- ================= 2. VISTA CAMBIO PASSWORD OPERAIO ================= -->
+            <!-- ================= VISTA LOGIN ARTIGIANO ================= -->
+            <div id="viewLoginArtigiano" class="view-section">
+                <div class="card-box" style="border-color: var(--brand-orange); text-align: center; padding: 25px 15px;">
+                    <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 8px;">🔧 Accesso Artigiani</div>
+                    
+                    <div style="text-align: left; margin-bottom: 10px;">
+                        <label>Seleziona il tuo Nome *</label>
+                        <select id="selectLoginArtigiano">
+                            <option value="">-- Il mio nome --</option>
+                        </select>
+                    </div>
+
+                    <div style="text-align: left; margin-bottom: 15px;">
+                        <label>Password *</label>
+                        <input type="password" id="inputPasswordLoginArtigiano" placeholder="Inserisci password...">
+                    </div>
+
+                    <button class="action-btn btn-artigiani" style="margin-bottom: 8px;" onclick="effettuaLoginArtigiano()">Accedi</button>
+                    <button class="action-btn btn-dark" style="background: #64748b;" onclick="mostraVista('selezione')">← Indietro</button>
+                </div>
+            </div>
+
+            <!-- ================= VISTA CAMBIO PASSWORD OPERAIO / ARTIGIANO ================= -->
             <div id="viewCambioPassword" class="view-section">
                 <div class="card-box" style="border-color: var(--brand-orange); padding: 25px 15px;">
                     <div style="font-size: 1rem; font-weight: 800; color: var(--brand-dark); text-align: center; margin-bottom: 5px;">🔑 Cambio Password Obbligatorio</div>
@@ -163,11 +187,11 @@
                 </div>
             </div>
 
-            <!-- ================= 3. VISTA COMPILAZIONE FOGLIO LAVORO OPERAIO ================= -->
-            <div id="viewFormOperaio" class="view-section">
+            <!-- ================= VISTA COMPILAZIONE FOGLIO LAVORO (OPERAIO / ARTIGIANO) ================= -->
+            <div id="viewFormUtente" class="view-section">
                 <div class="user-logged-box">
                     <span id="labelUtenteConnesso">Utente: -</span>
-                    <button class="action-btn btn-dark" style="width: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="esciLoginOperaio()">Esci</button>
+                    <button class="action-btn btn-dark" style="width: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="esciLoginUtente()">Esci</button>
                 </div>
 
                 <div class="card-box" style="border-color: var(--brand-orange);">
@@ -175,22 +199,22 @@
                     
                     <div>
                         <label>Cerca Cantiere Aperto</label>
-                        <input type="text" id="inputRicercaCantiereOperaio" placeholder="Scrivi per filtrare i cantieri..." oninput="popolaCantieriOperaio()">
+                        <input type="text" id="inputRicercaCantiereUtente" placeholder="Scrivi per filtrare i cantieri..." oninput="popolaCantieriUtente()">
                     </div>
 
-                    <!-- BOX AGGIUNTA RAPIDA CANTIERE DA PARTE DELL'OPERAIO -->
+                    <!-- BOX AGGIUNTA RAPIDA CANTIERE -->
                     <div style="background: #f1f5f9; padding: 12px; border-radius: 10px; border: 1px dashed var(--brand-orange);">
                         <div style="font-size: 0.8rem; font-weight: 700; color: var(--brand-dark); margin-bottom: 6px;">➕ Cantiere non trovato? Crealo subito:</div>
                         <div style="display: flex; flex-direction: column; gap: 6px;">
-                            <input type="text" id="nuovoClienteOperaio" placeholder="Nome Cliente..." style="padding: 10px; font-size: 0.9rem;">
-                            <input type="text" id="nuovoIndirizzoOperaio" placeholder="Indirizzo Cantiere..." style="padding: 10px; font-size: 0.9rem;">
-                            <button type="button" class="action-btn btn-dark" style="padding: 10px; font-size: 0.85rem;" onclick="creaCantiereAlVoloOperaio()">Crea e Seleziona Cantiere</button>
+                            <input type="text" id="nuovoClienteUtente" placeholder="Nome Cliente..." style="padding: 10px; font-size: 0.9rem;">
+                            <input type="text" id="nuovoIndirizzoUtente" placeholder="Indirizzo Cantiere..." style="padding: 10px; font-size: 0.9rem;">
+                            <button type="button" class="action-btn btn-dark" style="padding: 10px; font-size: 0.85rem;" onclick="creaCantiereAlVoloUtente()">Crea e Seleziona Cantiere</button>
                         </div>
                     </div>
 
                     <div>
                         <label>Seleziona Cantiere *</label>
-                        <select id="selectCantiereOperaio">
+                        <select id="selectCantiereUtente">
                             <option value="">Caricamento cantieri...</option>
                         </select>
                     </div>
@@ -206,12 +230,12 @@
 
                     <div>
                         <label>Data Intervento</label>
-                        <input type="date" id="dataInterventoOperaio">
+                        <input type="date" id="dataInterventoUtente">
                     </div>
 
                     <div>
                         <label>Tipo di Lavoro</label>
-                        <select id="tipoLavoroOperaio">
+                        <select id="tipoLavoroUtente">
                             <option value="Nuovo Lavoro / Installazione">Nuovo Lavoro / Installazione</option>
                             <option value="Manutenzione / Riparazione">Manutenzione / Riparazione</option>
                             <option value="Sopralluogo / Preventivo">Sopralluogo / Preventivo</option>
@@ -234,12 +258,12 @@
 
                     <div>
                         <label>Colleghi presenti e ore dedicate</label>
-                        <div class="container-colleghi-scroll" id="listaColleghiOperaio"></div>
+                        <div class="container-colleghi-scroll" id="listaColleghiUtente"></div>
                     </div>
 
                     <div>
                         <label>Note / Lavori Eseguiti *</label>
-                        <textarea id="noteInterventoOperaio" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea>
+                        <textarea id="noteInterventoUtente" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea>
                     </div>
 
                     <div>
@@ -252,11 +276,11 @@
                         <input type="file" id="fotoLavoriInput" accept="image/*" multiple>
                     </div>
 
-                    <button class="action-btn btn-orange" onclick="salvaFoglioLavoroOperaio()">Salva Foglio di Lavoro</button>
+                    <button class="action-btn btn-orange" onclick="salvaFoglioLavoroUtente()">Salva Foglio di Lavoro</button>
                 </div>
             </div>
 
-            <!-- ================= 4. VISTA PANNELLO UFFICIO ================= -->
+            <!-- ================= VISTA PANNELLO UFFICIO ================= -->
             <div id="viewUfficio" class="view-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; background: #e2e8f0; padding: 10px 14px; border-radius: 10px; font-weight: 700; font-size: 0.9rem;">
                     <span>📊 Pannello Amministrazione</span>
@@ -403,14 +427,18 @@
             "Rosini Jean Paul", "Saleh Mohamed"
         ];
 
+        // Elenco artigiani vuoto (verrà popolato con i nomi che mi dirai)
+        const elencoArtigianiTotali = [];
+
         let utenteCorrente = "";
+        let tipoUtenteCorrente = ""; // "operaio" o "artigiano"
         let cartellaCorrente = 'da_fare';
 
         window.onload = function() {
             let oggiStr = new Date().toISOString().split('T')[0];
-            document.getElementById('dataInterventoOperaio').value = oggiStr;
+            document.getElementById('dataInterventoUtente').value = oggiStr;
             document.getElementById('dataInterventoUfficio').value = oggiStr;
-            popolaTendinaLogin();
+            popolaTendineLogin();
         };
 
         function mostraVista(vista) {
@@ -426,6 +454,9 @@
             } else if (vista === 'login_operaio') {
                 document.getElementById('viewLoginOperaio').classList.add('active');
                 sub.innerText = "Accesso Operai";
+            } else if (vista === 'login_artigiano') {
+                document.getElementById('viewLoginArtigiano').classList.add('active');
+                sub.innerText = "Accesso Artigiani";
             } else if (vista === 'ufficio') {
                 document.getElementById('viewUfficio').classList.add('active');
                 sub.innerText = "Pannello Ufficio";
@@ -440,7 +471,6 @@
         // LOGIN UFFICIO
         function effettuaLoginUfficio() {
             let passInserita = document.getElementById('inputPasswordUfficio').value.trim();
-            // Password predefinita ufficio: "ufficio2026" (puoi cambiarla qui sotto o salvarla nel localStorage se preferisci)
             let passAdminSalvata = localStorage.getItem('idra_password_ufficio') || "ufficio2026";
 
             if (passInserita === passAdminSalvata) {
@@ -451,35 +481,54 @@
             }
         }
 
-        // GESTIONE LOGIN OPERAIO
-        function popolaTendinaLogin() {
-            let select = document.getElementById('selectLoginOperaio');
-            select.innerHTML = '<option value="">-- Il mio nome --</option>';
+        // GESTIONE LOGIN TENDINE
+        function popolaTendineLogin() {
+            let selectOp = document.getElementById('selectLoginOperaio');
+            selectOp.innerHTML = '<option value="">-- Il mio nome --</option>';
             elencoOperaiTotali.forEach(op => {
-                select.innerHTML += `<option value="${op}">${op}</option>`;
+                selectOp.innerHTML += `<option value="${op}">${op}</option>`;
+            });
+
+            let selectArt = document.getElementById('selectLoginArtigiano');
+            selectArt.innerHTML = '<option value="">-- Il mio nome --</option>';
+            elencoArtigianiTotali.forEach(art => {
+                selectArt.innerHTML += `<option value="${art}">${art}</option>`;
             });
         }
 
         function effettuaLoginOperaio() {
             let nome = document.getElementById('selectLoginOperaio').value;
-            let passInserita = document.getElementById('inputPasswordLogin').value.trim();
+            let passInserita = document.getElementById('inputPasswordLoginOperaio').value.trim();
             if (!nome || !passInserita) return alert("⚠️ Seleziona nome e password!");
+            gestisciLoginUtente(nome, passInserita, "operaio");
+        }
 
+        function effettuaLoginArtigiano() {
+            let nome = document.getElementById('selectLoginArtigiano').value;
+            let passInserita = document.getElementById('inputPasswordLoginArtigiano').value.trim();
+            if (!nome || !passInserita) return alert("⚠️ Seleziona nome e password!");
+            gestisciLoginUtente(nome, passInserita, "artigiano");
+        }
+
+        function gestisciLoginUtente(nome, passInserita, tipo) {
+            tipoUtenteCorrente = tipo;
+            let dbKey = tipo === "operaio" ? 'idra_password_operai' : 'idra_password_artigiani';
             let defPass = nome.toLowerCase().replace(/\s+/g, '');
-            let passwordDB = JSON.parse(localStorage.getItem('idra_password_operai')) || {};
+            let passwordDB = JSON.parse(localStorage.getItem(dbKey)) || {};
             let customPass = passwordDB[nome];
 
             if (!customPass) {
                 if (passInserita === defPass) {
                     utenteCorrente = nome;
                     document.getElementById('viewLoginOperaio').classList.remove('active');
+                    document.getElementById('viewLoginArtigiano').classList.remove('active');
                     document.getElementById('viewCambioPassword').classList.add('active');
                 } else {
                     alert("⚠️ Password errata! Al primo accesso usa il tuo nome tutto minuscolo.");
                 }
             } else {
                 if (passInserita === customPass) {
-                    avviaSessioneOperaio(nome);
+                    avviaSessioneUtente(nome, tipo);
                 } else {
                     alert("⚠️ Password non corretta!");
                 }
@@ -491,52 +540,55 @@
             let confermaP = document.getElementById('confermaPasswordInput').value.trim();
             if (nuovaP.length < 4 || nuovaP !== confermaP) return alert("⚠️ Controlla le password (min 4 caratteri e coincidenti)!");
 
-            let passwordDB = JSON.parse(localStorage.getItem('idra_password_operai')) || {};
+            let dbKey = tipoUtenteCorrente === "operaio" ? 'idra_password_operai' : 'idra_password_artigiani';
+            let passwordDB = JSON.parse(localStorage.getItem(dbKey)) || {};
             passwordDB[utenteCorrente] = nuovaP;
-            localStorage.setItem('idra_password_operai', JSON.stringify(passwordDB));
+            localStorage.setItem(dbKey, JSON.stringify(passwordDB));
 
             alert("✅ Password salvata!");
-            avviaSessioneOperaio(utenteCorrente);
+            avviaSessioneUtente(utenteCorrente, tipoUtenteCorrente);
         }
 
-        function avviaSessioneOperaio(nome) {
+        function avviaSessioneUtente(nome, tipo) {
             utenteCorrente = nome;
-            document.getElementById('labelUtenteConnesso').innerText = `Utente: ${utenteCorrente}`;
+            tipoUtenteCorrente = tipo;
+            document.getElementById('labelUtenteConnesso').innerText = `Utente: ${utenteCorrente} (${tipo === 'operaio' ? 'Operaio' : 'Artigiano'})`;
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById('viewFormOperaio').classList.add('active');
-            document.getElementById('sottotitoloHeader').innerText = "Portale Operai";
-            popolaCantieriOperaio();
-            popolaColleghiOperaio();
+            document.getElementById('viewFormUtente').classList.add('active');
+            document.getElementById('sottotitoloHeader').innerText = tipo === 'operaio' ? "Portale Operai" : "Portale Artigiani";
+            popolaCantieriUtente();
+            popolaColleghiUtente();
         }
 
-        function esciLoginOperaio() {
+        function esciLoginUtente() {
             utenteCorrente = "";
+            tipoUtenteCorrente = "";
             mostraVista('selezione');
         }
 
-        // FUNZIONE CREAZIONE CANTIERE AL VOLO DA PARTE DELL'OPERAIO
-        function creaCantiereAlVoloOperaio() {
-            let cliente = document.getElementById('nuovoClienteOperaio').value.trim();
-            let indirizzo = document.getElementById('nuovoIndirizzoOperaio').value.trim();
+        // FUNZIONE CREAZIONE CANTIERE AL VOLO
+        function creaCantiereAlVoloUtente() {
+            let cliente = document.getElementById('nuovoClienteUtente').value.trim();
+            let indirizzo = document.getElementById('nuovoIndirizzoUtente').value.trim();
             if (!cliente || !indirizzo) return alert("⚠️ Inserisci sia il cliente che l'indirizzo!");
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             cantieriDB.push({ cliente: cliente, indirizzo: indirizzo, completato: false, storico: [] });
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
 
-            document.getElementById('nuovoClienteOperaio').value = '';
-            document.getElementById('nuovoIndirizzoOperaio').value = '';
-            document.getElementById('inputRicercaCantiereOperaio').value = '';
+            document.getElementById('nuovoClienteUtente').value = '';
+            document.getElementById('nuovoIndirizzoUtente').value = '';
+            document.getElementById('inputRicercaCantiereUtente').value = '';
 
-            popolaCantieriOperaio();
-            let selectCantiere = document.getElementById('selectCantiereOperaio');
+            popolaCantieriUtente();
+            let selectCantiere = document.getElementById('selectCantiereUtente');
             selectCantiere.selectedIndex = selectCantiere.options.length - 1;
             alert("✅ Cantiere creato e selezionato con successo!");
         }
 
-        function popolaCantieriOperaio() {
-            let select = document.getElementById('selectCantiereOperaio');
-            let query = document.getElementById('inputRicercaCantiereOperaio').value.toLowerCase().trim();
+        function popolaCantieriUtente() {
+            let select = document.getElementById('selectCantiereUtente');
+            let query = document.getElementById('inputRicercaCantiereUtente').value.toLowerCase().trim();
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             select.innerHTML = '';
 
@@ -550,10 +602,13 @@
             if (count === 0) select.innerHTML = '<option value="">Nessun cantiere trovato</option>';
         }
 
-        function popolaColleghiOperaio() {
-            let container = document.getElementById('listaColleghiOperaio');
+        function popolaColleghiUtente() {
+            let container = document.getElementById('listaColleghiUtente');
             container.innerHTML = '';
-            elencoOperaiTotali.forEach(op => {
+            
+            // Uniamo operai e artigiani come possibili colleghi (escludendo l'utente loggato)
+            let tuttiColleghi = [...elencoOperaiTotali, ...elencoArtigianiTotali];
+            tuttiColleghi.forEach(op => {
                 if (op === utenteCorrente) return;
                 let idSelect = `ore_collega_${op.replace(/\s+/g, '_')}`;
                 container.innerHTML += `
@@ -595,13 +650,13 @@
             return arr;
         }
 
-        async function salvaFoglioLavoroOperaio() {
-            let cIdx = document.getElementById('selectCantiereOperaio').value;
+        async function salvaFoglioLavoroUtente() {
+            let cIdx = document.getElementById('selectCantiereUtente').value;
             let stato = document.getElementById('selectStatoCantiereIntervento').value;
-            let data = document.getElementById('dataInterventoOperaio').value;
-            let tipo = document.getElementById('tipoLavoroOperaio').value;
+            let data = document.getElementById('dataInterventoUtente').value;
+            let tipo = document.getElementById('tipoLavoroUtente').value;
             let ore = document.getElementById('mieOreLavorate').value;
-            let note = document.getElementById('noteInterventoOperaio').value.trim();
+            let note = document.getElementById('noteInterventoUtente').value.trim();
 
             if (cIdx === "" || stato === "" || !note) return alert("⚠️ Compila tutti i campi obbligatori!");
 
@@ -622,15 +677,16 @@
 
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             alert("✅ Salvato con successo!");
-            document.getElementById('noteInterventoOperaio').value = '';
-            popolaCantieriOperaio();
+            document.getElementById('noteInterventoUtente').value = '';
+            popolaCantieriUtente();
         }
 
         // GESTIONE UFFICIO
         function popolaSelectFiltroDipendenti() {
             let sel = document.getElementById('selectFiltroDipendente');
             sel.innerHTML = '<option value="">Tutti</option>';
-            elencoOperaiTotali.forEach(op => sel.innerHTML += `<option value="${op}">${op}</option>`);
+            let tutti = [...elencoOperaiTotali, ...elencoArtigianiTotali];
+            tutti.forEach(op => sel.innerHTML += `<option value="${op}">${op}</option>`);
         }
 
         function apriModaleFiltri() { document.getElementById('modalFiltri').classList.add('open'); filtraArchivioModale(); }
@@ -642,7 +698,8 @@
         function popolaDipendentiUfficioMultiplo() {
             let c = document.getElementById('listaDipendentiUfficioMultiplo');
             c.innerHTML = '';
-            elencoOperaiTotali.forEach(op => {
+            let tutti = [...elencoOperaiTotali, ...elencoArtigianiTotali];
+            tutti.forEach(op => {
                 let id = `ore_uff_${op.replace(/\s+/g, '_')}`;
                 c.innerHTML += `<div class="collega-card-item"><label><input type="checkbox" name="dipUffChk" value="${op}" onchange="document.getElementById('${id}').disabled = !this.checked"> ${op}</label><select id="${id}" disabled><option value="8">8h</option><option value="7">7h</option><option value="6">6h</option><option value="5">5h</option><option value="4">4h</option></select></div>`;
             });
@@ -652,7 +709,8 @@
             let c = document.getElementById('listaPresenzeUfficio');
             c.innerHTML = '';
             let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
-            elencoOperaiTotali.forEach(op => {
+            let tutti = [...elencoOperaiTotali, ...elencoArtigianiTotali];
+            tutti.forEach(op => {
                 let sId = op.replace(/\s+/g, '_');
                 let d = assenzeDB[op] || { stato: 'Presente', finoA: '', tipo: 'Ferie' };
                 c.innerHTML += `<div class="presenza-item"><b>${op}</b><select id="st_${sId}" onchange="document.getElementById('det_${sId}').style.display = (this.value==='Assente'?'flex':'none')"><option value="Presente" ${d.stato==='Presente'?'selected':''}>Presente</option><option value="Assente" ${d.stato==='Assente'?'selected':''}>Assente</option></select><div id="det_${sId}" style="display:${d.stato==='Assente'?'flex':'none'}; gap:5px;"><select id="tp_${sId}"><option value="Ferie">Ferie</option><option value="Malattia">Malattia</option></select><input type="date" id="fn_${sId}" value="${d.finoA}"></div></div>`;
@@ -661,7 +719,8 @@
 
         function salvaPresenzeUfficio() {
             let db = {};
-            elencoOperaiTotali.forEach(op => {
+            let tutti = [...elencoOperaiTotali, ...elencoArtigianiTotali];
+            tutti.forEach(op => {
                 let id = op.replace(/\s+/g, '_');
                 db[op] = { stato: document.getElementById(`st_${id}`).value, tipo: document.getElementById(`tp_${id}`).value, finoA: document.getElementById(`fn_${id}`).value };
             });
@@ -790,7 +849,7 @@
             tb.innerHTML = '';
             let righe = raccogliRighe(JSON.parse(localStorage.getItem('idra_cantieri_db')) || []).filter(r => (dF === "" || r.dipendente === dF) && (dtF === "" || r.data.includes(dtF)) && (cF === "" || r.cantiere.toLowerCase().includes(cF)));
             let tot = 0;
-            righe.exec = righe.forEach(r => { tot += r.oreNum; tb.innerHTML += `<tr><td><b>${r.data}</b></td><td><b>${r.dipendente}</b></td><td>${r.cantiere}</td><td><b>${r.ore}</b></td></tr>`; });
+            righe.forEach(r => { tot += r.oreNum; tb.innerHTML += `<tr><td><b>${r.data}</b></td><td><b>${r.dipendente}</b></td><td>${r.cantiere}</td><td><b>${r.ore}</b></td></tr>`; });
             document.getElementById('infoTotaleOreFiltro').innerHTML = `<b>Totale Ore:</b> ${tot}h`;
         }
 
@@ -799,10 +858,14 @@
             tb.innerHTML = '';
             let db = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             let oggi = new Date(), trovati = 0;
+            const operaiEsclusi = ["Bruno Nicola", "Coriglione Alessandro", "Marinoni Alessandro"];
+            let tuttiPerControllo = [...elencoOperaiTotali, ...elencoArtigianiTotali];
+
             for (let i = 1; i <= 2; i++) {
                 let d = new Date(); d.setDate(oggi.getDate() - i);
                 let dStr = d.toISOString().split('T')[0];
-                elencoOperaiTotali.forEach(op => {
+                tuttiPerControllo.forEach(op => {
+                    if (operaiEsclusi.includes(op)) return;
                     let oreTot = 0;
                     db.forEach(c => { if(c.storico) c.storico.forEach(s => { if(s.data === dStr && s.operai.includes(op)) oreTot += 8; }); });
                     if(oreTot < 8) {
