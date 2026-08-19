@@ -109,17 +109,33 @@
                     <h2 class="nav-title">Registro Ore & Calendario</h2>
                 </div>
 
-                <!-- BOX DI RICERCA -->
+                <!-- BOX DI RICERCA A TENDINA -->
                 <div class="search-box-container">
-                    <div style="font-weight: 800; font-size: 0.95rem; color: var(--text);">🔍 Cerca Intervento Dipendente / Data</div>
+                    <div style="font-weight: 800; font-size: 0.95rem; color: var(--text);">🔍 Filtra Interventi per Data / Dipendente</div>
                     <div style="display: flex; gap: 8px;">
                         <div style="flex: 1;">
                             <label>Data</label>
-                            <input type="date" id="filtroDataRicerca" oninput="filtraPerDataDipendente()" onchange="filtraPerDataDipendente()">
+                            <input type="date" id="filtroDataRicerca" onchange="filtraPerDataDipendente()">
                         </div>
                         <div style="flex: 1;">
                             <label>Dipendente</label>
-                            <input type="text" id="filtroDipendenteRicerca" placeholder="Es. Moris" oninput="filtraPerDataDipendente()" onkeyup="filtraPerDataDipendente()">
+                            <select id="filtroDipendenteRicerca" onchange="filtraPerDataDipendente()">
+                                <option value="">Tutti i dipendenti</option>
+                                <option value="Bruno Nicola">Bruno Nicola</option>
+                                <option value="Coriglione Alessandro">Coriglione Alessandro</option>
+                                <option value="Marinoni Alessandro">Marinoni Alessandro</option>
+                                <option value="Denti Claudio">Denti Claudio</option>
+                                <option value="De Bosio Marcello">De Bosio Marcello</option>
+                                <option value="Rocchetto Fabio">Rocchetto Fabio</option>
+                                <option value="Rosini Jean Paul">Rosini Jean Paul</option>
+                                <option value="Giaccone Federico">Giaccone Federico</option>
+                                <option value="Gjyly Moris">Gjyly Moris</option>
+                                <option value="Doda Enjo">Doda Enjo</option>
+                                <option value="Assali Luca">Assali Luca</option>
+                                <option value="Saleh Mohamed">Saleh Mohamed</option>
+                                <option value="Comolli Alessandro">Comolli Alessandro</option>
+                                <option value="Concato Filippo">Concato Filippo</option>
+                            </select>
                         </div>
                     </div>
                     <button class="action-btn" onclick="azzeraFiltriRicerca()" style="background:#e2e8f0; color:var(--text); padding:10px; font-size:0.85rem; margin-top:2px;">🔄 Mostra Tutti / Rimuovi Filtri</button>
@@ -295,11 +311,11 @@
 
         function filtraPerDataDipendente() {
             let dataFiltro = document.getElementById('filtroDataRicerca').value;
-            let dipFiltro = document.getElementById('filtroDipendenteRicerca').value.toLowerCase().trim();
+            let dipFiltro = document.getElementById('filtroDipendenteRicerca').value;
 
             let risultati = cacheInterventiUfficio.filter(item => {
                 let matchData = !dataFiltro || item.data === dataFiltro;
-                let matchDip = !dipFiltro || item.operai.toLowerCase().includes(dipFiltro);
+                let matchDip = !dipFiltro || item.operai.includes(dipFiltro);
                 return matchData && matchDip;
             });
 
