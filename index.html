@@ -34,14 +34,12 @@
         .app-section { display: none; }
         .app-section.active { display: block; }
         
-        /* Top nav perfettamente allineata e centrata */
         .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
-        .back-btn { background: #f1f5f9; color: var(--text); border: none; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-        .top-nav h2 { margin: 0; font-size: 1.15rem; color: #0f172a; text-align: right; font-weight: 700; }
+        .back-btn { background: #f1f5f9; color: var(--text); border: none; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+        .top-title { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0; text-align: right; white-space: nowrap; }
         
         label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-light); margin-bottom: 6px; margin-top: 14px; text-transform: uppercase; }
         
-        /* Campi uniformi, centrati e puliti */
         input, select, textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; background-color: #f8fafc; color: var(--text); box-sizing: border-box; font-family: 'Inter', sans-serif; }
         input[type="date"] { appearance: none; -webkit-appearance: none; background-color: #f8fafc; }
 
@@ -74,7 +72,7 @@
         <div id="sezione-rapportino" class="app-section">
             <div class="top-nav">
                 <button class="back-btn" onclick="cambiaSezione('home')">🏠 Home</button>
-                <h2>Foglio Lavoro</h2>
+                <h2 class="top-title">Foglio Lavoro</h2>
             </div>
             
             <label>Data</label>
@@ -101,7 +99,13 @@
             <label>Ore Lavoro</label>
             <select id="rapOre">
                 <option value="">Seleziona ore...</option>
+                <option value="1 Ora">1 Ora</option>
+                <option value="2 Ore">2 Ore</option>
+                <option value="3 Ore">3 Ore</option>
                 <option value="4 Ore">4 Ore</option>
+                <option value="5 Ore">5 Ore</option>
+                <option value="6 Ore">6 Ore</option>
+                <option value="7 Ore">7 Ore</option>
                 <option value="8 Ore">8 Ore</option>
             </select>
 
@@ -116,7 +120,7 @@
         <div id="sezione-lista" class="app-section">
             <div class="top-nav">
                 <button class="back-btn" onclick="cambiaSezione('home')">🏠 Home</button>
-                <h2>Lista Materiali</h2>
+                <h2 class="top-title">Lista Materiali</h2>
             </div>
             
             <label>Riferimento Cantiere</label>
@@ -241,7 +245,27 @@
         function inviaRapportinoWhatsApp() {
             let cliente = document.getElementById('rapCliente').value;
             if(!cliente) return alert("Seleziona cantiere");
-            let text = `🛠️ Rapportino Lavoro\n👤 Cliente: ${cliente}\n📍 Indirizzo: ${document.getElementById('rapIndirizzo').value}\n⚙️ Tipo: ${document.getElementById('rapTipoLavoro').value}\n👷 Operai: ${document.getElementById('rapOperai').value || 'Non specificato'}\n⏱️ Ore: ${document.getElementById('rapOre').value}\n📝 Note: ${document.getElementById('rapNote').value}`;
+            
+            let dataLavoro = document.getElementById('rapData').value;
+            let tipoLavoro = document.getElementById('rapTipoLavoro').value;
+            let operai = document.getElementById('rapOperai').value || 'Non specificato';
+            let ore = document.getElementById('rapOre').value;
+            let note = document.getElementById('rapNote').value;
+
+            let indexCantiere = document.getElementById('selezionaCantiere').value;
+            if(indexCantiere !== "") {
+                if(!cantieriDB[indexCantiere].storico) cantieriDB[indexCantiere].storico = [];
+                cantieriDB[indexCantiere].storico.push({
+                    data: dataLavoro,
+                    tipo: tipoLavoro,
+                    operai: operai,
+                    ore: ore,
+                    note: note
+                });
+                localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+            }
+
+            let text = `🛠️ Rapportino Lavoro\n👤 Cliente: ${cliente}\n📍 Indirizzo: ${document.getElementById('rapIndirizzo').value}\n📅 Data: ${dataLavoro}\n⚙️ Tipo: ${tipoLavoro}\n👷 Operai: ${operai}\n⏱️ Ore: ${ore}\n📝 Note: ${note}`;
             window.open(`https://wa.me/?text=` + encodeURIComponent(text));
         }
     </script>
