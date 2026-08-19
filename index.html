@@ -18,15 +18,16 @@
             --text-light: #64748b;
             --border: #e2e8f0;
         }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 15px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; box-sizing: border-box; }
-        .container { width: 100%; max-width: 480px; background: var(--card-bg); padding: 24px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); box-sizing: border-box; }
-        .brand-header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f1f5f9; }
-        .brand-logo-text { font-size: 1.6rem; font-weight: 800; color: var(--brand-dark); margin: 0; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 12px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
+        .container { width: 100%; max-width: 460px; background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); }
+        .brand-header { text-align: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #f1f5f9; }
+        .brand-logo-text { font-size: 1.5rem; font-weight: 800; color: var(--brand-dark); margin: 0; }
         .brand-logo-text span { color: var(--brand-orange); }
-        .brand-subtitle { font-size: 0.8rem; color: var(--text-light); font-style: italic; margin-top: 4px; }
+        .brand-subtitle { font-size: 0.75rem; color: var(--text-light); font-style: italic; margin-top: 4px; }
         
         .home-screen { text-align: center; padding: 10px 0; }
-        .home-menu-title { font-size: 0.9rem; font-weight: 600; color: var(--text-light); margin-bottom: 15px; text-transform: uppercase; }
+        .home-menu-title { font-size: 0.85rem; font-weight: 600; color: var(--text-light); margin-bottom: 15px; text-transform: uppercase; }
         .home-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 16px; font-size: 1.05rem; font-weight: 600; border-radius: 12px; border: none; cursor: pointer; margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .btn-lavoro { background-color: var(--brand-orange); color: white; }
         .btn-lista { background-color: var(--brand-dark); color: white; }
@@ -34,17 +35,17 @@
         .app-section { display: none; }
         .app-section.active { display: block; }
         
-        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
-        .back-btn { background: #f1f5f9; color: var(--text); border: none; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
-        .top-title { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0; text-align: right; white-space: nowrap; }
+        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .back-btn { background: #f1f5f9; color: var(--text); border: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .top-title { font-size: 1rem; font-weight: 700; color: #0f172a; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-light); margin-bottom: 6px; margin-top: 14px; text-transform: uppercase; }
+        label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-light); margin-bottom: 4px; margin-top: 10px; text-transform: uppercase; }
         
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; background-color: #f8fafc; color: var(--text); box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.9rem; background-color: #f8fafc; color: var(--text); font-family: 'Inter', sans-serif; }
         input[type="date"] { appearance: none; -webkit-appearance: none; background-color: #f8fafc; }
 
-        button { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 12px; box-sizing: border-box; }
-        .btn-whatsapp { background-color: var(--success); color: white; }
+        button { width: 100%; padding: 13px; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .btn-salva { background-color: var(--success); color: white; }
         .btn-secondary { background-color: #e2e8f0; color: var(--text); }
         hr { border: 0; border-top: 1px solid var(--border); margin: 15px 0; }
         ul { list-style: none; padding: 0; margin: 0; max-height: 180px; overflow-y: auto; }
@@ -52,8 +53,7 @@
         .badge { background: #ffedd5; color: #c2410c; padding: 2px 6px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
         .delete-btn { background: #fee2e2; color: var(--danger); border: none; width: 28px; height: 28px; border-radius: 6px; font-weight: bold; cursor: pointer; }
         
-        /* Anteprima foto */
-        .preview-box { margin-top: 8px; display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--success); font-weight: 600; }
+        .preview-box { margin-top: 6px; font-size: 0.8rem; color: var(--success); font-weight: 600; }
     </style>
 </head>
 <body>
@@ -113,14 +113,14 @@
             </select>
 
             <label>Note / Lavori Eseguiti</label>
-            <textarea id="rapNote" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea>
+            <textarea id="rapNote" rows="2" placeholder="Descrivi il lavoro fatto..."></textarea>
 
             <label>Foto Bolla / Documento</label>
             <input type="file" id="fotoBolla" accept="image/*" capture="environment" style="display:none;" onchange="mostraStatoFoto()">
-            <button class="btn-secondary" onclick="document.getElementById('fotoBolla').click()" style="background:#e0f2fe; color:#0369a1; border: 1px dashed #7dd3fc;">📷 Allega Foto Bolla / Documento</button>
+            <button class="btn-secondary" onclick="document.getElementById('fotoBolla').click()" style="background:#e0f2fe; color:#0369a1; border: 1px dashed #7dd3fc; margin-top: 4px;">📷 Allega Foto Bolla / Documento</button>
             <div id="statoFoto" class="preview-box" style="display:none;"></div>
 
-            <button class="btn-whatsapp" onclick="inviaRapportinoWhatsApp()">Invia Rapportino e Bolla su WhatsApp</button>
+            <button class="btn-salva" onclick="salvaRapportinoUfficio()">💾 Salva Rapportino e Invia all'Ufficio</button>
             <button class="btn-secondary" onclick="segnalaConcluso()">✅ Segna Cantiere Concluso</button>
         </div>
 
@@ -147,10 +147,10 @@
             <label>Quantità</label>
             <input type="number" id="quantitaInput" value="1" min="1">
 
-            <button class="btn-whatsapp" onclick="aggiungiMateriale()" style="background:var(--brand-orange); margin-top: 15px;">Aggiungi alla Lista</button>
+            <button class="btn-salva" onclick="aggiungiMateriale()" style="background:var(--brand-orange); margin-top: 12px;">Aggiungi alla Lista</button>
             <hr>
             <ul id="listaSpesa"></ul>
-            <button class="btn-whatsapp" onclick="inviaListaWhatsApp()">Invia Lista su WhatsApp</button>
+            <button class="btn-salva" onclick="inviaListaWhatsApp()">Invia Lista su WhatsApp</button>
             <button class="btn-secondary" onclick="pulisciLista()">Svuota</button>
         </div>
     </div>
@@ -197,10 +197,10 @@
         function segnalaConcluso() {
             const index = document.getElementById('selezionaCantiere').value;
             if(index === "") return alert("Seleziona un cantiere!");
-            if(confirm("Segnare come concluso?")) {
+            if(confirm("Segnare il cantiere come concluso?")) {
                 cantieriDB[index].stato = 'Concluso';
                 localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-                window.open(`https://wa.me/?text=` + encodeURIComponent(`✅ Cantiere concluso: ${cantieriDB[index].cliente} (${cantieriDB[index].indirizzo})`));
+                alert("Cantiere chiuso e aggiornato nel pannello ufficio!");
                 cambiaSezione('home');
             }
         }
@@ -259,9 +259,9 @@
             window.open(`https://wa.me/?text=` + encodeURIComponent(text));
         }
 
-        function inviaRapportinoWhatsApp() {
+        function salvaRapportinoUfficio() {
             let cliente = document.getElementById('rapCliente').value;
-            if(!cliente) return alert("Seleziona cantiere");
+            if(!cliente) return alert("Seleziona un cantiere valido!");
             
             let dataLavoro = document.getElementById('rapData').value;
             let tipoLavoro = document.getElementById('rapTipoLavoro').value;
@@ -271,7 +271,6 @@
             let fotoInput = document.getElementById('fotoBolla');
             let haFoto = (fotoInput.files && fotoInput.files.length > 0);
 
-            // Salvataggio nello storico locale per l'ufficio
             let indexCantiere = document.getElementById('selezionaCantiere').value;
             if(indexCantiere !== "") {
                 if(!cantieriDB[indexCantiere].storico) cantieriDB[indexCantiere].storico = [];
@@ -281,16 +280,19 @@
                     operai: operai,
                     ore: ore,
                     note: note,
-                    bollaAllega: haFoto ? "Sì (Foto allegata)" : "No"
+                    bolla: haFoto ? "📎 Bolla allegata" : "Nessuna bolla"
                 });
                 localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             }
 
-            let text = `🛠️ Rapportino Lavoro\n👤 Cliente: ${cliente}\n📍 Indirizzo: ${document.getElementById('rapIndirizzo').value}\n📅 Data: ${dataLavoro}\n⚙️ Tipo: ${tipoLavoro}\n👷 Operai: ${operai}\n⏱️ Ore: ${ore}\n📝 Note: ${note}${haFoto ? '\n📎 [Bolla/Documento fotografato e allegato dall\'operaio]' : ''}`;
+            alert("✅ Rapportino salvato con successo e inviato allo storico dell'ufficio!");
             
-            window.open(`https://wa.me/?text=` + encodeURIComponent(text));
-            
-            // Nota: WhatsApp apre la chat e pre-compila il testo. Su smartphone, se l'utente ha scattato la foto, basterà fare "Incolla" nell'app di WhatsApp subito dopo aver inviato il testo per allegare anche l'immagine catturata!
+            // Pulisce il form e torna alla home
+            document.getElementById('rapOperai').value = '';
+            document.getElementById('rapNote').value = '';
+            document.getElementById('fotoBolla').value = '';
+            document.getElementById('statoFoto').style.display = 'none';
+            cambiaSezione('home');
         }
     </script>
 </body>
