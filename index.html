@@ -104,6 +104,11 @@
                 </div>
                 
                 <div>
+                    <label>Ricerca Rapida Cantiere</label>
+                    <input type="text" id="filtroCantiere" placeholder="🔍 Digita nome cliente o indirizzo..." oninput="filtraCantieri()">
+                </div>
+
+                <div>
                     <label>Seleziona Cantiere</label>
                     <select id="selezionaCantiere">
                         <option value="">-- Seleziona cantiere --</option>
@@ -211,24 +216,40 @@
         function cambiaSezione(id) {
             document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
             document.getElementById('sezione-' + id).classList.add('active');
-            if(id === 'rapportino') aggiornaTendinaCantieri();
+            if(id === 'rapportino') {
+                document.getElementById('filtroCantiere').value = '';
+                aggiornaTendinaCantieri();
+            }
         }
 
         let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
         let fotoBolleArray = [];
         let fotoLavoriArray = [];
 
-        function aggiornaTendinaCantieri() {
+        function aggiornaTendinaCantieri(filtro = '') {
             cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             const select = document.getElementById('selezionaCantiere');
             select.innerHTML = '<option value="">-- Seleziona cantiere --</option>';
+            
+            let testoFiltro = filtro.toLowerCase();
+
             cantieriDB.forEach((c, index) => {
-                let opt = document.createElement('option');
-                opt.value = index;
-                let numInterventi = c.storico ? c.storico.length : 0;
-                opt.textContent = `${c.cliente} - ${c.indirizzo} (${numInterventi} interventi registrati)`;
-                select.appendChild(opt);
+                let stringaCantiere = `${c.cliente} - ${c.indirizzo}`.toLowerCase();
+                
+                // Se corrisponde alla ricerca (o se la ricerca è vuota)
+                if(stringaCantiere.includes(testoFiltro)) {
+                    let opt = document.createElement('option');
+                    opt.value = index;
+                    let numInterventi = c.storico ? c.storico.length : 0;
+                    opt.textContent = `${c.cliente} - ${c.indirizzo} (${numInterventi} int.)`;
+                    select.appendChild(opt);
+                }
             });
+        }
+
+        function filtraCantieri() {
+            let val = document.getElementById('filtroCantiere').value;
+            aggiornaTendinaCantieri(val);
         }
 
         // Compressione automatica immagini per evitare blocchi su iOS
@@ -372,6 +393,7 @@
             document.getElementById('containerLavori').innerHTML = '';
             document.getElementById('rapOperai').value = '';
             document.getElementById('rapNote').value = '';
+            document.getElementById('filtroCantiere').value = '';
             
             cambiaSezione('home');
         }
