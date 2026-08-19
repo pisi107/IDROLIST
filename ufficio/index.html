@@ -71,8 +71,13 @@
         
         .presenza-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px; }
 
-        /* MODALE FILTRI ARCHIVIO */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 999; justify-content: center; align-items: center; padding: 15px; }
+        /* MINIATURE FOTO */
+        .foto-thumb-container { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+        .foto-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s; }
+        .foto-thumb:hover { transform: scale(1.05); }
+
+        /* MODALE IMMAGINE FULLSCREEN */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 999; justify-content: center; align-items: center; padding: 15px; }
         .modal-overlay.open { display: flex; }
         .modal-card { background: #fff; width: 100%; max-width: 480px; max-height: 90vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .modal-header { background: #1e293b; color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 1.1rem; }
@@ -120,7 +125,7 @@
                 </div>
             </div>
 
-            <!-- FISARMONICA 2: REGISTRAZIONE PER CONTO DIPENDENTI (CON RICERCA E SOLO APERTI) -->
+            <!-- FISARMONICA 2: REGISTRAZIONE PER CONTO DIPENDENTI -->
             <div>
                 <div class="accordion-header" onclick="toggleAccordion('contentRegistrazione', this)">
                     <span>✏️ Registrazione per conto Dipendenti</span>
@@ -251,6 +256,13 @@
         </div>
     </div>
 
+    <!-- MODALE VISUALIZZAZIONE FOTO IN GRANDE -->
+    <div class="modal-overlay" id="modalFotoZoom" onclick="chiudiZoomFoto()">
+        <div style="max-width: 90%; max-height: 90%; display: flex; justify-content: center; align-items: center;" onclick="event.stopPropagation()">
+            <img id="imgZoomFull" src="" style="max-width: 100%; max-height: 85vh; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        </div>
+    </div>
+
     <script>
         const elencoOperaiTotali = [
             "Assali Luca", "Bruno Nicola", "Comolli Alessandro", "Concato Filippo", 
@@ -292,6 +304,15 @@
             document.getElementById('inputFiltroData').value = "";
             document.getElementById('inputFiltroCantiere').value = "";
             filtraArchivioModale();
+        }
+
+        function apriZoomFoto(srcBase64) {
+            document.getElementById('imgZoomFull').src = srcBase64;
+            document.getElementById('modalFotoZoom').classList.add('open');
+        }
+
+        function chiudiZoomFoto() {
+            document.getElementById('modalFotoZoom').classList.remove('open');
         }
 
         function toggleAccordion(contentId, headerEl) {
@@ -508,7 +529,6 @@
             let containerLista = document.getElementById('listaCantieriUfficio');
 
             containerLista.innerHTML = '';
-
             popolaSelectCantieriUfficio();
 
             if (cantieriDB.length === 0) {
@@ -527,10 +547,32 @@
                     let storicoHtml = '';
                     if (c.storico && c.storico.length > 0) {
                         c.storico.forEach((s) => {
+                            // Genera miniature foto bolle
+                            let fotoBolleHtml = '';
+                            if (s.fotoBolle && s.fotoBolle.length > 0) {
+                                fotoBolleHtml += `<div style="margin-top: 4px; font-size: 0.75rem; font-weight: 700; color: var(--text-light);">Bolle:</div><div class="foto-thumb-container">`;
+                                s.fotoBolle.forEach(imgBase64 => {
+                                    fotoBolleHtml += `<img src="${imgBase64}" class="foto-thumb" onclick="apriZoomFoto('${imgBase64}')">`;
+                                });
+                                fotoBolleHtml += `</div>`;
+                            }
+
+                            // Genera miniature foto lavori
+                            let fotoLavoriHtml = '';
+                            if (s.fotoLavori && s.fotoLavori.length > 0) {
+                                fotoLavoriHtml += `<div style="margin-top: 6px; font-size: 0.75rem; font-weight: 700; color: var(--text-light);">Lavori / Installazioni:</div><div class="foto-thumb-container">`;
+                                s.fotoLavori.forEach(imgBase64 => {
+                                    fotoLavoriHtml += `<img src="${imgBase64}" class="foto-thumb" onclick="apriZoomFoto('${imgBase64}')">`;
+                                });
+                                fotoLavoriHtml += `</div>`;
+                            }
+
                             storicoHtml += `
-                                <div style="font-size: 0.8rem; background: #f1f5f9; padding: 8px; border-radius: 6px; margin-top: 4px;">
+                                <div style="font-size: 0.8rem; background: #f1f5f9; padding: 10px; border-radius: 8px; margin-top: 6px;">
                                     <b>${s.data}</b> - ${s.operai}<br>
                                     <i>Note: ${s.note}</i>
+                                    ${fotoBolleHtml}
+                                    ${fotoLavoriHtml}
                                 </div>
                             `;
                         });
@@ -753,7 +795,9 @@
                 tipo: "Inserito da Ufficio",
                 operai: stringaOperaiArray.join(', '),
                 note: note ? note : "Inserito dall'ufficio",
-                statoIntervento: cantieriDB[cantiereIdx].completato ? "Terminato" : "Da terminare"
+                statoIntervento: cantieriDB[cantiereIdx].completato ? "Terminato" : "Da terminare",
+                fotoBolle: [],
+                fotoLavori: []
             });
 
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
