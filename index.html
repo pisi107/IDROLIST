@@ -106,7 +106,7 @@
                 <div>
                     <label>Seleziona Cantiere</label>
                     <select id="selezionaCantiere">
-                        <option value="">-- Seleziona cantiere attivo --</option>
+                        <option value="">-- Seleziona cantiere --</option>
                     </select>
                 </div>
 
@@ -161,7 +161,7 @@
                     <div id="containerLavori" class="grid-anteprime"></div>
                 </div>
 
-                <button class="action-btn btn-green" onclick="salvaEConcludiCantiere()" style="margin-top: 15px;">✅ Salva e Segna Cantiere Concluso</button>
+                <button class="action-btn btn-green" onclick="salvaEConcludiCantiere()" style="margin-top: 15px;">✅ Salva e Invia Rapportino</button>
             </div>
 
             <!-- LISTA MATERIALI -->
@@ -221,18 +221,17 @@
         function aggiornaTendinaCantieri() {
             cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             const select = document.getElementById('selezionaCantiere');
-            select.innerHTML = '<option value="">-- Seleziona cantiere attivo --</option>';
+            select.innerHTML = '<option value="">-- Seleziona cantiere --</option>';
             cantieriDB.forEach((c, index) => {
-                if(c.stato !== 'Concluso') {
-                    let opt = document.createElement('option');
-                    opt.value = index;
-                    opt.textContent = `${c.cliente} - ${c.indirizzo}`;
-                    select.appendChild(opt);
-                }
+                let opt = document.createElement('option');
+                opt.value = index;
+                let numInterventi = c.storico ? c.storico.length : 0;
+                opt.textContent = `${c.cliente} - ${c.indirizzo} (${numInterventi} interventi registrati)`;
+                select.appendChild(opt);
             });
         }
 
-        // Funzione di compressione automatica immagini per evitare blocchi su iOS
+        // Compressione automatica immagini per evitare blocchi su iOS
         function comprimiEggiungiFoto(input, tipo) {
             if (input.files && input.files[0]) {
                 let reader = new FileReader();
@@ -241,15 +240,12 @@
                     img.onload = function() {
                         let canvas = document.createElement('canvas');
                         let ctx = canvas.getContext('2d');
-                        
-                        // Imposta larghezza massima ridotta per alleggerire il file
                         let maxWidth = 900;
                         let scaleSize = maxWidth / img.width;
                         canvas.width = maxWidth;
                         canvas.height = img.height * scaleSize;
-                        
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        let compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7); // Compressione al 70%
+                        let compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
                         
                         if (tipo === 'bolla') {
                             fotoBolleArray.push(compressedDataUrl);
@@ -364,10 +360,10 @@
                 fotoLavori: [...fotoLavoriArray]
             });
             
-            cantieriDB[indexCantiere].stato = 'Concluso';
+            cantieriDB[indexCantiere].stato = 'Aggiornato';
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
 
-            alert("✅ Rapportino salvato e inviato all'ufficio!");
+            alert("✅ Rapportino salvato con successo!");
             
             // Pulisci i campi e gli array
             fotoBolleArray = [];
