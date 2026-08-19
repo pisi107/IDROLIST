@@ -52,6 +52,7 @@
         .badge-da-fare { background: #fef3c7; color: #b45309; }
         .badge-fatto { background: #dcfce7; color: #15803d; }
         .badge-alert { background: #fee2e2; color: #b91c1c; }
+        .badge-assenza { background: #e0f2fe; color: #0369a1; }
 
         /* Stili per le cartelle / tab */
         .tabs-container { display: flex; gap: 8px; margin-bottom: 8px; }
@@ -183,7 +184,7 @@
                         <thead>
                             <tr>
                                 <th>Dipendente</th>
-                                <th>Cantiere</th>
+                                <th>Cantiere / Stato</th>
                                 <th>Totale Ore</th>
                             </tr>
                         </thead>
@@ -314,6 +315,7 @@
 
             localStorage.setItem('idra_assenze_dettaglio_db', JSON.stringify(assenzeDB));
             alert("✅ Stato presenze e assenze salvato con successo!");
+            aggiornaVistaUfficio();
             eseguiControlloMancantiUfficio();
         }
 
@@ -322,9 +324,7 @@
             let datiOp = assenzeDB[nomeOp];
             if (!datiOp || datiOp.stato !== 'Assente') return false;
 
-            // Controlla se la data è compresa tra oggi e la data "finoA" impostata dall'ufficio
             let dataIntervento = new Date(dataStr);
-            let dataInizioAssenza = new Date(); // di solito registrata di recente
             let dataFineAssenza = new Date(datiOp.finoA);
 
             if (dataIntervento <= dataFineAssenza) {
@@ -378,7 +378,6 @@
             let oggi = new Date();
             let righeTrovate = 0;
 
-            // Controlla gli ultimi 2 giorni precedenti
             for (let i = 1; i <= 2; i++) {
                 let d = new Date();
                 d.setDate(oggi.getDate() - i);
@@ -436,7 +435,7 @@
             if (cantieriDB.length === 0) {
                 selectCantiere.innerHTML = '<option value="">Nessun cantiere disponibile</option>';
                 containerLista.innerHTML = '<div style="font-size: 0.85rem; color: var(--text-light); text-align: center; padding: 10px;">Nessun cantiere inserito nel database.</div>';
-                aggiornaTabellaRiepilogo([]);
+                aggiornaTabellaRiepilogo(cantieriDB);
                 return;
             }
 
@@ -504,6 +503,7 @@
 
             let mappaAggregata = {};
 
+            // 1. Aggiunge i cantieri lavorati
             cantieriDB.forEach(c => {
                 if (c.storico) {
                     c.storico.forEach(s => {
@@ -524,6 +524,28 @@
                             });
                         }
                     });
+                }
+            });
+
+            // 2. Aggiunge gli operai in Ferie, Malattia o Permesso attivi
+            let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
+            let oggiStr = new Date().toISOString().split('T')[0];
+
+            elencoOperaiTotali.forEach(op => {
+                let datiOp = assenzeDB[op];
+                if (datiOp && datiOp.stato === 'Assente') {
+                    // Controlla se la data odierna o impostata rientra nella validità
+                    let dataFineAssenza = new Date(datiOp.finoA);
+                    let oggiDate = new Date(oggiStr);
+                    
+                    if (oggiDate <= dataFineAssenza) {
+                        let chiaveAssenza = `${op}___ASSENZA_${datiOp.tipo}`;
+                        mappaAggregata[chiaveAssenza] = {
+                            dipendente: op,
+                            cantiere: `<span class="badge badge-assenza">🔴 ${datiOp.tipo} (fino al ${datiOp.finoA})</span>`,
+                            ore: 0
+                        };
+                    }
                 }
             });
 
