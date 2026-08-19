@@ -76,7 +76,6 @@
         .foto-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s; }
         .foto-thumb:hover { transform: scale(1.05); }
 
-        /* Stili specifici per Cartella Clienti a struttura ad albero */
         .folder-cliente-box { background: #fff; border: 2px solid var(--border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
         .folder-cliente-header { background: #1e293b; color: white; padding: 12px 16px; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .folder-cliente-body { display: none; padding: 12px; background: #f8fafc; flex-direction: column; gap: 10px; }
@@ -101,10 +100,8 @@
 
         <div class="content-body">
             
-            <!-- PULSANTE APERTURA CARTELLA CLIENTI FOTO -->
             <button class="action-btn btn-orange" style="font-size: 1.05rem; padding: 18px;" onclick="apriModaleCartellaClienti()">📁 Apri Archivio Cartella Clienti & Foto Lavori</button>
 
-            <!-- SEZIONE CONTROLLO MANCATI FOGLI -->
             <div class="card-box" style="border-color: #ef4444; background: #fff5f5;">
                 <div style="font-size: 1.05rem; font-weight: 800; color: #b91c1c;">🚨 Controllo Ufficio: Mancati Fogli Lavoro (Ultimi 2 Giorni)</div>
                 <div style="font-size: 0.8rem; color: #7f1d1d; line-height: 1.4;">Elenco dipendenti che negli ultimi 2 giorni non hanno completato le ore o il report:</div>
@@ -121,7 +118,6 @@
                 </div>
             </div>
 
-            <!-- FISARMONICA 1: GESTIONE PRESENZE / ASSENZE -->
             <div>
                 <div class="accordion-header" onclick="toggleAccordion('contentPresenze', this)">
                     <span>📋 Gestione Presenze / Assenze Dipendenti</span>
@@ -134,7 +130,6 @@
                 </div>
             </div>
 
-            <!-- FISARMONICA 2: REGISTRAZIONE PER CONTO DIPENDENTI -->
             <div>
                 <div class="accordion-header" onclick="toggleAccordion('contentRegistrazione', this)">
                     <span>✏️ Registrazione per conto Dipendenti</span>
@@ -169,7 +164,6 @@
                 </div>
             </div>
 
-            <!-- SEZIONE CREA NUOVO CANTIERE -->
             <div class="card-box">
                 <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Inserisci Nuovo Cantiere</div>
                 <div>
@@ -183,7 +177,6 @@
                 <button class="action-btn btn-green" onclick="creaCantiereUfficio()">Crea Cantiere</button>
             </div>
 
-            <!-- SEZIONE CARTELLE CANTIERI -->
             <div class="card-box">
                 <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Archivio Cantieri</div>
                 
@@ -195,7 +188,6 @@
                 <div id="listaCantieriUfficio"></div>
             </div>
 
-            <!-- SEZIONE TABELLA RIEPILOGO ORE TOTALI -->
             <div class="card-box">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                     <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">📊 Tabella Riepilogo Ore</div>
@@ -218,7 +210,6 @@
         </div>
     </div>
 
-    <!-- MODALE CARTELLA CLIENTI & FOTO LAVORI -->
     <div class="modal-overlay" id="modalCartellaClienti">
         <div class="modal-card" style="max-width: 580px;">
             <div class="modal-header">
@@ -237,7 +228,6 @@
         </div>
     </div>
 
-    <!-- MODALE ARCHIVIO E FILTRI AVANZATI -->
     <div class="modal-overlay" id="modalFiltri">
         <div class="modal-card">
             <div class="modal-header">
@@ -284,7 +274,6 @@
         </div>
     </div>
 
-    <!-- MODALE VISUALIZZAZIONE FOTO IN GRANDE -->
     <div class="modal-overlay" id="modalFotoZoom" onclick="chiudiZoomFoto()">
         <div style="max-width: 90%; max-height: 90%; display: flex; justify-content: center; align-items: center;" onclick="event.stopPropagation()">
             <img id="imgZoomFull" src="" style="max-width: 100%; max-height: 85vh; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
@@ -344,7 +333,6 @@
                     let interventiHtml = '';
                     if (c.storico && Array.isArray(c.storico) && c.storico.length > 0) {
                         c.storico.forEach((s, sIdx) => {
-                            // PRENDIAMO SOLO LE FOTO LAVORI ED ESCLUDIAMO LE BOLLE
                             let lavoriArr = s.fotoLavori || s.lavori || [];
                             if(!Array.isArray(lavoriArr)) lavoriArr = [];
 
@@ -606,19 +594,33 @@
                 cantieriDB = [];
             }
 
-            cantieriDB.push({
-                cliente: cliente,
-                indirizzo: indirizzo,
-                completato: false,
-                storico: []
-            });
+            // Normalizziamo le stringhe per il controllo anti-duplicato (tutto minuscolo e senza spazi extra)
+            let clienteNorm = cliente.toLowerCase().replace(/\s+/g, ' ');
+            let indirizzoNorm = indirizzo.toLowerCase().replace(/\s+/g, ' ');
+
+            // Cerchiamo se esiste già un cantiere con lo stesso cliente e indirizzo esatto
+            let cantiereEsistente = cantieriDB.find(c => 
+                c.cliente.toLowerCase().replace(/\s+/g, ' ') === clienteNorm && 
+                c.indirizzo.toLowerCase().replace(/\s+/g, ' ') === indirizzoNorm
+            );
+
+            if (cantiereEsistente) {
+                alert("⚠️ Attenzione: Esiste già una cartella per questo cliente a questo indirizzo! Il sistema ha riconosciuto il cliente come unico.");
+            } else {
+                cantieriDB.push({
+                    cliente: cliente,
+                    indirizzo: indirizzo,
+                    completato: false,
+                    storico: []
+                });
+                alert("✅ Cantiere creato con successo!");
+            }
 
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             clienteEl.value = '';
             indirizzoEl.value = '';
             
             aggiornaVistaUfficio();
-            alert("✅ Cantiere creato con successo!");
         }
 
         function eseguiControlloMancantiUfficio() {
