@@ -94,10 +94,10 @@
 
         <div class="content-body">
             
-            <!-- SEZIONE CONTROLLO MANCATI FOGLI (RAGGRUPPATI PER OPERAIO) -->
+            <!-- SEZIONE CONTROLLO MANCATI FOGLI (RAGGRUPPATI PER OPERAIO - ESCLUSI SPECIFICI) -->
             <div class="card-box" style="border-color: #ef4444; background: #fff5f5;">
                 <div style="font-size: 1.05rem; font-weight: 800; color: #b91c1c;">🚨 Controllo Ufficio: Mancati Fogli Lavoro (Ultimi 2 Giorni)</div>
-                <div style="font-size: 0.8rem; color: #7f1d1d; line-height: 1.4;">Elenco dipendenti che negli ultimi 2 giorni non hanno completato le ore o il report (raggruppati per operaio):</div>
+                <div style="font-size: 0.8rem; color: #7f1d1d; line-height: 1.4;">Elenco dipendenti che negli ultimi 2 giorni non hanno completato le ore o il report:</div>
                 <div style="overflow-x: auto;">
                     <table class="riepilogo-table" id="tabellaControlloMancanti">
                         <thead>
@@ -473,9 +473,12 @@
             let corpoTabella = document.getElementById('corpoTabellaControlloMancanti');
             corpoTabella.innerHTML = '';
 
+            // Lista degli operai da escludere dagli allarmi
+            const operaiEsclusi = ["Bruno Nicola", "Coriglione Alessandro", "Marinoni Alessandro"];
+
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             let oggi = new Date();
-            let mappaMancanti = {}; // Raggruppamento per operaio
+            let mappaMancanti = {}; 
 
             for (let i = 1; i <= 2; i++) {
                 let d = new Date();
@@ -483,6 +486,9 @@
                 let dataStr = d.toISOString().split('T')[0];
 
                 elencoOperaiTotali.forEach(nomeOp => {
+                    // Se l'operaio è nella lista degli esclusi, saltalo completamente
+                    if (operaiEsclusi.includes(nomeOp)) return;
+
                     let eAssente = isOperaioAssenteInData(nomeOp, dataStr);
 
                     if (!eAssente) {
@@ -507,7 +513,6 @@
                             if (!mappaMancanti[nomeOp]) {
                                 mappaMancanti[nomeOp] = [];
                             }
-                            let oreMancanti = 8 - oreTotData;
                             mappaMancanti[nomeOp].push(`${dataStr} (${oreTotData}h)`);
                         }
                     }
@@ -516,7 +521,7 @@
 
             let operaiKeys = Object.keys(mappaMancanti);
             if (operaiKeys.length === 0) {
-                corpoTabella.innerHTML = `<tr><td colspan="2" style="text-align: center; color: var(--success); font-weight: 700;">Tutti i dipendenti presenti sono in regola negli ultimi 2 giorni! 🎉</td></tr>`;
+                corpoTabella.innerHTML = `<tr><td colspan="2" style="text-align: center; color: var(--success); font-weight: 700;">Nessun allarme attivo per i dipendenti controllati! 🎉</td></tr>`;
             } else {
                 operaiKeys.forEach(nomeOp => {
                     let dettagliGiorni = mappaMancanti[nomeOp].join(', ');
