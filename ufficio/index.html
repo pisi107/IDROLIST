@@ -35,6 +35,26 @@
         input, select, textarea { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; background-color: #f8fafc; color: var(--text); font-family: 'Inter', sans-serif; outline: none; }
         input[type="date"] { appearance: none; -webkit-appearance: none; }
 
+        /* CORREZIONE PER LA TENDINA DI GOOGLE MAPS SU MOBILE */
+        .pac-container {
+            z-index: 999999 !important;
+            background-color: #ffffff !important;
+            border-radius: 10px !important;
+            border: 2px solid var(--border) !important;
+            margin-top: 4px !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        .pac-item {
+            padding: 10px 14px !important;
+            font-size: 0.95rem !important;
+            cursor: pointer !important;
+            border-top: 1px solid #f1f5f9 !important;
+        }
+        .pac-item:first-child { border-top: none !important; }
+        .pac-item:hover { background-color: #f8fafc !important; }
+        .pac-item-query { font-size: 0.95rem !important; font-weight: 700 !important; color: var(--brand-dark) !important; }
+
         .action-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
         .btn-green { background-color: var(--success); color: white; }
         .btn-orange { background: linear-gradient(135deg, #f28c1e, #d97712); color: white; }
@@ -174,7 +194,7 @@
                 </div>
                 <div>
                     <label>Indirizzo Cantiere (Suggerito da Google Maps)</label>
-                    <input type="text" id="nuovoIndirizzo" placeholder="Inizia a scrivere la via...">
+                    <input type="text" id="nuovoIndirizzo" placeholder="Inizia a scrivere la via..." autocomplete="off">
                 </div>
                 <button class="action-btn btn-green" onclick="creaCantiereUfficio()">Crea Cantiere</button>
             </div>
@@ -316,7 +336,18 @@
             if (inputIndirizzo && window.google && google.maps && google.maps.places) {
                 autocompleteGoogle = new google.maps.places.Autocomplete(inputIndirizzo, {
                     types: ['address'],
-                    componentRestrictions: { country: 'it' } // Limitato all'Italia
+                    componentRestrictions: { country: 'it' }
+                });
+
+                // Evita che la tendina si chiuda improvvisamente su dispositivi mobili
+                google.maps.event.addListener(autocompleteGoogle, 'place_changed', function() {
+                    // Selezionato l'indirizzo
+                });
+
+                inputIndirizzo.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                    }
                 });
             }
         }
@@ -1147,7 +1178,7 @@
         function eliminaCantiere(idx) {
             if(confirm("Sei sicuro di voler eliminare questo cantiere?")) {
                 let cantieriDB = ottieniCantieriAggiornati();
-                if(cantieriDB[idx]){$
+                if(cantieriDB[idx]) {
                     cantieriDB.splice(idx, 1);
                     localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
                     aggiornaVistaUfficio();
