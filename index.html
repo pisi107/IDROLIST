@@ -34,6 +34,7 @@
         label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
         input, select, textarea { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; background-color: #f8fafc; color: var(--text); font-family: 'Inter', sans-serif; outline: none; }
         input[type="date"] { appearance: none; -webkit-appearance: none; }
+        input[type="file"] { padding: 10px; font-size: 0.85rem; background: #fff; }
 
         .action-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
         .btn-orange { background: linear-gradient(135deg, #f28c1e, #d97712); color: white; }
@@ -44,7 +45,7 @@
         .collega-card-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
         .collega-card-item label { margin: 0; font-size: 0.9rem; color: var(--text); text-transform: none; display: flex; align-items: center; gap: 8px; cursor: pointer; }
         .collega-card-item input[type="checkbox"] { width: 18px; height: 18px; }
-        .collega-card-item select { width: 110px; padding: 8px; font-size: 0.9rem; }
+        .collega-card-item select { width: 120px; padding: 8px; font-size: 0.9rem; }
         .container-colleghi-scroll { max-height: 220px; overflow-y: auto; background: #fff; padding: 8px; border: 1px solid var(--border); border-radius: 10px; }
         .user-logged-box { display: flex; justify-content: space-between; align-items: center; background: #e2e8f0; padding: 10px 14px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; }
     </style>
@@ -144,15 +145,25 @@
                         <label>Le tue Ore Lavorate *</label>
                         <select id="mieOreLavorate">
                             <option value="">Seleziona ore...</option>
+                            <option value="0.5">0.5 Ore</option>
                             <option value="1">1 Ora</option>
+                            <option value="1.5">1.5 Ore</option>
                             <option value="2">2 Ore</option>
+                            <option value="2.5">2.5 Ore</option>
                             <option value="3">3 Ore</option>
+                            <option value="3.5">3.5 Ore</option>
                             <option value="4">4 Ore</option>
+                            <option value="4.5">4.5 Ore</option>
                             <option value="5">5 Ore</option>
+                            <option value="5.5">5.5 Ore</option>
                             <option value="6">6 Ore</option>
+                            <option value="6.5">6.5 Ore</option>
                             <option value="7">7 Ore</option>
+                            <option value="7.5">7.5 Ore</option>
                             <option value="8" selected>8 Ore</option>
+                            <option value="8.5">8.5 Ore</option>
                             <option value="9">9 Ore</option>
+                            <option value="9.5">9.5 Ore</option>
                             <option value="10">10 Ore</option>
                         </select>
                     </div>
@@ -165,6 +176,16 @@
                     <div>
                         <label>Note / Lavori Eseguiti *</label>
                         <textarea id="noteInterventoOperaio" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea>
+                    </div>
+
+                    <div>
+                        <label>📷 Foto Bolla</label>
+                        <input type="file" id="fotoBollaInput" accept="image/*" capture="environment">
+                    </div>
+
+                    <div>
+                        <label>📷 Foto Lavoro / Installazione</label>
+                        <input type="file" id="fotoLavoroInput" accept="image/*" capture="environment">
                     </div>
 
                     <button class="action-btn btn-orange" onclick="salvaFoglioLavoroOperaio()">Salva Foglio di Lavoro</button>
@@ -198,7 +219,6 @@
         }
 
         function getPasswordDefault(nome) {
-            // Rimuove gli spazi e mette tutto minuscolo (es. "Assali Luca" -> "assaliluca")
             return nome.toLowerCase().replace(/\s+/g, '');
         }
 
@@ -229,10 +249,8 @@
             let defPass = getPasswordDefault(nome);
             let customPass = getDatabasePassword(nome);
 
-            // Se non ha ancora una password personalizzata salvata, controlliamo quella di default
             if (!customPass) {
                 if (passInserita === defPass) {
-                    // Primo accesso: reindirizza al cambio password obbligatorio
                     utenteCorrente = nome;
                     document.getElementById('viewLoginOperaio').classList.remove('active');
                     document.getElementById('viewCambioPassword').classList.add('active');
@@ -243,11 +261,10 @@
                     return;
                 }
             } else {
-                // Accesso successivo con password personalizzata
                 if (passInserita === customPass) {
                     avviaSessioneOperaio(nome);
                 } else {
-                    alert("⚠️ Password non corrette!");
+                    alert("⚠️ Password non corretta!");
                 }
             }
         }
@@ -271,7 +288,6 @@
                 return;
             }
 
-            // Salva la nuova password personalizzata
             salvaDatabasePassword(utenteCorrente, nuovaP);
             alert("✅ Password aggiornata con successo! Benvenuto.");
 
@@ -320,7 +336,7 @@
                 if (op === utenteCorrente) return; 
                 let idSelect = `ore_collega_${op.replace(/\s+/g, '_')}`;
                 let optionsHtml = '';
-                for (let i = 1; i <= 10; i++) {
+                for (let i = 0.5; i <= 10; i += 0.5) {
                     let sel = (i === 8) ? 'selected' : '';
                     optionsHtml += `<option value="${i}" ${sel}>${i} ${i === 1 ? 'Ora' : 'Ore'}</option>`;
                 }
@@ -341,7 +357,20 @@
             if (selectEl) selectEl.disabled = !checkbox.checked;
         }
 
-        function salvaFoglioLavoroOperaio() {
+        function convertiFileInBase64(file) {
+            return new Promise((resolve, reject) => {
+                if (!file) {
+                    resolve(null);
+                    return;
+                }
+                let reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        async function salvaFoglioLavoroOperaio() {
             let cantiereIdx = document.getElementById('selectCantiereOperaio').value;
             let statoCantiereIntervento = document.getElementById('selectStatoCantiereIntervento').value;
             let data = document.getElementById('dataInterventoOperaio').value;
@@ -376,6 +405,13 @@
                 participantiArray.push(`${nomeCollega} (${oreCollega}h)`);
             });
 
+            // Gestione Foto
+            let fotoBollaFile = document.getElementById('fotoBollaInput').files[0];
+            let fotoLavoroFile = document.getElementById('fotoLavoroInput').files[0];
+
+            let fotoBollaBase64 = await convertiFileInBase64(fotoBollaFile);
+            let fotoLavoroBase64 = await convertiFileInBase64(fotoLavoroFile);
+
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             if (!cantieriDB[cantiereIdx].storico) cantieriDB[cantiereIdx].storico = [];
 
@@ -384,7 +420,9 @@
                 tipo: tipoLavoro,
                 operai: partecipantiArray.join(', '),
                 note: note,
-                statoIntervento: statoCantiereIntervento
+                statoIntervento: statoCantiereIntervento,
+                fotoBolla: fotoBollaBase64,
+                fotoLavoro: fotoLavoroBase64
             });
 
             if (statoCantiereIntervento === "Terminato") {
@@ -396,12 +434,16 @@
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             alert("✅ Foglio di lavoro salvato con successo!");
 
+            // Reset form
             document.getElementById('noteInterventoOperaio').value = '';
             document.getElementById('selectStatoCantiereIntervento').value = '';
             document.getElementById('mieOreLavorate').value = '8';
+            document.getElementById('fotoBollaInput').value = '';
+            document.getElementById('fotoLavoroInput').value = '';
             document.querySelectorAll('input[name="collegaCheckbox"]').forEach(cb => {
                 cb.checked = false;
-                let sel = document.getElementById(`ore_collega_${cb.value.replace(/\s+/g, '_')}`);
+                let idSelect = `ore_collega_${cb.value.replace(/\s+/g, '_')}`;
+                let sel = document.getElementById(idSelect);
                 if(sel) sel.disabled = true;
             });
         }
