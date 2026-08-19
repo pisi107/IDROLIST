@@ -132,6 +132,14 @@
                     </div>
 
                     <div>
+                        <label>Stato Cantiere per questo Intervento</label>
+                        <select id="selectStatoIntervento">
+                            <option value="Da terminare">Cantiere Da Terminare</option>
+                            <option value="Terminato">Cantiere Terminato</option>
+                        </select>
+                    </div>
+
+                    <div>
                         <label>Data Intervento</label>
                         <input type="date" id="dataIntervento">
                     </div>
@@ -148,16 +156,12 @@
 
                     <div>
                         <label>Le Tue Ore Lavorate</label>
-                        <select id="selectOreUtentePrincipale">
-                            <!-- Popolato da JS da 0.5 a 10 ore -->
-                        </select>
+                        <select id="selectOreUtentePrincipale"></select>
                     </div>
 
                     <div>
-                        <label>Colleghi Presenti e Ore Dedicate (Spunta e seleziona ore)</label>
-                        <div class="container-colleghi-scroll" id="listaColleghiConOre">
-                            <!-- Popolato dinamicamente da JS con checkbox + select ore -->
-                        </div>
+                        <label>Colleghi Presenti e Ore Dedicate</label>
+                        <div class="container-colleghi-scroll" id="listaColleghiConOre"></div>
                     </div>
 
                     <div>
@@ -291,7 +295,7 @@
             }
 
             cantieriDB.forEach((c, idx) => {
-                select.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo}</option>`;
+                select.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo} (${c.completato ? 'Terminato' : 'Da terminare'})</option>`;
             });
         }
 
@@ -302,6 +306,12 @@
             elencoOperaiTotali.forEach(op => {
                 if (op !== utenteEscluso) {
                     let idSelect = `ore_collega_${op.replace(/\s+/g, '_')}`;
+                    let optionsHtml = '';
+                    for (let i = 0.5; i <= 10; i += 0.5) {
+                        let sel = (i === 8) ? 'selected' : '';
+                        optionsHtml += `<option value="${i}" ${sel}>${i} ${i === 1 ? 'Ora' : 'Ore'}</option>`;
+                    }
+
                     container.innerHTML += `
                         <div class="collega-card-item">
                             <label>
@@ -309,26 +319,7 @@
                                 ${op}
                             </label>
                             <select id="${idSelect}" disabled>
-                                <option value="8">8 Ore</option>
-                                <option value="0.5">0.5 Ore</option>
-                                <option value="1">1 Ora</option>
-                                <option value="1.5">1.5 Ore</option>
-                                <option value="2">2 Ore</option>
-                                <option value="2.5">2.5 Ore</option>
-                                <option value="3">3 Ore</option>
-                                <option value="3.5">3.5 Ore</option>
-                                <option value="4" selected>4 Ore</option>
-                                <option value="4.5">4.5 Ore</option>
-                                <option value="5">5 Ore</option>
-                                <option value="5.5">5.5 Ore</option>
-                                <option value="6">6 Ore</option>
-                                <option value="6.5">6.5 Ore</option>
-                                <option value="7">7 Ore</option>
-                                <option value="7.5">7.5 Ore</option>
-                                <option value="8.5">8.5 Ore</option>
-                                <option value="9">9 Ore</option>
-                                <option value="9.5">9.5 Ore</option>
-                                <option value="10">10 Ore</option>
+                                ${optionsHtml}
                             </select>
                         </div>
                     `;
@@ -343,7 +334,7 @@
             }
         }
 
-        function verificaOreMancantiPersonali(nomeOperaio) {
+        function verificaOreMancantiPersonale(nomeOperaio) {
             const dipendentiSenzaNotifiche = ["Bruno Nicola", "Coriglione Alessandro", "Marinoni Alessandro"];
             if (dipendentiSenzaNotifiche.includes(nomeOperaio)) {
                 document.getElementById('boxNotificaOrePersonale').innerHTML = '';
@@ -397,6 +388,7 @@
 
         function salvaFoglioLavoroOperaio() {
             let cantiereIdx = document.getElementById('selectCantiereOperaio').value;
+            let statoIntervento = document.getElementById('selectStatoIntervento').value;
             let data = document.getElementById('dataIntervento').value;
             let tipoLavoro = document.getElementById('tipoLavoroOperaio').value;
             let oreUtente = parseFloat(document.getElementById('selectOreUtentePrincipale').value) || 8;
@@ -405,7 +397,6 @@
             if (cantiereIdx === '') return alert("Seleziona un cantiere valido!");
             if (!data) return alert("Inserisci una data valida!");
 
-            // Raccogli i colleghi spuntati e le loro ore specifiche
             let stringaOperai = `${utenteCorrente} (${oreUtente}h)`;
 
             document.querySelectorAll('input[name="collegaCheckbox"]:checked').forEach(cb => {
@@ -419,7 +410,6 @@
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_db')) || {};
-
             let chiaveAssenza = `${utenteCorrente}_${data}`;
 
             if (tipoLavoro.includes('Assenza')) {
@@ -436,19 +426,23 @@
                     cantieriDB[cantiereIdx].storico = [];
                 }
 
+                // Aggiorna lo stato globale del cantiere in base alla scelta dell'operaio
+                cantieriDB[cantiereIdx].completato = (statoIntervento === "Terminato");
+
                 cantieriDB[cantiereIdx].storico.push({
                     data: data,
                     tipo: tipoLavoro,
                     operai: stringaOperai,
                     note: note ? note : "Foglio lavoro compilato da dipendente",
-                    statoIntervento: "Da terminare"
+                    statoIntervento: statoIntervento
                 });
 
                 localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-                alert(`✅ Foglio lavoro salvato con successo per ${cantieriDB[cantiereIdx].cliente}!`);
+                alert(`✅ Foglio lavoro salvato! Cantiere impostato come: ${statoIntervento}.`);
             }
 
             document.getElementById('noteIntervento').value = '';
+            caricaCantieriPerOperaio();
             verificaOreMancantiPersonali(utenteCorrente);
         }
     </script>
