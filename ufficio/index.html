@@ -70,6 +70,14 @@
         .riepilogo-table tr:last-child td { border-bottom: none; }
         
         .presenza-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px; }
+
+        /* MODALE FILTRI ARCHIVIO */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 999; justify-content: center; align-items: center; padding: 15px; }
+        .modal-overlay.open { display: flex; }
+        .modal-card { background: #fff; width: 100%; max-width: 480px; max-height: 90vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .modal-header { background: #1e293b; color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 1.1rem; }
+        .modal-body { padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+        .close-modal-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -168,9 +176,12 @@
                 <div id="listaCantieriUfficio"></div>
             </div>
 
-            <!-- SEZIONE TABELLA RIEPILOGO ORE TOTALI (AGGIORNATA CON COLONNA DATA) -->
+            <!-- SEZIONE TABELLA RIEPILOGO ORE TOTALI CON PULSANTE ARCHIVIO FILTRI -->
             <div class="card-box">
-                <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">📊 Tabella Riepilogo Ore per Dipendente</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">📊 Tabella Riepilogo Ore</div>
+                    <button class="action-btn btn-orange" style="width: auto; padding: 10px 14px; font-size: 0.85rem;" onclick="apriModaleFiltri()">📁 Apri Archivio Completo / Filtri</button>
+                </div>
                 <div style="overflow-x: auto;">
                     <table class="riepilogo-table" id="tabellaRiepilogoOre">
                         <thead>
@@ -182,6 +193,40 @@
                             </tr>
                         </thead>
                         <tbody id="corpoTabellaRiepilogo"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE ARCHIVIO E FILTRI AVANZATI -->
+    <div class="modal-overlay" id="modalFiltri">
+        <div class="modal-card">
+            <div class="modal-header">
+                <span>📁 Archivio e Filtri Dipendenti</span>
+                <button class="close-modal-btn" onclick="chiudiModaleFiltri()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <label>Filtra per Dipendente</label>
+                    <select id="selectFiltroDipendente" onchange="filtraArchivioModale()">
+                        <option value="">Tutti i dipendenti</option>
+                    </select>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-light);" id="infoTotaleOreFiltro"></div>
+                <div style="overflow-x: auto;">
+                    <table class="riepilogo-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Dipendente</th>
+                                <th>Cantiere / Stato</th>
+                                <th>Ore</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoTabellaModaleFiltri">
+                            <!-- Popolato dinamicamente -->
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -202,9 +247,27 @@
             document.getElementById('dataInterventoUfficio').value = new Date().toISOString().split('T')[0];
             popolaDipendentiUfficioMultiplo();
             popolaTabellaPresenzeUfficio();
+            popolaSelectFiltroDipendenti();
             aggiornaVistaUfficio();
             eseguiControlloMancantiUfficio();
         };
+
+        function popolaSelectFiltroDipendenti() {
+            let sel = document.getElementById('selectFiltroDipendente');
+            sel.innerHTML = '<option value="">Tutti i dipendenti</option>';
+            elencoOperaiTotali.forEach(op => {
+                sel.innerHTML += `<option value="${op}">${op}</option>`;
+            });
+        }
+
+        function apriModaleFiltri() {
+            document.getElementById('modalFiltri').classList.add('open');
+            filtraArchivioModale();
+        }
+
+        function chiudiModaleFiltri() {
+            document.getElementById('modalFiltri').classList.remove('open');
+        }
 
         function toggleAccordion(contentId, headerEl) {
             let content = document.getElementById(contentId);
@@ -488,11 +551,7 @@
             aggiornaTabellaRiepilogo(cantieriDB);
         }
 
-        // FUNZIONE AGGIORNATA PER MOSTRARE ANCHE LA DATA NELLA TABELLA RIEPILOGO
-        function aggiornaTabellaRiepilogo(cantieriDB) {
-            let corpoTabella = document.getElementById('corpoTabellaRiepilogo');
-            corpoTabella.innerHTML = '';
-
+        function raccogliTutteLeRigheRiepilogo(cantieriDB) {
             let listaRigheRiepilogo = [];
 
             cantieriDB.forEach(c => {
@@ -510,6 +569,7 @@
                                         data: s.data || 'N/D',
                                         dipendente: nomeOp,
                                         cantiere: c.cliente,
+                                        oreNum: oreOp,
                                         ore: `${oreOp} Ore`
                                     });
                                 }
@@ -533,22 +593,76 @@
                             data: `Oggi / Fino al ${datiOp.finoA}`,
                             dipendente: op,
                             cantiere: `<span class="badge badge-assenza">🔴 ${datiOp.tipo}</span>`,
+                            oreNum: 0,
                             ore: `0 Ore`
                         });
                     }
                 }
             });
 
+            // Ordina per data decrescente
+            listaRigheRiepilogo.sort((a, b) => new Date(b.data) - new Date(a.data));
+            return listaRigheRiepilogo;
+        }
+
+        function aggiornaTabellaRiepilogo(cantieriDB) {
+            let corpoTabella = document.getElementById('corpoTabellaRiepilogo');
+            corpoTabella.innerHTML = '';
+
+            let listaRigheRiepilogo = raccogliTutteLeRigheRiepilogo(cantieriDB);
+
             if (listaRigheRiepilogo.length === 0) {
                 corpoTabella.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-light);">Nessuna ora registrata finora.</td></tr>`;
                 return;
             }
 
-            // Ordina per data decrescente (dalla più recente alla meno recente)
-            listaRigheRiepilogo.sort((a, b) => new Date(b.data) - new Date(a.data));
+            // Mostra solo le ultime 5 righe nella schermata principale per compattezza
+            let ultimeRighe = listaRigheRiepilogo.slice(0, 5);
 
-            listaRigheRiepilogo.forEach(item => {
+            ultimeRighe.forEach(item => {
                 corpoTabella.innerHTML += `
+                    <tr>
+                        <td><b>${item.data}</b></td>
+                        <td><b>${item.dipendente}</b></td>
+                        <td>${item.cantiere}</td>
+                        <td><b>${item.ore}</b></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function filtraArchivioModale() {
+            let dipendenteFiltro = document.getElementById('selectFiltroDipendente').value;
+            let corpoModale = document.getElementById('corpoTabellaModaleFiltri');
+            let infoOre = document.getElementById('infoTotaleOreFiltro');
+            corpoModale.innerHTML = '';
+
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            let tutteLeRighe = raccogliTutteLeRigheRiepilogo(cantieriDB);
+
+            let righeFiltrate = tutteLeRighe;
+            if (dipendenteFiltro !== "") {
+                righeFiltrate = tutteLeRighe.filter(r => r.dipendente === dipendenteFiltro);
+            }
+
+            let sommaOreTotale = 0;
+            righeFiltrate.forEach(r => {
+                sommaOreTotale += (r.oreNum || 0);
+            });
+
+            if (dipendenteFiltro !== "") {
+                infoOre.innerHTML = `<b>Dipendente Selezionato:</b> ${dipendenteFiltro} | <b>Totale Ore Filtrate:</b> ${sommaOreTotale} Ore`;
+            } else {
+                infoOre.innerHTML = `<b>Tutti i dipendenti</b> | <b>Totale Complessivo Ore:</b> ${sommaOreTotale} Ore`;
+            }
+
+            if (righeFiltrate.length === 0) {
+                corpoModale.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-light);">Nessun record trovato per i filtri selezionati.</td></tr>`;
+                return;
+            }
+
+            righeFiltrate.forEach(item => {
+                corpoModale.innerHTML += `
                     <tr>
                         <td><b>${item.data}</b></td>
                         <td><b>${item.dipendente}</b></td>
