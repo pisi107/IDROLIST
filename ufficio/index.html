@@ -179,6 +179,9 @@
             "Rosini Jean Paul", "Saleh Mohamed"
         ];
 
+        // Lista dei dipendenti esclusi dalle notifiche di mancata compilazione ore
+        const esclusiDaNotifiche = ["Bruno Nicola", "Coriglione Alessandro", "Marinoni Alessandro"];
+
         function cambiaSezione(id) {
             document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
             document.getElementById('sezione-' + id).classList.add('active');
@@ -235,25 +238,24 @@
             caricaCantieriUfficio();
         }
 
-        // Funzione per controllare i dipendenti che non raggiungono le 8 ore negli ultimi 2 giorni e non sono assenti
         function controllaNotificheMancataCompilazione() {
             let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_db')) || {};
             let oggi = new Date();
             let ritardatari = [];
 
-            // Controlla gli ultimi 2 giorni (oggi e ieri)
             for (let i = 0; i < 2; i++) {
                 let d = new Date();
                 d.setDate(oggi.getDate() - i);
                 let dataStr = d.toISOString().split('T')[0];
 
                 elencoOperai.forEach(operaio => {
-                    // Verifica se l'operaio è segnato come assente in questa data
+                    // Salta i dipendenti esclusi dalle notifiche
+                    if (esclusiDaNotifiche.includes(operaio)) return;
+
                     let chiaveAssenza = `${operaio}_${dataStr}`;
                     let eAssente = assenzeDB[chiaveAssenza] === true;
 
                     if (!eAssente) {
-                        // Calcola ore totali inserite in questa data specifica
                         let oreTotData = 0;
                         cantieriDB.forEach(c => {
                             if (c.storico) {
@@ -264,7 +266,7 @@
                                             let val = parseFloat(matchOre[1]);
                                             if (!isNaN(val)) oreTotData += val;
                                         } else {
-                                            oreTotData += 4; // Default se non specificato
+                                            oreTotData += 4;
                                         }
                                     }
                                 });
@@ -286,7 +288,7 @@
                 box.innerHTML = `
                     <div class="banner-notifiche">
                         <div class="banner-notifiche-title">🚨 NOTIFICA UFFICIO: Fogli di Lavoro Incompleti (&lt; 8h)</div>
-                        <div style="font-size: 0.8rem; color: #7f1d1d;">I seguenti dipendenti non hanno raggiunto le 8 ore negli ultimi 2 giorni (esclusi gli assenti):<br>${listaHtml}</div>
+                        <div style="font-size: 0.8rem; color: #7f1d1d;">I seguenti dipendenti non hanno raggiunto le 8 ore negli ultimi 2 giorni (esclusi gli assenti e i profili esonerati):<br>${listaHtml}</div>
                     </div>
                 `;
             } else {
@@ -451,7 +453,7 @@
                         <div style="font-size: 0.95rem; font-weight: 800; color: var(--text);">📁 Cliente: ${item.cliente}</div>
                         <div style="font-size: 0.85rem; color: var(--text-light);">📍 ${item.indirizzo}</div>
                         <div style="font-size: 0.85rem; margin-top: 4px;"><b>Tipo:</b> ${item.tipo} | <b>Operai:</b> ${item.operai}</div>
-                        ${item.note ? '<div style="font-size: 0.85rem; background: white; padding: 6px; border-radius: 6px; margin-top: 6px; border: 1px solid #e2e8f0;"><b>Notes:</b> ' + item.note + '</div>' : ''}
+                        ${item.note ? '<div style="font-size: 0.85rem; background: white; padding: 6px; border-radius: 6px; margin-top: 6px; border: 1px solid #e2e8f0;"><b>Note:</b> ' + item.note + '</div>' : ''}
                     </div>
                 `;
             });
