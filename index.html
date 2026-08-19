@@ -52,10 +52,12 @@
         .btn-gray { background-color: #cbd5e1; color: var(--text); }
         .btn-blue-light { background-color: #e0f2fe; color: #0369a1; border: 2px dashed #38bdf8; }
         
-        /* Griglia Checkbox Operai Ordinata Alfabeticamente */
-        .grid-operai { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; max-height: 220px; overflow-y: auto; padding: 8px; background: #f8fafc; border: 2px solid var(--border); border-radius: 12px; }
-        .checkbox-operaio { font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 8px; padding: 4px; cursor: pointer; }
-        .checkbox-operaio input { width: auto; margin: 0; }
+        /* Lista Operai con Ore Personali */
+        .container-operai-ore { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; max-height: 260px; overflow-y: auto; padding: 8px; background: #f8fafc; border: 2px solid var(--border); border-radius: 12px; }
+        .riga-operaio { display: flex; align-items: center; justify-content: space-between; background: white; padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0; gap: 10px; }
+        .riga-operaio label { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600; color: var(--text); text-transform: none; margin: 0; cursor: pointer; flex: 1; }
+        .riga-operaio input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--brand-orange); }
+        .select-ore-op { width: 100px; padding: 6px 8px; font-size: 0.85rem; border-radius: 8px; border: 1px solid var(--border); background: #f8fafc; }
 
         .grid-anteprime { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
         .thumb-container { position: relative; width: 70px; height: 70px; border-radius: 8px; overflow: hidden; border: 2px solid #bbf7d0; background: #f0fdf4; }
@@ -131,27 +133,12 @@
                     </select>
                 </div>
 
-                <!-- SELEZIONE MULTIPLA OPERAI (ORDINATA ALFABETICAMENTE) -->
+                <!-- SELEZIONE OPERAI E ORE PERSONALI -->
                 <div>
-                    <label>Operai Presenti (Spunta i nomi coinvolti)</label>
-                    <div id="containerOperai" class="grid-operai">
-                        <!-- Popolato dinamicamente via JavaScript -->
+                    <label>Operai e Ore Dedicate (Spunta i presenti e indica le ore)</label>
+                    <div id="containerOperaiOre" class="container-operai-ore">
+                        <!-- Generato dinamicamente via JavaScript -->
                     </div>
-                </div>
-
-                <div>
-                    <label>Ore Lavoro</label>
-                    <select id="rapOre">
-                        <option value="">Seleziona ore...</option>
-                        <option value="1 Ora">1 Ora</option>
-                        <option value="2 Ore">2 Ore</option>
-                        <option value="3 Ore">3 Ore</option>
-                        <option value="4 Ore">4 Ore</option>
-                        <option value="5 Ore">5 Ore</option>
-                        <option value="6 Ore">6 Ore</option>
-                        <option value="7 Ore">7 Ore</option>
-                        <option value="8 Ore">8 Ore</option>
-                    </select>
                 </div>
 
                 <div>
@@ -240,13 +227,25 @@
             "Saleh Mohamed"
         ];
 
-        // Inserimento automatico delle checkbox degli operai
-        const containerOp = document.getElementById('containerOperai');
-        elencoOperai.forEach(nome => {
+        // Inserimento automatico delle righe operai con selezione ore personali
+        const containerOp = document.getElementById('containerOperaiOre');
+        elencoOperai.forEach((nome, idx) => {
             containerOp.innerHTML += `
-                <label class="checkbox-operaio">
-                    <input type="checkbox" name="operaio" value="${nome}"> ${nome}
-                </label>
+                <div class="riga-operaio">
+                    <label>
+                        <input type="checkbox" name="chkOperaio" value="${nome}" id="op_${idx}"> ${nome}
+                    </label>
+                    <select class="select-ore-op" id="ore_${idx}">
+                        <option value="1h">1 ora</option>
+                        <option value="2h">2 ore</option>
+                        <option value="3h">3 ore</option>
+                        <option value="4h" selected>4 ore</option>
+                        <option value="5h">5 ore</option>
+                        <option value="6h">6 ore</option>
+                        <option value="7h">7 ore</option>
+                        <option value="8h">8 ore</option>
+                    </select>
+                </div>
             `;
         });
 
@@ -402,11 +401,17 @@
             let indexCantiere = document.getElementById('selezionaCantiere').value;
             if(indexCantiere === "") return alert("Seleziona un cantiere dalla lista!");
             
-            // Raccogli tutti gli operai spuntati
-            let operaiSelezionati = Array.from(document.querySelectorAll('input[name="operaio"]:checked'))
-                                         .map(el => el.value);
+            // Raccogli operai e relative ore personali
+            let operaiConOre = [];
+            elencoOperai.forEach((nome, idx) => {
+                let chk = document.getElementById(`op_${idx}`);
+                if (chk && chk.checked) {
+                    let ore = document.getElementById(`ore_${idx}`).value;
+                    operaiConOre.push(`${nome} (${ore})`);
+                }
+            });
 
-            if(operaiSelezionati.length === 0) return alert("Seleziona almeno un operaio presente!");
+            if(operaiConOre.length === 0) return alert("Seleziona almeno un operaio presente!");
 
             if(!cantieriDB[indexCantiere].storico) {
                 cantieriDB[indexCantiere].storico = [];
@@ -415,8 +420,7 @@
             cantieriDB[indexCantiere].storico.push({
                 data: document.getElementById('rapData').value,
                 tipo: document.getElementById('rapTipoLavoro').value,
-                operai: operaiSelezionati.join(', '),
-                ore: document.getElementById('rapOre').value || 'Non specificate',
+                operai: operaiConOre.join(', '),
                 note: document.getElementById('rapNote').value,
                 fotoBolle: [...fotoBolleArray],
                 fotoLavori: [...fotoLavoriArray]
@@ -432,7 +436,10 @@
             fotoLavoriArray = [];
             document.getElementById('containerBolle').innerHTML = '';
             document.getElementById('containerLavori').innerHTML = '';
-            document.querySelectorAll('input[name="operaio"]').forEach(el => el.checked = false);
+            elencoOperai.forEach((_, idx) => {
+                let chk = document.getElementById(`op_${idx}`);
+                if(chk) chk.checked = false;
+            });
             document.getElementById('rapNote').value = '';
             document.getElementById('filtroCantiere').value = '';
             
