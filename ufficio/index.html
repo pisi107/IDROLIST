@@ -120,13 +120,18 @@
                 </div>
             </div>
 
-            <!-- FISARMONICA 2: REGISTRAZIONE PER CONTO DIPENDENTI -->
+            <!-- FISARMONICA 2: REGISTRAZIONE PER CONTO DIPENDENTI (CON RICERCA E SOLO APERTI) -->
             <div>
                 <div class="accordion-header" onclick="toggleAccordion('contentRegistrazione', this)">
                     <span>✏️ Registrazione per conto Dipendenti</span>
                     <span id="arrowRegistrazione">▼</span>
                 </div>
                 <div id="contentRegistrazione" class="accordion-content card-box" style="border-color: var(--brand-orange);">
+                    <div>
+                        <label>Cerca Cantiere Aperto</label>
+                        <input type="text" id="inputRicercaCantiereUfficio" placeholder="Scrivi per filtrare i cantieri..." oninput="filtraSelectCantieriUfficio()">
+                    </div>
+
                     <div>
                         <label>Seleziona Cantiere</label>
                         <select id="selectCantiereUfficio"></select>
@@ -199,7 +204,7 @@
         </div>
     </div>
 
-    <!-- MODALE ARCHIVIO E FILTRI AVANZATI (AGGIUNTI DATA E CANTIERE) -->
+    <!-- MODALE ARCHIVIO E FILTRI AVANZATI -->
     <div class="modal-overlay" id="modalFiltri">
         <div class="modal-card">
             <div class="modal-header">
@@ -239,9 +244,7 @@
                                 <th>Ore</th>
                             </tr>
                         </thead>
-                        <tbody id="corpoTabellaModaleFiltri">
-                            <!-- Popolato dinamicamente -->
-                        </tbody>
+                        <tbody id="corpoTabellaModaleFiltri"></tbody>
                     </table>
                 </div>
             </div>
@@ -502,14 +505,14 @@
 
         function aggiornaVistaUfficio() {
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            let selectCantiere = document.getElementById('selectCantiereUfficio');
             let containerLista = document.getElementById('listaCantieriUfficio');
 
-            selectCantiere.innerHTML = '';
             containerLista.innerHTML = '';
 
+            // Popola il menu a tendina dei cantieri aperti con filtro di ricerca
+            popolaSelectCantieriUfficio();
+
             if (cantieriDB.length === 0) {
-                selectCantiere.innerHTML = '<option value="">Nessun cantiere disponibile</option>';
                 containerLista.innerHTML = '<div style="font-size: 0.85rem; color: var(--text-light); text-align: center; padding: 10px;">Nessun cantiere inserito nel database.</div>';
                 aggiornaTabellaRiepilogo(cantieriDB);
                 return;
@@ -518,8 +521,6 @@
             let cantieriFiltratiCount = 0;
 
             cantieriDB.forEach((c, idx) => {
-                selectCantiere.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo} (${c.completato ? 'Terminato' : 'Da terminare'})</option>`;
-
                 let isCompletato = c.completato === true;
                 if ((cartellaCorrente === 'da_fare' && !isCompletato) || (cartellaCorrente === 'terminati' && isCompletato)) {
                     cantieriFiltratiCount++;
@@ -571,6 +572,37 @@
             }
 
             aggiornaTabellaRiepilogo(cantieriDB);
+        }
+
+        function popolaSelectCantieriUfficio() {
+            let selectCantiere = document.getElementById('selectCantiereUfficio');
+            let filtroTesto = document.getElementById('inputRicercaCantiereUfficio') ? document.getElementById('inputRicercaCantiereUfficio')->value.toLowerCase().trim() : '';
+            // Fix per evitare errori se l'input non esiste ancora
+            let inputRicerca = document.getElementById('inputRicercaCantiereUfficio');
+            let query = inputRicerca ? inputRicerca.value.toLowerCase().trim() : '';
+
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            selectCantiere.innerHTML = '';
+
+            let countAperti = 0;
+            cantieriDB.forEach((c, idx) => {
+                // Mostra SOLO i cantieri NON completati (aperti)
+                if (!c.completato) {
+                    let testoCompleto = `${c.cliente} - ${c.indirizzo}`.toLowerCase();
+                    if (query === '' || testoCompleto.includes(query)) {
+                        selectCantiere.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo}</option>`;
+                        countAperti++;
+                    }
+                }
+            });
+
+            if (countAperti === 0) {
+                selectCantiere.innerHTML = '<option value="">Nessun cantiere aperto trovato</option>';
+            }
+        }
+
+        function filtraSelectCantieriUfficio() {
+            popolaSelectCantieriUfficio();
         }
 
         function raccogliTutteLeRigheRiepilogo(cantieriDB) {
@@ -730,6 +762,7 @@
 
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             document.getElementById('noteUfficio').value = '';
+            document.getElementById('inputRicercaCantiereUfficio').value = '';
             
             document.querySelectorAll('input[name="dipendenteUfficioCheckbox"]').forEach(cb => {
                 cb.checked = false;
