@@ -135,13 +135,9 @@
                         </select>
                     </div>
 
-                    <div style="text-align: left; margin-bottom: 8px;">
+                    <div style="text-align: left; margin-bottom: 15px;">
                         <label>Password *</label>
                         <input type="password" id="inputPasswordLoginOperaio" placeholder="Inserisci password...">
-                    </div>
-                    
-                    <div style="text-align: right; margin-bottom: 15px;">
-                        <a href="#" onclick="alert('ℹ️ Per recuperare la password contatta l\'Ufficio: provvederanno a resettarla in un click dal pannello amministrativo.'); return false;" style="font-size: 0.75rem; color: var(--brand-orange); text-decoration: none; font-weight: 600;">Password dimenticata?</a>
                     </div>
 
                     <button class="action-btn btn-orange" style="margin-bottom: 8px;" onclick="effettuaLoginOperaio()">Accedi</button>
@@ -161,13 +157,9 @@
                         </select>
                     </div>
 
-                    <div style="text-align: left; margin-bottom: 8px;">
+                    <div style="text-align: left; margin-bottom: 15px;">
                         <label>Password *</label>
                         <input type="password" id="inputPasswordLoginArtigiano" placeholder="Inserisci password...">
-                    </div>
-
-                    <div style="text-align: right; margin-bottom: 15px;">
-                        <a href="#" onclick="alert('ℹ️ Per recuperare la password contatta l\'Ufficio: provvederanno a resettarla in un click dal pannello amministrativo.'); return false;" style="font-size: 0.75rem; color: var(--brand-orange); text-decoration: none; font-weight: 600;">Password dimenticata?</a>
                     </div>
 
                     <button class="action-btn btn-artigiani" style="margin-bottom: 8px;" onclick="effettuaLoginArtigiano()">Accedi</button>
@@ -275,13 +267,13 @@
                     </div>
 
                     <div>
-                        <label>📷 Foto Bolle <span id="statoAiBolle" style="font-size:0.7rem; color:var(--brand-orange);"></span></label>
-                        <input type="file" id="fotoBolleInput" accept="image/*" multiple onchange="gestisciCaricamentoFotoAI(this, 'bolle')">
+                        <label>📷 Foto Bolle</label>
+                        <input type="file" id="fotoBolleInput" accept="image/*" multiple>
                     </div>
 
                     <div>
-                        <label>📷 Foto Lavori <span id="statoAiLavori" style="font-size:0.7rem; color:var(--brand-orange);"></span></label>
-                        <input type="file" id="fotoLavoriInput" accept="image/*" multiple onchange="gestisciCaricamentoFotoAI(this, 'lavori')">
+                        <label>📷 Foto Lavori</label>
+                        <input type="file" id="fotoLavoriInput" accept="image/*" multiple>
                     </div>
 
                     <button class="action-btn btn-orange" onclick="salvaFoglioLavoroUtente()">Salva Foglio di Lavoro</button>
@@ -309,18 +301,6 @@
                             </thead>
                             <tbody id="corpoTabellaControlloMancanti"></tbody>
                         </table>
-                    </div>
-                </div>
-
-                <!-- GESTIONE PASSWORD UTENTI -->
-                <div>
-                    <div class="accordion-header" onclick="toggleAccordion('contentGestionePassword', this)">
-                        <span>🔑 Gestione Password Utenti</span>
-                        <span id="arrowGestionePassword">▼</span>
-                    </div>
-                    <div id="contentGestionePassword" class="accordion-content card-box" style="border-color: var(--brand-orange);">
-                        <div style="font-size: 0.8rem; color: var(--text-light);">Da qui puoi resettare la password di un operaio/artigiano (tornerà quella predefinita con il nome minuscolo) oppure impostarne una nuova.</div>
-                        <div class="container-colleghi-scroll" id="listaGestionePasswordUfficio" style="max-height: 250px;"></div>
                     </div>
                 </div>
 
@@ -440,10 +420,6 @@
     </div>
 
     <script>
-        // CONFIGURAZIONE GEMINI AI API KEY
-        const GEMINI_API_KEY = "INSERISCI_QUI_LA_TUA_API_KEY...";
-
-
         const elencoOperaiTotali = [
             "Assali Luca", "Bruno Nicola", "Comolli Alessandro", "Concato Filippo", 
             "Coriglione Alessandro", "De Bosio Marcello", "Denti Claudio", "Doda Enjo", 
@@ -451,12 +427,13 @@
             "Rosini Jean Paul", "Saleh Mohamed"
         ];
 
+        // Artigiani aggiornati con i nomi richiesti
         const elencoArtigianiTotali = [
-            "SGL", "ARBO", "Clima Group Srl"
+            "SGL", "CLIMA GROUP SRL", "ARBO"
         ];
 
         let utenteCorrente = "";
-        let tipoUtenteCorrente = ""; 
+        let tipoUtenteCorrente = ""; // "operaio" o "artigiano"
         let cartellaCorrente = 'da_fare';
 
         window.onload = function() {
@@ -487,13 +464,13 @@
                 sub.innerText = "Pannello Ufficio";
                 popolaDipendentiUfficioMultiplo();
                 popolaTabellaPresenzeUfficio();
-                popolaGestionePasswordUfficio();
                 popolaSelectFiltroDipendenti();
                 aggiornaVistaUfficio();
                 eseguiControlloMancantiUfficio();
             }
         }
 
+        // LOGIN UFFICIO
         function effettuaLoginUfficio() {
             let passInserita = document.getElementById('inputPasswordUfficio').value.trim();
             let passAdminSalvata = localStorage.getItem('idra_password_ufficio') || "ufficio2026";
@@ -506,6 +483,7 @@
             }
         }
 
+        // GESTIONE LOGIN TENDINE
         function popolaTendineLogin() {
             let selectOp = document.getElementById('selectLoginOperaio');
             selectOp.innerHTML = '<option value="">-- Il mio nome --</option>';
@@ -548,7 +526,7 @@
                     document.getElementById('viewLoginArtigiano').classList.remove('active');
                     document.getElementById('viewCambioPassword').classList.add('active');
                 } else {
-                    alert("⚠️ Password errata! Al primo accesso usa il tuo nome tutto minuscolo.");
+                    alert("⚠️ Password errata! Al primo accesso usa il tuo nome tutto minuscolo (es. sgl oppure climagroupsrl).");
                 }
             } else {
                 if (passInserita === customPass) {
@@ -590,65 +568,11 @@
             mostraVista('selezione');
         }
 
-        function popolaGestionePasswordUfficio() {
-            let container = document.getElementById('listaGestionePasswordUfficio');
-            container.innerHTML = '';
-
-            let opPassDB = JSON.parse(localStorage.getItem('idra_password_operai')) || {};
-            let artPassDB = JSON.parse(localStorage.getItem('idra_password_artigiani')) || {};
-
-            let tutti = [
-                ...elencoOperaiTotali.map(n => ({ nome: n, tipo: 'operaio' })),
-                ...elencoArtigianiTotali.map(n => ({ nome: n, tipo: 'artigiano' }))
-            ];
-
-            tutti.forEach(item => {
-                let db = item.tipo === 'operaio' ? opPassDB : artPassDB;
-                let haPersonalizzato = !!db[item.nome];
-                let statoTxt = haPersonalizzato ? "Personalizzata" : "Predefinita";
-                let safeId = item.nome.replace(/\s+/g, '_');
-
-                container.innerHTML += `
-                    <div class="collega-card-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
-                        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                            <div><b>${item.nome}</b> <span style="font-size: 0.75rem; color: var(--text-light);">(${item.tipo})</span></div>
-                            <button class="action-btn btn-danger" style="padding: 4px 8px; font-size: 0.7rem;" onclick="resettaPasswordUtente('${item.nome}', '${item.tipo}')">Resetta</button>
-                        </div>
-                        <div style="font-size: 0.75rem; color: ${haPersonalizzato ? 'var(--success)' : 'var(--text-light)'};">Stato: <b>${statoTxt}</b></div>
-                        <div style="display: flex; gap: 6px; width: 100%;">
-                            <input type="text" id="new_pass_${safeId}" placeholder="Nuova password..." style="padding: 6px 10px; font-size: 0.8rem;">
-                            <button class="action-btn btn-orange" style="width: auto; padding: 6px 12px; font-size: 0.8rem;" onclick="impostaPasswordAlVolo('${item.nome}', '${item.tipo}', '${safeId}')">Imposta</button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function resettaPasswordUtente(nome, tipo) {
-            if (confirm(`Azzerare la password di ${nome}?`)) {
-                let dbKey = tipo === 'operaio' ? 'idra_password_operai' : 'idra_password_artigiani';
-                let db = JSON.parse(localStorage.getItem(dbKey)) || {};
-                delete db[nome];
-                localStorage.setItem(dbKey, JSON.stringify(db));
-                popolaGestionePasswordUfficio();
-            }
-        }
-
-        function impostaPasswordAlVolo(nome, tipo, safeId) {
-            let inputVal = document.getElementById(`new_pass_${safeId}`).value.trim();
-            if (inputVal.length < 4) return alert("⚠️ Minimo 4 caratteri!");
-            let dbKey = tipo === 'operaio' ? 'idra_password_operai' : 'idra_password_artigiani';
-            let db = JSON.parse(localStorage.getItem(dbKey)) || {};
-            db[nome] = inputVal;
-            localStorage.setItem(dbKey, JSON.stringify(db));
-            document.getElementById(`new_pass_${safeId}`).value = '';
-            popolaGestionePasswordUfficio();
-        }
-
+        // FUNZIONE CREAZIONE CANTIERE AL VOLO
         function creaCantiereAlVoloUtente() {
             let cliente = document.getElementById('nuovoClienteUtente').value.trim();
             let indirizzo = document.getElementById('nuovoIndirizzoUtente').value.trim();
-            if (!cliente || !indirizzo) return alert("⚠️ Inserisci cliente e indirizzo!");
+            if (!cliente || !indirizzo) return alert("⚠️ Inserisci sia il cliente che l'indirizzo!");
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             cantieriDB.push({ cliente: cliente, indirizzo: indirizzo, completato: false, storico: [] });
@@ -656,9 +580,12 @@
 
             document.getElementById('nuovoClienteUtente').value = '';
             document.getElementById('nuovoIndirizzoUtente').value = '';
+            document.getElementById('inputRicercaCantiereUtente').value = '';
+
             popolaCantieriUtente();
             let selectCantiere = document.getElementById('selectCantiereUtente');
             selectCantiere.selectedIndex = selectCantiere.options.length - 1;
+            alert("✅ Cantiere creato e selezionato con successo!");
         }
 
         function popolaCantieriUtente() {
@@ -680,10 +607,11 @@
         function popolaColleghiUtente() {
             let container = document.getElementById('listaColleghiUtente');
             container.innerHTML = '';
+            
             let tuttiColleghi = [...elencoOperaiTotali, ...elencoArtigianiTotali];
             tuttiColleghi.forEach(op => {
                 if (op === utenteCorrente) return;
-                let idSelect = `ore_collega_${op.replace(/\s+/g, '_')}`;
+                let idSelect = `ore_collega_${op.replace(/[\s\.]+/g, '_')}`;
                 container.innerHTML += `
                     <div class="collega-card-item">
                         <label><input type="checkbox" name="collegaCheckbox" value="${op}" onchange="document.getElementById('${idSelect}').disabled = !this.checked"> ${op}</label>
@@ -693,6 +621,7 @@
             });
         }
 
+        // COMPRESSIONE IMMAGINI
         function comprimiEConvertiImmagine(file) {
             return new Promise((resolve) => {
                 let reader = new FileReader();
@@ -712,84 +641,6 @@
                 };
             });
         }
-
-        // ================= INTEGRAZIONE GEMINI AI PER CONTROLLO FOTO =================
-        async function analizzaImmagineConGemini(base64Data) {
-            if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("INSERISCI")) {
-                console.warn("⚠️ Chiave API Gemini non configurata.");
-                return "SCONOSCIUTO";
-            }
-
-            try {
-                let cleanBase64 = base64Data.split(',')[1] || base64Data;
-                let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-                
-                let response = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [
-                                { text: "Analizza questa immagine. Se è una bolla di consegna, un documento di trasporto o una fattura cartacea, rispondi tassativamente solo 'BOLLA'. Se è una foto di lavori edili, idraulici, operai o impianti installati, rispondi tassativamente solo 'LAVORO'. Non aggiungere altro." },
-                                { inline_data: { mime_type: "image/jpeg", data: cleanBase64 } }
-                            ]
-                        }]
-                    })
-                });
-
-                let data = await response.json();
-                if (data.candidates && data.candidates[0].content) {
-                    return data.candidates[0].content.parts[0].text.trim().toUpperCase();
-                }
-            } catch (err) {
-                console.error("Errore chiamata Gemini:", err);
-            }
-            return "SCONOSCIUTO";
-        }
-
-        async function gestisciCaricamentoFotoAI(inputElement, tipoSelezionato) {
-            let files = inputElement.files;
-            if (!files || files.length === 0) return;
-
-            let spanStato = tipoSelezionato === 'bolle' ? document.getElementById('statoAiBolle') : document.getElementById('statoAiLavori');
-            spanStato.innerText = "🔄 Controllo IA in corso...";
-
-            let altroInputId = tipoSelezionato === 'bolle' ? 'fotoLavoriInput' : 'fotoBolleInput';
-            let altroInput = document.getElementById(altroInputId);
-
-            for (let i = 0; i < files.length; i++) {
-                let base64 = await comprimiEConvertiImmagine(files[i]);
-                let verdetto = await analizzaImmagineConGemini(base64);
-
-                // Se l'utente ha messo una bolla nei lavori o viceversa
-                if (tipoSelezionato === 'bolle' && verdetto.includes("LAVORO")) {
-                    alert("⚠️ Attenzione! L'IA ha rilevato che questa foto è un LAVORO ESEGUITO, non una bolla. L'ho spostata automaticamente nella sezione corretta!");
-                    spostaFileTraInput(files[i], inputElement, altroInput);
-                } else if (tipoSelezionato === 'lavori' && verdetto.includes("BOLLA")) {
-                    alert("⚠️ Attenzione! L'IA ha rilevato che questa foto è una BOLLA DI CONSEGNA, non un lavoro. L'ho spostata automaticamente nella sezione corretta!");
-                    spostaFileTraInput(files[i], inputElement, altroInput);
-                }
-            }
-            spanStato.innerText = "✅ Verificato";
-            setTimeout(() => spanStato.innerText = "", 3000);
-        }
-
-        function spostaFileTraInput(fileDaSpostare, inputOrigine, inputDestinazione) {
-            // Crea un DataTransfer per gestire i file negli input file del browser
-            let dtOrigine = new DataTransfer();
-            for (let f of inputOrigine.files) {
-                if (f !== fileDaSpostare) dtOrigine.items.add(f);
-            }
-            inputOrigine.files = dtOrigine.files;
-
-            let dtDest = new DataTransfer();
-            for (let f of inputDestinazione.files) {
-                dtDest.items.add(f);
-            }
-            dtDest.items.add(fileDaSpostare);
-            inputDestinazione.files = dtDest.files;
-        }
-        // ===========================================================================
 
         async function elaboraListaFile(fileList) {
             let arr = [];
@@ -812,7 +663,7 @@
 
             let partecipanti = [`${utenteCorrente} (${ore}h)`];
             document.querySelectorAll('input[name="collegaCheckbox"]:checked').forEach(cb => {
-                let oCollega = document.getElementById(`ore_collega_${cb.value.replace(/\s+/g, '_')}`).value;
+                let oCollega = document.getElementById(`ore_collega_${cb.value.replace(/[\s\.]+/g, '_')}`).value;
                 participanti.push(`${cb.value} (${oCollega}h)`);
             });
 
@@ -828,11 +679,10 @@
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             alert("✅ Salvato con successo!");
             document.getElementById('noteInterventoUtente').value = '';
-            document.getElementById('fotoBolleInput').value = '';
-            document.getElementById('fotoLavoriInput').value = '';
             popolaCantieriUtente();
         }
 
+        // GESTIONE UFFICIO
         function popolaSelectFiltroDipendenti() {
             let sel = document.getElementById('selectFiltroDipendente');
             sel.innerHTML = '<option value="">Tutti</option>';
@@ -851,7 +701,7 @@
             c.innerHTML = '';
             let tutti = [...elencoOperaiTotali, ...elencoArtigianiTotali];
             tutti.forEach(op => {
-                let id = `ore_uff_${op.replace(/\s+/g, '_')}`;
+                let id = `ore_uff_${op.replace(/[\s\.]+/g, '_')}`;
                 c.innerHTML += `<div class="collega-card-item"><label><input type="checkbox" name="dipUffChk" value="${op}" onchange="document.getElementById('${id}').disabled = !this.checked"> ${op}</label><select id="${id}" disabled><option value="8">8h</option><option value="7">7h</option><option value="6">6h</option><option value="5">5h</option><option value="4">4h</option></select></div>`;
             });
         }
@@ -862,7 +712,7 @@
             let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
             let tutti = [...elencoOperaiTotali, ...elencoArtigianiTotali];
             tutti.forEach(op => {
-                let sId = op.replace(/\s+/g, '_');
+                let sId = op.replace(/[\s\.]+/g, '_');
                 let d = assenzeDB[op] || { stato: 'Presente', finoA: '', tipo: 'Ferie' };
                 c.innerHTML += `<div class="presenza-item"><b>${op}</b><select id="st_${sId}" onchange="document.getElementById('det_${sId}').style.display = (this.value==='Assente'?'flex':'none')"><option value="Presente" ${d.stato==='Presente'?'selected':''}>Presente</option><option value="Assente" ${d.stato==='Assente'?'selected':''}>Assente</option></select><div id="det_${sId}" style="display:${d.stato==='Assente'?'flex':'none'}; gap:5px;"><select id="tp_${sId}"><option value="Ferie">Ferie</option><option value="Malattia">Malattia</option></select><input type="date" id="fn_${sId}" value="${d.finoA}"></div></div>`;
             });
@@ -872,7 +722,7 @@
             let db = {};
             let tutti = [...elencoOperaiTotali, ...elencoArtigianiTotali];
             tutti.forEach(op => {
-                let id = op.replace(/\s+/g, '_');
+                let id = op.replace(/[\s\.]+/g, '_');
                 db[op] = { stato: document.getElementById(`st_${id}`).value, tipo: document.getElementById(`tp_${id}`).value, finoA: document.getElementById(`fn_${id}`).value };
             });
             localStorage.setItem('idra_assenze_dettaglio_db', JSON.stringify(db));
@@ -912,7 +762,7 @@
 
             let ops = [];
             document.querySelectorAll('input[name="dipUffChk"]:checked').forEach(cb => {
-                let o = document.getElementById(`ore_uff_${cb.value.replace(/\s+/g, '_')}`).value;
+                let o = document.getElementById(`ore_uff_${cb.value.replace(/[\s\.]+/g, '_')}`).value;
                 ops.push(`${cb.value} (${o})`);
             });
             if (ops.length === 0) return alert("Seleziona dipendenti!");
