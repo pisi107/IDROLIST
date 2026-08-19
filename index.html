@@ -31,15 +31,14 @@
         .content-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 16px; }
 
         .home-menu { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
-        .big-menu-btn { display: flex; align-items: center; padding: 22px 20px; border-radius: 16px; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; text-align: left; gap: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); transition: transform 0.1s; }
+        .big-menu-btn { display: flex; align-items: center; padding: 22px 20px; border-radius: 16px; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; text-align: left; gap: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
         .big-menu-btn:active { transform: scale(0.98); }
         .btn-lavoro-bg { background: linear-gradient(135deg, #f28c1e, #d97712); color: white; }
         .btn-lista-bg { background: linear-gradient(135deg, #334155, #1e293b); color: white; }
         .big-menu-btn span { font-size: 1.8rem; }
 
         .app-section { display: none; }
-        .app-section.active { display: flex; flex-direction: column; gap: 14px; animation: fadeIn 0.2s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .app-section.active { display: flex; flex-direction: column; gap: 14px; }
 
         .top-nav-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 4px; }
         .nav-back { background: #f1f5f9; color: var(--text); border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
@@ -47,9 +46,9 @@
 
         label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
         
-        input, select, textarea { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; background-color: #f8fafc; color: var(--text); font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; }
+        input, select, textarea { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; background-color: #f8fafc; color: var(--text); font-family: 'Inter', sans-serif; outline: none; }
         input:focus, select:focus, textarea:focus { border-color: var(--brand-orange); background-color: #fff; }
-        input[type="date"] { appearance: none; -webkit-appearance: none; background-color: #f8fafc; }
+        input[type="date"] { appearance: none; -webkit-appearance: none; }
 
         .action-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 1.05rem; font-weight: 700; cursor: pointer; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.1); margin-top: 10px; }
         .btn-green { background-color: var(--success); color: white; }
@@ -107,11 +106,9 @@
                 
                 <div>
                     <label>Seleziona Cantiere</label>
-                    <select id="selezionaCantiere" onchange="caricaDatiCantiere()">
+                    <select id="selezionaCantiere">
                         <option value="">-- Seleziona cantiere attivo --</option>
                     </select>
-                    <input type="hidden" id="rapCliente">
-                    <input type="hidden" id="rapIndirizzo">
                 </div>
 
                 <div>
@@ -212,6 +209,7 @@
         let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
 
         function aggiornaTendinaCantieri() {
+            cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             const select = document.getElementById('selezionaCantiere');
             select.innerHTML = '<option value="">-- Seleziona cantiere attivo --</option>';
             cantieriDB.forEach((c, index) => {
@@ -222,14 +220,6 @@
                     select.appendChild(opt);
                 }
             });
-        }
-
-        function caricaDatiCantiere() {
-            const index = document.getElementById('selezionaCantiere').value;
-            if(index !== "") {
-                document.getElementById('rapCliente').value = cantieriDB[index].cliente;
-                document.getElementById('rapIndirizzo').value = cantieriDB[index].indirizzo;
-            }
         }
 
         function mostraStatoFoto() {
@@ -296,42 +286,49 @@
         }
 
         function salvaEConcludiCantiere() {
-            let cliente = document.getElementById('rapCliente').value;
-            if(!cliente) return alert("Seleziona un cantiere!");
+            let indexCantiere = document.getElementById('selezionaCantiere').value;
+            if(indexCantiere === "") return alert("Seleziona un cantiere dalla lista!");
             
             let fotoInput = document.getElementById('fotoBolla');
-            let indexCantiere = document.getElementById('selezionaCantiere').value;
 
-            if(indexCantiere !== "") {
-                if(!cantieriDB[indexCantiere].storico) cantieriDB[indexCantiere].storico = [];
-
-                if(fotoInput.files && fotoInput.files[0]) {
-                    let reader = new FileReader();
-                    reader.onload = function(e) {
-                        salvaDatiNelDb(e.target.result);
-                    };
-                    reader.readAsDataURL(fotoInput.files[0]);
-                } else {
-                    salvaDatiNelDb(null);
-                }
+            if(fotoInput.files && fotoInput.files[0]) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    salvaDatiNelDb(e.target.result);
+                };
+                reader.readAsDataURL(fotoInput.files[0]);
+            } else {
+                salvaDatiNelDb(null);
             }
         }
 
         function salvaDatiNelDb(fotoBase64) {
             let indexCantiere = document.getElementById('selezionaCantiere').value;
+            
+            if(!cantieriDB[indexCantiere].storico) {
+                cantieriDB[indexCantiere].storico = [];
+            }
+
             cantieriDB[indexCantiere].storico.push({
                 data: document.getElementById('rapData').value,
                 tipo: document.getElementById('rapTipoLavoro').value,
                 operai: document.getElementById('rapOperai').value || 'Non specificato',
-                ore: document.getElementById('rapOre').value,
+                ore: document.getElementById('rapOre').value || 'Non specificate',
                 note: document.getElementById('rapNote').value,
                 foto: fotoBase64
             });
+            
             cantieriDB[indexCantiere].stato = 'Concluso';
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
 
             alert("✅ Rapportino, foto e chiusura cantiere inviati all'ufficio!");
             cambiaSezione('home');
+            
+            // Pulisci i campi
+            document.getElementById('rapOperai').value = '';
+            document.getElementById('rapNote').value = '';
+            document.getElementById('fotoBolla').value = '';
+            document.getElementById('statoFoto').style.display = 'none';
         }
     </script>
 </body>
