@@ -2,29 +2,28 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ufficio - Idrotech Varese</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        :root { --brand-orange: #f28c1e; --brand-dark: #1e293b; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; color: #333; }
         .container { max-width: 900px; margin: auto; }
-        h1 { text-align: center; color: #2c3e50; margin-bottom: 25px; }
-        .cantiere-card { background: #fff; padding: 25px; margin-bottom: 25px; border-radius: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); border-left: 6px solid #f28c1e; }
+        h1 { text-align: center; color: var(--brand-dark); }
+        
+        .cantiere-card { background: #fff; padding: 20px; margin-bottom: 15px; border-radius: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); border-left: 6px solid var(--brand-orange); cursor: pointer; }
+        .contenuto-espanso { display: none; margin-top: 15px; padding-top: 15px; border-top: 2px solid #f1f5f9; cursor: default; }
+        
         .data-folder { background: #fdfdfd; border: 2px solid #e2e8f0; padding: 18px; margin-top: 18px; border-radius: 10px; }
         .sub-folder { margin: 12px 0; padding: 12px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; }
-        
-        /* Foto grandi e ben visibili */
         .foto-grid { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
-        .thumb { width: 120px; height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid #cbd5e1; transition: transform 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .thumb:hover { transform: scale(1.03); border-color: #f28c1e; }
-
+        .thumb { width: 120px; height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid #cbd5e1; }
+        
         .btn-del { background: #e74c3c; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; float: right; font-weight: bold; }
-        .btn-add { background: #27ae60; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; margin-top: 10px; font-size: 1rem; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 10px; margin: 6px 0 12px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
-
-        /* Finestra Modale per ingrandire la foto */
-        #modalFoto { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        #modalFoto img { max-width: 90%; max-height: 85vh; border-radius: 10px; box-shadow: 0 5px 25px rgba(0,0,0,0.5); }
-        .chiudi-modal { position: absolute; top: 20px; right: 25px; background: white; color: black; border: none; font-size: 2rem; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; font-weight: bold; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .btn-add { background: #27ae60; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; margin-top: 10px; font-weight: bold; }
+        input { width: 100%; padding: 10px; margin: 6px 0 12px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        
+        #modalFoto { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+        #modalFoto img { max-width: 90%; max-height: 85vh; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -32,118 +31,87 @@
 <div class="container">
     <h1>📂 Gestione Cantieri Ufficio</h1>
     
-    <!-- Form Creazione -->
-    <div class="cantiere-card">
+    <div class="cantiere-card" style="cursor:default; border-left-color: #27ae60;">
         <h3>Nuovo Cantiere</h3>
-        <label>Nome Cliente</label>
-        <input type="text" id="nomeCliente" placeholder="Es. Mario Rossi">
-        <label>Indirizzo Cantiere</label>
-        <input type="text" id="indirizzo" placeholder="Es. Via Roma 10, Varese">
+        <input type="text" id="nomeCliente" placeholder="Nome Cliente">
+        <input type="text" id="indirizzo" placeholder="Indirizzo">
         <button class="btn-add" onclick="creaCantiere()">+ Crea Cartella Cantiere</button>
     </div>
 
     <div id="listaCantieri"></div>
 </div>
 
-<!-- Modale per ingrandire le foto -->
 <div id="modalFoto" onclick="chiudiFoto()">
-    <button class="chiudi-modal">&times;</button>
-    <img id="imgVisualizzata" src="" alt="Foto Ingrandita">
+    <img id="imgVisualizzata" src="">
 </div>
 
 <script>
     let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
 
+    function toggleCantiere(el) {
+        let content = el.querySelector('.contenuto-espanso');
+        content.style.display = (content.style.display === 'block') ? 'none' : 'block';
+    }
+
     function creaCantiere() {
         let cliente = document.getElementById('nomeCliente').value;
         let indirizzo = document.getElementById('indirizzo').value;
-        if(!cliente) return alert("Inserisci il nome del cliente!");
-        
+        if(!cliente) return alert("Inserisci il nome!");
         cantieriDB.push({ cliente, indirizzo, stato: 'Attivo', storico: [] });
         localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-        
         document.getElementById('nomeCliente').value = '';
         document.getElementById('indirizzo').value = '';
         render();
     }
 
-    function rimuovi(index) {
-        if(confirm("Vuoi eliminare questa cartella cliente?")) {
-            cantieriDB.splice(index, 1);
+    function rimuovi(i, event) {
+        event.stopPropagation();
+        if(confirm("Eliminare questa cartella?")) {
+            cantieriDB.splice(i, 1);
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             render();
         }
     }
 
-    function mostraFoto(base64Data) {
-        document.getElementById('imgVisualizzata').src = base64Data;
+    function mostraFoto(f, event) {
+        event.stopPropagation();
+        document.getElementById('imgVisualizzata').src = f;
         document.getElementById('modalFoto').style.display = 'flex';
     }
 
-    function chiudiFoto() {
-        document.getElementById('modalFoto').style.display = 'none';
-    }
+    function chiudiFoto() { document.getElementById('modalFoto').style.display = 'none'; }
 
     function render() {
         const container = document.getElementById('listaCantieri');
         container.innerHTML = '';
-
-        if(cantieriDB.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#666;">Nessun cantiere presente.</p>';
-            return;
-        }
-
         cantieriDB.forEach((c, index) => {
             let div = document.createElement('div');
             div.className = 'cantiere-card';
+            div.onclick = function() { toggleCantiere(this); };
             
-            let html = `
-                <button class="btn-del" onclick="rimuovi(${index})">Elimina Cantiere</button>
-                <h2 style="margin-top:0; color:#1e293b;">📂 ${c.cliente}</h2>
-                <p style="color:#64748b; font-size:1.05rem;">📍 ${c.indirizzo}</p>
-                <hr style="border:0; border-top:1px solid #e2e8f0; margin: 15px 0;">`;
+            let storicoHtml = c.storico && c.storico.length > 0 ? c.storico.map(item => `
+                <div class="data-folder">
+                    <div style="font-weight:bold; font-size:1.1rem;">📅 Intervento: ${item.data} - ${item.tipo}</div>
+                    <p>Operai: ${item.operai} | Ore: ${item.ore} | Note: ${item.note}</p>
+                    <div class="sub-folder">
+                        <strong>📁 Foto Bolle:</strong>
+                        <div class="foto-grid">${(item.fotoBolle||[]).map(f => `<img src="${f}" class="thumb" onclick="mostraFoto('${f}', event)">`).join('')}</div>
+                    </div>
+                    <div class="sub-folder">
+                        <strong>📁 Foto Lavori:</strong>
+                        <div class="foto-grid">${(item.fotoLavori||[]).map(f => `<img src="${f}" class="thumb" onclick="mostraFoto('${f}', event)">`).join('')}</div>
+                    </div>
+                </div>`).join('') : '<p>Nessun intervento registrato.</p>';
 
-            if (c.storico && c.storico.length > 0) {
-                c.storico.forEach(item => {
-                    let bolleArray = item.fotoBolle || [];
-                    let lavoriArray = item.fotoLavori || [];
-
-                    html += `
-                    <div class="data-folder">
-                        <div style="font-size: 1.1rem; font-weight: bold; color: #0f172a; margin-bottom: 5px;">📅 Intervento del ${item.data}</div>
-                        <div style="font-size: 0.95rem; color: #475569; margin-bottom: 8px;">
-                            <b>Tipo:</b> ${item.tipo} | <b>Operai:</b> ${item.operai} | <b>Ore:</b> ${item.ore}
-                        </div>
-                        <div style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 12px;">
-                            <b>Note:</b> ${item.note || 'Nessuna nota'}
-                        </div>
-                        
-                        <div class="sub-folder">
-                            <strong>📁 Cartella Foto Bolle (${bolleArray.length})</strong>
-                            <div class="foto-grid">
-                                ${bolleArray.length > 0 ? bolleArray.map(f => `<img src="${f}" class="thumb" onclick="mostraFoto('${f}')">`).join('') : '<p style="font-size:0.9rem; color:#888; margin:5px 0;">Nessuna foto bolla</p>'}
-                            </div>
-                        </div>
-                        
-                        <div class="sub-folder">
-                            <strong>📁 Cartella Foto Lavori (${lavoriArray.length})</strong>
-                            <div class="foto-grid">
-                                ${lavoriArray.length > 0 ? lavoriArray.map(f => `<img src="${f}" class="thumb" onclick="mostraFoto('${f}')">`).join('') : '<p style="font-size:0.9rem; color:#888; margin:5px 0;">Nessuna foto lavoro</p>'}
-                            </div>
-                        </div>
-                    </div>`;
-                });
-            } else {
-                html += `<p style="color:#888; font-style:italic;">Nessun intervento registrato in questa cartella.</p>`;
-            }
-
-            div.innerHTML = html;
+            div.innerHTML = `
+                <button class="btn-del" onclick="rimuovi(${index}, event)">Elimina</button>
+                <h2 style="margin:0;">📂 ${c.cliente}</h2>
+                <p style="color:#666; margin:5px 0;">📍 ${c.indirizzo}</p>
+                <div class="contenuto-espanso">${storicoHtml}</div>`;
             container.appendChild(div);
         });
     }
-
     render();
 </script>
-
 </body>
 </html>
