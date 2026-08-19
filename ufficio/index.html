@@ -509,7 +509,6 @@
 
             containerLista.innerHTML = '';
 
-            // Popola il menu a tendina dei cantieri aperti con filtro di ricerca
             popolaSelectCantieriUfficio();
 
             if (cantieriDB.length === 0) {
@@ -576,8 +575,6 @@
 
         function popolaSelectCantieriUfficio() {
             let selectCantiere = document.getElementById('selectCantiereUfficio');
-            let filtroTesto = document.getElementById('inputRicercaCantiereUfficio') ? document.getElementById('inputRicercaCantiereUfficio')->value.toLowerCase().trim() : '';
-            // Fix per evitare errori se l'input non esiste ancora
             let inputRicerca = document.getElementById('inputRicercaCantiereUfficio');
             let query = inputRicerca ? inputRicerca.value.toLowerCase().trim() : '';
 
@@ -586,7 +583,6 @@
 
             let countAperti = 0;
             cantieriDB.forEach((c, idx) => {
-                // Mostra SOLO i cantieri NON completati (aperti)
                 if (!c.completato) {
                     let testoCompleto = `${c.cliente} - ${c.indirizzo}`.toLowerCase();
                     if (query === '' || testoCompleto.includes(query)) {
