@@ -89,7 +89,7 @@
 
         <div class="content-body">
             
-            <!-- SEZIONE NOTIFICHE / CONTROLLO DIPENDENTI SENZA ORE -->
+            <!-- SEZIONE CONTROLLO MANCATI FOGLI -->
             <div class="card-box" style="border-color: #ef4444; background: #fff5f5;">
                 <div style="font-size: 1.05rem; font-weight: 800; color: #b91c1c;">🚨 Controllo Ufficio: Mancati Fogli Lavoro (Ultimi 2 Giorni)</div>
                 <div style="font-size: 0.8rem; color: #7f1d1d; line-height: 1.4;">Elenco dipendenti che negli ultimi 2 giorni non hanno raggiunto le 8 ore o non hanno compilato il report (esclusi assenti giustificati):</div>
@@ -176,7 +176,7 @@
                 <div id="listaCantieriUfficio"></div>
             </div>
 
-            <!-- SEZIONE TABELLA RIEPILOGO ORE TOTALI CON PULSANTE ARCHIVIO FILTRI -->
+            <!-- SEZIONE TABELLA RIEPILOGO ORE TOTALI -->
             <div class="card-box">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                     <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">📊 Tabella Riepilogo Ore</div>
@@ -199,11 +199,11 @@
         </div>
     </div>
 
-    <!-- MODALE ARCHIVIO E FILTRI AVANZATI -->
+    <!-- MODALE ARCHIVIO E FILTRI AVANZATI (AGGIUNTI DATA E CANTIERE) -->
     <div class="modal-overlay" id="modalFiltri">
         <div class="modal-card">
             <div class="modal-header">
-                <span>📁 Archivio e Filtri Dipendenti</span>
+                <span>📁 Archivio e Filtri Avanzati</span>
                 <button class="close-modal-btn" onclick="chiudiModaleFiltri()">&times;</button>
             </div>
             <div class="modal-body">
@@ -213,7 +213,22 @@
                         <option value="">Tutti i dipendenti</option>
                     </select>
                 </div>
-                <div style="font-size: 0.8rem; color: var(--text-light);" id="infoTotaleOreFiltro"></div>
+
+                <div>
+                    <label>Filtra per Data Specifica</label>
+                    <input type="date" id="inputFiltroData" onchange="filtraArchivioModale()">
+                </div>
+
+                <div>
+                    <label>Cerca Cantiere / Cliente</label>
+                    <div style="display: flex; gap: 6px;">
+                        <input type="text" id="inputFiltroCantiere" placeholder="Es. Mario..." oninput="filtraArchivioModale()">
+                        <button class="action-btn btn-danger" style="padding: 0 12px; font-size: 0.8rem;" onclick="azzeraFiltriModale()">Reset</button>
+                    </div>
+                </div>
+
+                <div style="font-size: 0.8rem; color: var(--text-light); margin-top: -4px;" id="infoTotaleOreFiltro"></div>
+                
                 <div style="overflow-x: auto;">
                     <table class="riepilogo-table">
                         <thead>
@@ -267,6 +282,13 @@
 
         function chiudiModaleFiltri() {
             document.getElementById('modalFiltri').classList.remove('open');
+        }
+
+        function azzeraFiltriModale() {
+            document.getElementById('selectFiltroDipendente').value = "";
+            document.getElementById('inputFiltroData').value = "";
+            document.getElementById('inputFiltroCantiere').value = "";
+            filtraArchivioModale();
         }
 
         function toggleAccordion(contentId, headerEl) {
@@ -600,7 +622,6 @@
                 }
             });
 
-            // Ordina per data decrescente
             listaRigheRiepilogo.sort((a, b) => new Date(b.data) - new Date(a.data));
             return listaRigheRiepilogo;
         }
@@ -616,7 +637,6 @@
                 return;
             }
 
-            // Mostra solo le ultime 5 righe nella schermata principale per compattezza
             let ultimeRighe = listaRigheRiepilogo.slice(0, 5);
 
             ultimeRighe.forEach(item => {
@@ -633,6 +653,9 @@
 
         function filtraArchivioModale() {
             let dipendenteFiltro = document.getElementById('selectFiltroDipendente').value;
+            let dataFiltro = document.getElementById('inputFiltroData').value;
+            let cantiereFiltro = document.getElementById('inputFiltroCantiere').value.toLowerCase().trim();
+
             let corpoModale = document.getElementById('corpoTabellaModaleFiltri');
             let infoOre = document.getElementById('infoTotaleOreFiltro');
             corpoModale.innerHTML = '';
@@ -640,21 +663,19 @@
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             let tutteLeRighe = raccogliTutteLeRigheRiepilogo(cantieriDB);
 
-            let righeFiltrate = tutteLeRighe;
-            if (dipendenteFiltro !== "") {
-                righeFiltrate = tutteLeRighe.filter(r => r.dipendente === dipendenteFiltro);
-            }
+            let righeFiltrate = tutteLeRighe.filter(r => {
+                let matchDip = (dipendenteFiltro === "" || r.dipendente === dipendenteFiltro);
+                let matchData = (dataFiltro === "" || r.data.includes(dataFiltro));
+                let matchCantiere = (cantiereFiltro === "" || r.cantiere.toLowerCase().includes(cantiereFiltro));
+                return matchDip && matchData && matchCantiere;
+            });
 
             let sommaOreTotale = 0;
             righeFiltrate.forEach(r => {
                 sommaOreTotale += (r.oreNum || 0);
             });
 
-            if (dipendenteFiltro !== "") {
-                infoOre.innerHTML = `<b>Dipendente Selezionato:</b> ${dipendenteFiltro} | <b>Totale Ore Filtrate:</b> ${sommaOreTotale} Ore`;
-            } else {
-                infoOre.innerHTML = `<b>Tutti i dipendenti</b> | <b>Totale Complessivo Ore:</b> ${sommaOreTotale} Ore`;
-            }
+            infoOre.innerHTML = `<b>Risultati Trovati:</b> ${righeFiltrate.length} | <b>Totale Ore:</b> ${sommaOreTotale} Ore`;
 
             if (righeFiltrate.length === 0) {
                 corpoModale.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-light);">Nessun record trovato per i filtri selezionati.</td></tr>`;
