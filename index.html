@@ -45,13 +45,17 @@
         .banner-text { font-size: 0.85rem; color: #7f1d1d; line-height: 1.4; }
 
         .card-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        
+        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 150px; overflow-y: auto; background: #fff; padding: 10px; border: 1px solid var(--border); border-radius: 10px; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+        .checkbox-item input { width: auto; padding: 0; margin: 0; }
     </style>
 </head>
 <body>
     <div class="app-container">
         <div class="header-app">
             <h1>IDROTECH <span>VARESE</span></h1>
-            <p>Portale Dipendenti - Sicurezza</p>
+            <p>Portale Dipendenti - Foglio Lavoro</p>
         </div>
 
         <div class="content-body">
@@ -80,31 +84,30 @@
                         </select>
                     </div>
                     <div>
-                        <label>Password (Iniziale = il tuo nome, es: brunonicola)</label>
+                        <label>Password</label>
                         <input type="password" id="inputPassword" placeholder="Inserisci la password">
                     </div>
                     <button class="action-btn btn-orange" onclick="effettuaLogin()" style="margin-top: 5px;">Accedi</button>
                 </div>
             </div>
 
-            <!-- 2. SEZIONE CAMBIO PASSWORD OBBLIGATORIO -->
+            <!-- 2. SEZIONE CAMBIO PASSWORD -->
             <div id="sezione-cambio-password" class="app-section">
                 <div class="card-box" style="margin-top: 10px; border-color: var(--brand-orange);">
                     <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); text-align: center;">Modifica Password Obbligatoria</div>
-                    <div style="font-size: 0.85rem; color: var(--text-light); line-height: 1.4;">È il tuo primo accesso. Per motivi di sicurezza, devi impostare una nuova password personale prima di procedere.</div>
                     <div>
                         <label>Nuova Password Personale</label>
-                        <input type="password" id="nuovaPassword1" placeholder="Inserisci la nuova password">
+                        <input type="password" id="nuovaPassword1" placeholder="Nuova password">
                     </div>
                     <div>
                         <label>Conferma Nuova Password</label>
-                        <input type="password" id="nuovaPassword2" placeholder="Ripeti la nuova password">
+                        <input type="password" id="nuovaPassword2" placeholder="Ripeti password">
                     </div>
                     <button class="action-btn btn-orange" onclick="salvaNuovaPassword()" style="margin-top: 5px;">Salva e Accedi</button>
                 </div>
             </div>
 
-            <!-- 3. SEZIONE DASHBOARD PRINCIPALE -->
+            <!-- 3. SEZIONE DASHBOARD / FOGLIO LAVORO COMPLETO -->
             <div id="sezione-dashboard" class="app-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border);">
                     <div>
@@ -114,37 +117,63 @@
                     <button onclick="esciProfilo()" style="background: #fee2e2; color: var(--danger); border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer;">Esci</button>
                 </div>
 
-                <!-- BOX DINAMICO NOTIFICA ORE MANCANTI -->
+                <!-- BOX NOTIFICA ORE MANCANTI -->
                 <div id="boxNotificaOrePersonale"></div>
 
                 <div class="card-box">
-                    <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Registrazione Intervento / Assenza</div>
+                    <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">📝 Compila Foglio di Lavoro</div>
+                    
                     <div>
                         <label>Seleziona Cantiere</label>
                         <select id="selectCantiereOperaio"></select>
                     </div>
+
                     <div>
                         <label>Data Intervento</label>
                         <input type="date" id="dataIntervento">
                     </div>
+
+                    <div>
+                        <label>Tipo di Lavoro</label>
+                        <select id="tipoLavoroOperaio">
+                            <option value="Nuovo Lavoro / Installazione">Nuovo Lavoro / Installazione</option>
+                            <option value="Manutenzione / Riparazione">Manutenzione / Riparazione</option>
+                            <option value="Sopralluogo / Preventivo">Sopralluogo / Preventivo</option>
+                            <option value="Assenza (Ferie/Malattia)">Assenza (Ferie/Malattia)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>Seleziona Colleghi Presenti in Cantiere (Oltre a te)</label>
+                        <div class="checkbox-grid" id="listaColleghiCheckbox">
+                            <!-- Popolato dinamicamente da JS -->
+                        </div>
+                    </div>
+
                     <div>
                         <label>Ore Lavorate (es. 8 o 4)</label>
                         <input type="number" id="oreIntervento" value="8" min="1" max="12" step="0.5">
                     </div>
+
                     <div>
-                        <label>Stato Giornata</label>
-                        <select id="statoGiornataOperaio">
-                            <option value="Lavorativo">Lavorativo / In corso</option>
-                            <option value="Assente">Segna come Giornata di Assenza (Ferie/Malattia)</option>
-                        </select>
+                        <label>Note / Lavori Eseguiti</label>
+                        <textarea id="noteIntervento" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea>
                     </div>
-                    <button class="action-btn btn-green" onclick="salvaInterventoOperaio()">Salva Registrazione</button>
+
+                    <button class="action-btn btn-green" onclick="salvaFoglioLavoroOperaio()" style="margin-top: 10px;">Salva e Invia Rapportino</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        const elencoOperaiTotali = [
+            "Assali Luca", "Bruno Nicola", "Comolli Alessandro", "Concato Filippo", 
+            "Coriglione Alessandro", "De Bosio Marcello", "Denti Claudio", "Doda Enjo", 
+            "Giaccone Federico", "Gjyly Moris", "Marinoni Alessandro", "Rocchetto Fabio", 
+            "Rosini Jean Paul", "Saleh Mohamed"
+        ];
+
         let utenteCorrente = localStorage.getItem('idra_utente_corrente') || '';
 
         window.onload = function() {
@@ -173,13 +202,11 @@
 
             let dbPassword = JSON.parse(localStorage.getItem('idra_db_password')) || {};
             let datiUtente = dbPassword[nome];
-
             let pwdSalvata = datiUtente ? datiUtente.password : getPasswordIniziale(nome);
             let deveCambiare = datiUtente ? datiUtente.deveCambiare : true;
 
             if (passwordInput === pwdSalvata) {
                 document.getElementById('inputPassword').value = '';
-                
                 if (deveCambiare) {
                     mostraCambioPassword(nome);
                 } else {
@@ -207,21 +234,12 @@
             if(p1 !== p2) return alert("Le password non coincidono!");
             if(p1.length < 4) return alert("La password deve essere di almeno 4 caratteri.");
 
-            let pwdIniziale = getPasswordIniziale(nome);
-            if(p1 === pwdIniziale) {
-                return alert("⚠️ La nuova password non può essere uguale a quella iniziale basata sul nome. Scegline una diversa.");
-            }
-
             let dbPassword = JSON.parse(localStorage.getItem('idra_db_password')) || {};
-            dbPassword[nome] = {
-                password: p1,
-                deveCambiare: false
-            };
+            dbPassword[nome] = { password: p1, deveCambiare: false };
             localStorage.setItem('idra_db_password', JSON.stringify(dbPassword));
 
             document.getElementById('nuovaPassword1').value = '';
             document.getElementById('nuovaPassword2').value = '';
-
             localStorage.setItem('idra_utente_corrente', nome);
             utenteCorrente = nome;
             alert("✅ Password aggiornata con successo!");
@@ -241,6 +259,7 @@
             document.getElementById('sezione-dashboard').classList.add('active');
             
             caricaCantieriPerOperaio();
+            popolaColleghiCheckbox(nome);
             verificaOreMancantiPersonali(nome);
         }
 
@@ -259,14 +278,23 @@
             });
         }
 
-        function verificaOreMancantiPersonali(nomeOperaio) {
-            // Dipendenti esclusi dalle notifiche di ore mancanti
-            const dipendentiSenzaNotifiche = [
-                "Bruno Nicola",
-                "Coriglione Alessandro",
-                "Marinoni Alessandro"
-            ];
+        function popolaColleghiCheckbox(utenteEscluso) {
+            let container = document.getElementById('listaColleghiCheckbox');
+            container.innerHTML = '';
 
+            elencoOperaiTotali.forEach(op => {
+                if (op !== utenteEscluso) {
+                    container.innerHTML += `
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="collegaSelezionato" value="${op}"> ${op}
+                        </label>
+                    `;
+                }
+            });
+        }
+
+        function verificaOreMancantiPersonali(nomeOperaio) {
+            const dipendentiSenzaNotifiche = ["Bruno Nicola", "Coriglione Alessandro", "Marinoni Alessandro"];
             if (dipendentiSenzaNotifiche.includes(nomeOperaio)) {
                 document.getElementById('boxNotificaOrePersonale').innerHTML = '';
                 return;
@@ -308,34 +336,46 @@
                         notificheHtml += `
                             <div class="banner-ore-mancanti">
                                 <div class="banner-title">⚠️ Attenzione: Ore Mancanti</div>
-                                <div class="banner-text">Per la giornata del <b>${dataStr}</b> hai registrato ${oreTotData} ore su 8.<br>Ti mancano esattamente <b>${oreMancanti} ore</b> per completare la giornata lavorativa.</div>
+                                <div class="banner-text">Per la giornata del <b>${dataStr}</b> hai registrato ${oreTotData} ore su 8.<br>Ti mancano esattamente <b>${oreMancanti} ore</b>.</div>
                             </div>
                         `;
                     }
                 }
             }
-
             document.getElementById('boxNotificaOrePersonale').innerHTML = notificheHtml;
         }
 
-        function salvaInterventoOperaio() {
+        function salvaFoglioLavoroOperaio() {
             let cantiereIdx = document.getElementById('selectCantiereOperaio').value;
             let data = document.getElementById('dataIntervento').value;
+            let tipoLavoro = document.getElementById('tipoLavoroOperaio').value;
             let ore = parseFloat(document.getElementById('oreIntervento').value) || 8;
-            let statoGiornata = document.getElementById('statoGiornataOperaio').value;
+            let note = document.getElementById('noteIntervento').value.trim();
 
             if (cantiereIdx === '') return alert("Seleziona un cantiere valido!");
             if (!data) return alert("Inserisci una data valida!");
+
+            // Raccogli i colleghi spuntati
+            let colleghiSelezionati = [];
+            document.querySelectorAll('input[name="collegaSelezionato"]:checked').forEach(cb => {
+                colleghiSelezionati.push(cb.value);
+            });
+
+            // Costruisci la stringa operai con tutti i presenti
+            let stringaOperai = `${utenteCorrente} (${ore}h)`;
+            colleghiSelezionati.forEach(collega => {
+                stringaOperai += `, ${collega} (${ore}h)`;
+            });
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_db')) || {};
 
             let chiaveAssenza = `${utenteCorrente}_${data}`;
 
-            if (statoGiornata === 'Assente') {
+            if (tipoLavoro.includes('Assenza')) {
                 assenzeDB[chiaveAssenza] = true;
                 localStorage.setItem('idra_assenze_db', JSON.stringify(assenzeDB));
-                alert(`✅ Giornata del ${data} registrata come Assenza per ${utenteCorrente}.`);
+                alert(`✅ Giornata del ${data} registrata come Assenza.`);
             } else {
                 if (assenzeDB[chiaveAssenza]) {
                     delete assenzeDB[chiaveAssenza];
@@ -348,16 +388,17 @@
 
                 cantieriDB[cantiereIdx].storico.push({
                     data: data,
-                    tipo: "Intervento Operativo",
-                    operai: `${utenteCorrente} (${ore}h)`,
-                    note: "Inserito da portale dipendente",
+                    tipo: tipoLavoro,
+                    operai: stringaOperai,
+                    note: note ? note : "Foglio lavoro compilato da dipendente",
                     statoIntervento: "Da terminare"
                 });
 
                 localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-                alert(`✅ Registrate ${ore} ore sul cantiere di ${cantieriDB[cantiereIdx].cliente}!`);
+                alert(`✅ Foglio lavoro salvato con successo per ${cantieriDB[cantiereIdx].cliente}! (Registrati: ${stringaOperai})`);
             }
 
+            document.getElementById('noteIntervento').value = '';
             verificaOreMancantiPersonali(utenteCorrente);
         }
     </script>
