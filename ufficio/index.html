@@ -44,12 +44,15 @@
         .btn-green { background-color: var(--success); color: white; }
         .btn-orange { background: linear-gradient(135deg, #f28c1e, #d97712); color: white; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.05rem; }
 
-        /* Filtri Ufficio */
+        /* Banner Notifiche Urgente */
+        .banner-notifiche { background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 6px; animation: pulse-border 2s infinite; }
+        @keyframes pulse-border { 0% { border-color: #ef4444; } 50% { border-color: #fca5a5; } 100% { border-color: #ef4444; } }
+        .banner-notifiche-title { font-size: 0.9rem; font-weight: 800; color: #b91c1c; display: flex; align-items: center; gap: 6px; }
+
         .container-filtri-stato { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 5px; }
         .btn-filtro { padding: 10px 6px; border-radius: 10px; border: 2px solid var(--border); background: #f8fafc; font-size: 0.75rem; font-weight: 800; cursor: pointer; text-align: center; color: var(--text); }
         .btn-filtro.active { background: var(--brand-dark); color: white; border-color: var(--brand-dark); }
 
-        /* Card Cantieri Ufficio */
         .cantiere-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
         .cantiere-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .cantiere-title { font-size: 1.1rem; font-weight: 800; color: var(--text); margin: 0; }
@@ -61,13 +64,11 @@
 
         .btn-elimina-cantiere { background: #fee2e2; color: var(--danger); border: none; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
 
-        /* Storico Interventi dentro la card */
         .storico-box { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-top: 6px; display: flex; flex-direction: column; gap: 8px; }
         .storico-item-header { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: var(--brand-orange); border-bottom: 1px dashed #f1f5f9; padding-bottom: 4px; }
         .storico-grid-foto { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
         .mini-foto { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border); cursor: pointer; }
 
-        /* Tabella Calendario / Ore Operai */
         .tabella-ore { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 0.9rem; background: white; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
         .tabella-ore th, .tabella-ore td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #f1f5f9; }
         .tabella-ore th { background: #f1f5f9; font-size: 0.75rem; text-transform: uppercase; color: var(--text-light); font-weight: 700; }
@@ -88,6 +89,9 @@
         <div class="content-body">
             <!-- HOME UFFICIO -->
             <div id="sezione-home" class="app-section active">
+                <!-- BOX NOTIFICHE RITARDO 8 ORE -->
+                <div id="boxNotificheUfficio"></div>
+
                 <div class="cantiere-card" style="border-left: 5px solid var(--success);">
                     <div class="cantiere-title">Nuovo Cantiere</div>
                     <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
@@ -111,7 +115,6 @@
                     <div style="font-size: 0.9rem; font-weight: 700; color: var(--text-light); text-transform: uppercase;">Lista Cantieri</div>
                 </div>
 
-                <!-- PULSANTI FILTRO STATO -->
                 <div class="container-filtri-stato">
                     <button class="btn-filtro active" id="filtroTutti" onclick="impostaFiltroStato('Tutti')">📂 Tutti</button>
                     <button class="btn-filtro" id="filtroTerminare" onclick="impostaFiltroStato('Da terminare')">⏳ Da Terminare</button>
@@ -128,7 +131,6 @@
                     <h2 class="nav-title">Registro Ore & Calendario</h2>
                 </div>
 
-                <!-- BOX DI RICERCA A TENDINA (ORDINATA ALFABETICAMENTE) -->
                 <div class="search-box-container">
                     <div style="font-weight: 800; font-size: 0.95rem; color: var(--text);">🔍 Filtra Interventi per Data / Dipendente</div>
                     <div style="display: flex; gap: 8px;">
@@ -170,6 +172,13 @@
     </div>
 
     <script>
+        const elencoOperai = [
+            "Assali Luca", "Bruno Nicola", "Comolli Alessandro", "Concato Filippo",
+            "Coriglione Alessandro", "De Bosio Marcello", "Denti Claudio", "Doda Enjo",
+            "Giaccone Federico", "Gjyly Moris", "Marinoni Alessandro", "Rocchetto Fabio",
+            "Rosini Jean Paul", "Saleh Mohamed"
+        ];
+
         function cambiaSezione(id) {
             document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
             document.getElementById('sezione-' + id).classList.add('active');
@@ -226,8 +235,69 @@
             caricaCantieriUfficio();
         }
 
+        // Funzione per controllare i dipendenti che non raggiungono le 8 ore negli ultimi 2 giorni e non sono assenti
+        function controllaNotificheMancataCompilazione() {
+            let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_db')) || {};
+            let oggi = new Date();
+            let ritardatari = [];
+
+            // Controlla gli ultimi 2 giorni (oggi e ieri)
+            for (let i = 0; i < 2; i++) {
+                let d = new Date();
+                d.setDate(oggi.getDate() - i);
+                let dataStr = d.toISOString().split('T')[0];
+
+                elencoOperai.forEach(operaio => {
+                    // Verifica se l'operaio è segnato come assente in questa data
+                    let chiaveAssenza = `${operaio}_${dataStr}`;
+                    let eAssente = assenzeDB[chiaveAssenza] === true;
+
+                    if (!eAssente) {
+                        // Calcola ore totali inserite in questa data specifica
+                        let oreTotData = 0;
+                        cantieriDB.forEach(c => {
+                            if (c.storico) {
+                                c.storico.forEach(s => {
+                                    if (s.data === dataStr && s.operai && s.operai.includes(operaio)) {
+                                        let matchOre = s.operai.match(new RegExp(`${operaio} \\((.*?)\\)`));
+                                        if (matchOre && matchOre[1]) {
+                                            let val = parseFloat(matchOre[1]);
+                                            if (!isNaN(val)) oreTotData += val;
+                                        } else {
+                                            oreTotData += 4; // Default se non specificato
+                                        }
+                                    }
+                                });
+                            }
+                        });
+
+                        if (oreTotData < 8) {
+                            if (!ritardatari.some(r => r.nome === operaio && r.data === dataStr)) {
+                                ritardatari.push({ nome: operaio, data: dataStr, ore: oreTotData });
+                            }
+                        }
+                    }
+                });
+            }
+
+            let box = document.getElementById('boxNotificheUfficio');
+            if (ritardatari.length > 0) {
+                let listaHtml = ritardatari.map(r => `• <b>${r.nome}</b> (${r.data}) - Totale registrato: ${r.ore}h (Mancano ore)`).join('<br>');
+                box.innerHTML = `
+                    <div class="banner-notifiche">
+                        <div class="banner-notifiche-title">🚨 NOTIFICA UFFICIO: Fogli di Lavoro Incompleti (&lt; 8h)</div>
+                        <div style="font-size: 0.8rem; color: #7f1d1d;">I seguenti dipendenti non hanno raggiunto le 8 ore negli ultimi 2 giorni (esclusi gli assenti):<br>${listaHtml}</div>
+                    </div>
+                `;
+            } else {
+                box.innerHTML = '';
+            }
+        }
+
         function caricaCantieriUfficio() {
             cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            controllaNotificheMancataCompilazione();
+
             let container = document.getElementById('listaCantieriUfficio');
             container.innerHTML = '';
 
@@ -244,12 +314,7 @@
 
             cantieriFiltrati.forEach((c) => {
                 let index = c.originalIndex;
-                let badgeStatoHtml = '';
-                if(c.stato === 'Lavoro Ultimato') {
-                    badgeStatoHtml = '<span class="badge-stato badge-ultimato">✅ Lavoro Ultimato</span>';
-                } else {
-                    badgeStatoHtml = '<span class="badge-stato badge-terminare">⏳ Da Terminare</span>';
-                }
+                let badgeStatoHtml = c.stato === 'Lavoro Ultimato' ? '<span class="badge-stato badge-ultimato">✅ Lavoro Ultimato</span>' : '<span class="badge-stato badge-terminare">⏳ Da Terminare</span>';
 
                 let storicoHtml = '';
                 if(c.storico && c.storico.length > 0) {
@@ -308,25 +373,19 @@
                 if(c.storico && c.storico.length > 0) {
                     c.storico.forEach(s => {
                         cacheInterventiUfficio.push({
-                             cliente: c.cliente,
-                             indirizzo: c.indirizzo,
-                             data: s.data || '',
-                             tipo: s.tipo,
-                             operai: s.operai || '',
-                             note: s.note,
-                             statoIntervento: s.statoIntervento
+                             cliente: c.cliente, indirizzo: c.indirizzo, data: s.data || '',
+                             tipo: s.tipo, operai: s.operai || '', note: s.note, statoIntervento: s.statoIntervento
                         });
 
                         if(s.operai) {
                             let listaOp = s.operai.split(',');
                             listaOp.forEach(op => {
                                 let matchOre = op.match(/\((.*?)\)/);
-                                let oreNum = 4; // Default
+                                let oreNum = 4;
                                 if(matchOre && matchOre[1]) {
                                     let numParsed = parseFloat(matchOre[1]);
                                     if(!isNaN(numParsed)) oreNum = numParsed;
                                 }
-
                                 let nomePulito = op.replace(/\(.*?\)/, '').trim();
                                 if(nomePulito) {
                                     if(!riepilogoOreOperai[nomePulito]) riepilogoOreOperai[nomePulito] = 0;
@@ -338,7 +397,6 @@
                 }
             });
 
-            // 1. Tabella Totale Ore Operai
             let divTabella = document.getElementById('tabellaTotaleOperai');
             if(Object.keys(riepilogoOreOperai).length === 0) {
                 divTabella.innerHTML = '<div style="font-size:0.85rem; color:var(--text-light); font-style:italic;">Nessuna ora registrata finora.</div>';
@@ -363,7 +421,6 @@
                 let matchDip = !dipFiltro || item.operai.includes(dipFiltro);
                 return matchData && matchDip;
             });
-
             mostraCalendarioFiltrato(risultati);
         }
 
@@ -394,7 +451,7 @@
                         <div style="font-size: 0.95rem; font-weight: 800; color: var(--text);">📁 Cliente: ${item.cliente}</div>
                         <div style="font-size: 0.85rem; color: var(--text-light);">📍 ${item.indirizzo}</div>
                         <div style="font-size: 0.85rem; margin-top: 4px;"><b>Tipo:</b> ${item.tipo} | <b>Operai:</b> ${item.operai}</div>
-                        ${item.note ? '<div style="font-size: 0.85rem; background: white; padding: 6px; border-radius: 6px; margin-top: 6px; border: 1px solid #e2e8f0;"><b>Note:</b> ' + item.note + '</div>' : ''}
+                        ${item.note ? '<div style="font-size: 0.85rem; background: white; padding: 6px; border-radius: 6px; margin-top: 6px; border: 1px solid #e2e8f0;"><b>Notes:</b> ' + item.note + '</div>' : ''}
                     </div>
                 `;
             });
