@@ -35,6 +35,7 @@
         label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
         input, select, textarea { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; background-color: #f8fafc; color: var(--text); font-family: 'Inter', sans-serif; outline: none; }
         input[type="date"] { appearance: none; -webkit-appearance: none; }
+        input[type="file"] { padding: 10px; font-size: 0.85rem; background: #fff; }
 
         .action-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
         .btn-green { background-color: var(--success); color: white; }
@@ -52,6 +53,9 @@
         .collega-card-item select { width: 110px; padding: 8px; font-size: 0.9rem; }
         
         .container-colleghi-scroll { max-height: 220px; overflow-y: auto; background: #fff; padding: 8px; border: 1px solid var(--border); border-radius: 10px; }
+        
+        .preview-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+        .preview-thumb { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
@@ -167,6 +171,21 @@
                     <div>
                         <label>Note / Lavori Eseguiti</label>
                         <textarea id="noteIntervento" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea>
+                    </div>
+
+                    <!-- SEZIONE FOTO BOLLA E FOTO LAVORI -->
+                    <div style="background: #fff; padding: 12px; border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; gap: 12px;">
+                        <div>
+                            <label>📷 Foto Bolla (1 o più)</label>
+                            <input type="file" id="fotoBollaInput" accept="image/*" multiple onchange="mostraAnteprima(this, 'previewBolla')">
+                            <div id="previewBolla" class="preview-container"></div>
+                        </div>
+
+                        <div>
+                            <label>📸 Foto Lavori Eseguiti (Più foto)</label>
+                            <input type="file" id="fotoLavoriInput" accept="image/*" multiple onchange="mostraAnteprima(this, 'previewLavori')">
+                            <div id="previewLavori" class="preview-container"></div>
+                        </div>
                     </div>
 
                     <button class="action-btn btn-green" onclick="salvaFoglioLavoroOperaio()" style="margin-top: 10px;">Salva e Invia Rapportino</button>
@@ -334,7 +353,21 @@
             }
         }
 
-        function verificaOreMancantiPersonale(nomeOperaio) {
+        function mostraAnteprima(input, containerId) {
+            let container = document.getElementById(containerId);
+            container.innerHTML = '';
+            if (input.files) {
+                Array.from(input.files).forEach(file => {
+                    let reader = new FileReader();
+                    reader.onload = function(e) {
+                        container.innerHTML += `<img src="${e.target.result}" class="preview-thumb">`;
+                    }
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+
+        function verificaOreMancantiPersonali(nomeOperaio) {
             const dipendentiSenzaNotifiche = ["Bruno Nicola", "Coriglione Alessandro", "Marinoni Alessandro"];
             if (dipendentiSenzaNotifiche.includes(nomeOperaio)) {
                 document.getElementById('boxNotificaOrePersonale').innerHTML = '';
@@ -426,7 +459,6 @@
                     cantieriDB[cantiereIdx].storico = [];
                 }
 
-                // Aggiorna lo stato globale del cantiere in base alla scelta dell'operaio
                 cantieriDB[cantiereIdx].completato = (statoIntervento === "Terminato");
 
                 cantieriDB[cantiereIdx].storico.push({
@@ -434,7 +466,9 @@
                     tipo: tipoLavoro,
                     operai: stringaOperai,
                     note: note ? note : "Foglio lavoro compilato da dipendente",
-                    statoIntervento: statoIntervento
+                    statoIntervento: statoIntervento,
+                    haBolla: document.getElementById('fotoBollaInput').files.length > 0,
+                    numFotoLavori: document.getElementById('fotoLavoriInput').files.length
                 });
 
                 localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
@@ -442,6 +476,10 @@
             }
 
             document.getElementById('noteIntervento').value = '';
+            document.getElementById('fotoBollaInput').value = '';
+            document.getElementById('fotoLavoriInput').value = '';
+            document.getElementById('previewBolla').innerHTML = '';
+            document.getElementById('previewLavori').innerHTML = '';
             caricaCantieriPerOperaio();
             verificaOreMancantiPersonali(utenteCorrente);
         }
