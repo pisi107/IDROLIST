@@ -142,7 +142,7 @@
                 </div>
 
                 <div>
-                    <label>Note / Lavori Eseguiti</label>
+                    <label>Note / Lavori Eseguiti (Obbligatorio)</label>
                     <textarea id="rapNote" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea>
                 </div>
 
@@ -413,7 +413,7 @@
             let indexCantiere = document.getElementById('selezionaCantiere').value;
             if(indexCantiere === "") return alert("Seleziona un cantiere dalla lista!");
             
-            // Raccogli operai e relative ore personali (incluse le mezze ore)
+            // Controllo operai
             let operaiConOre = [];
             elencoOperai.forEach((nome, idx) => {
                 let chk = document.getElementById(`op_${idx}`);
@@ -425,6 +425,12 @@
 
             if(operaiConOre.length === 0) return alert("Seleziona almeno un operaio presente!");
 
+            // Controllo descrizione lavoro obbligatoria
+            let noteLavoro = document.getElementById('rapNote').value.trim();
+            if(noteLavoro === "") {
+                return alert("⚠️ Inserisci la descrizione dei lavori eseguiti prima di procedere!");
+            }
+
             if(!cantieriDB[indexCantiere].storico) {
                 cantieriDB[indexCantiere].storico = [];
             }
@@ -433,7 +439,7 @@
                 data: document.getElementById('rapData').value,
                 tipo: document.getElementById('rapTipoLavoro').value,
                 operai: operaiConOre.join(', '),
-                note: document.getElementById('rapNote').value,
+                note: noteLavoro,
                 fotoBolle: [...fotoBolleArray],
                 fotoLavori: [...fotoLavoriArray]
             });
