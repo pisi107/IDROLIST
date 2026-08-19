@@ -38,7 +38,6 @@
         .btn-orange { background: linear-gradient(135deg, #f28c1e, #d97712); color: white; }
         .btn-danger { background-color: var(--danger); color: white; padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; box-shadow: none; width: auto; }
         
-        /* NUOVI STILI PER STAMPA */
         .btn-print { background-color: #64748b; color: white; border: none; padding: 6px 12px; font-size: 0.75rem; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
         .btn-print:hover { background-color: #475569; }
         .badge-stampato { background: #3b82f6; color: white; }
@@ -76,12 +75,10 @@
         
         .presenza-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px; }
 
-        /* MINIATURE FOTO */
         .foto-thumb-container { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
         .foto-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s; }
         .foto-thumb:hover { transform: scale(1.05); }
 
-        /* MODALE IMMAGINE FULLSCREEN */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 999; justify-content: center; align-items: center; padding: 15px; }
         .modal-overlay.open { display: flex; }
         .modal-card { background: #fff; width: 100%; max-width: 480px; max-height: 90vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
@@ -99,7 +96,6 @@
 
         <div class="content-body">
             
-            <!-- SEZIONE CONTROLLO MANCATI FOGLI -->
             <div class="card-box" style="border-color: #ef4444; background: #fff5f5;">
                 <div style="font-size: 1.05rem; font-weight: 800; color: #b91c1c;">🚨 Controllo Ufficio: Mancati Fogli Lavoro (Ultimi 2 Giorni)</div>
                 <div style="font-size: 0.8rem; color: #7f1d1d; line-height: 1.4;">Elenco dipendenti che negli ultimi 2 giorni non hanno raggiunto le 8 ore o non hanno compilato il report (esclusi assenti giustificati):</div>
@@ -117,7 +113,6 @@
                 </div>
             </div>
 
-            <!-- FISARMONICA 1: GESTIONE PRESENZE / ASSENZE -->
             <div>
                 <div class="accordion-header" onclick="toggleAccordion('contentPresenze', this)">
                     <span>📋 Gestione Presenze / Assenze Dipendenti</span>
@@ -130,7 +125,6 @@
                 </div>
             </div>
 
-            <!-- FISARMONICA 2: REGISTRAZIONE PER CONTO DIPENDENTI -->
             <div>
                 <div class="accordion-header" onclick="toggleAccordion('contentRegistrazione', this)">
                     <span>✏️ Registrazione per conto Dipendenti</span>
@@ -165,7 +159,6 @@
                 </div>
             </div>
 
-            <!-- SEZIONE CREA NUOVO CANTIERE -->
             <div class="card-box">
                 <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Inserisci Nuovo Cantiere</div>
                 <div>
@@ -179,7 +172,6 @@
                 <button class="action-btn btn-green" onclick="creaCantiereUfficio()">Crea Cantiere</button>
             </div>
 
-            <!-- SEZIONE CARTELLE CANTIERI -->
             <div class="card-box">
                 <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Archivio Cantieri</div>
                 
@@ -191,7 +183,6 @@
                 <div id="listaCantieriUfficio"></div>
             </div>
 
-            <!-- SEZIONE TABELLA RIEPILOGO ORE TOTALI -->
             <div class="card-box">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                     <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">📊 Tabella Riepilogo Ore</div>
@@ -214,7 +205,6 @@
         </div>
     </div>
 
-    <!-- MODALE ARCHIVIO E FILTRI AVANZATI -->
     <div class="modal-overlay" id="modalFiltri">
         <div class="modal-card">
             <div class="modal-header">
@@ -261,7 +251,6 @@
         </div>
     </div>
 
-    <!-- MODALE VISUALIZZAZIONE FOTO IN GRANDE -->
     <div class="modal-overlay" id="modalFotoZoom" onclick="chiudiZoomFoto()">
         <div style="max-width: 90%; max-height: 90%; display: flex; justify-content: center; align-items: center;" onclick="event.stopPropagation()">
             <img id="imgZoomFull" src="" style="max-width: 100%; max-height: 85vh; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
@@ -554,7 +543,6 @@
                         c.storico.forEach((s, sIdx) => {
                             let isStampato = s.stampato === true;
 
-                            // Genera miniature foto bolle
                             let fotoBolleHtml = '';
                             if (s.fotoBolle && s.fotoBolle.length > 0) {
                                 fotoBolleHtml += `<div style="margin-top: 4px; font-size: 0.75rem; font-weight: 700; color: var(--text-light);">Bolle:</div><div class="foto-thumb-container">`;
@@ -564,7 +552,6 @@
                                 fotoBolleHtml += `</div>`;
                             }
 
-                            // Genera miniature foto lavori
                             let fotoLavoriHtml = '';
                             if (s.fotoLavori && s.fotoLavori.length > 0) {
                                 fotoLavoriHtml += `<div style="margin-top: 6px; font-size: 0.75rem; font-weight: 700; color: var(--text-light);">Lavori / Installazioni:</div><div class="foto-thumb-container">`;
@@ -627,32 +614,186 @@
         }
 
         function stampaRapportino(cantiereIdx, storicoIdx) {
+            if (!confirm("Vuoi procedere con la stampa di questo rapportino?")) {
+                return; 
+            }
+
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             let report = cantieriDB[cantiereIdx].storico[storicoIdx];
+            let cantiere = cantieriDB[cantiereIdx];
 
-            let printWindow = window.open('', '_blank', 'width=600,height=600');
+            let fotoHtml = '';
+            if ((report.fotoLavori && report.fotoLavori.length > 0) || (report.fotoBolle && report.fotoBolle.length > 0)) {
+                fotoHtml += `
+                    <div class="section-box" style="margin-top: 20px;">
+                        <div class="section-title">📷 Documentazione Fotografica & Allegati</div>
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px;">`;
+                
+                if (report.fotoLavori) {
+                    report.fotoLavori.forEach(img => {
+                        fotoHtml += `<img src="${img}" style="width: 140px; height: 140px; object-fit: cover; border: 2px solid #cbd5e1; border-radius: 6px;">`;
+                    });
+                }
+                if (report.fotoBolle) {
+                    report.fotoBolle.forEach(img => {
+                        fotoHtml += `<img src="${img}" style="width: 140px; height: 140px; object-fit: cover; border: 2px solid #cbd5e1; border-radius: 6px;">`;
+                    });
+                }
+                fotoHtml += `</div></div>`;
+            }
+
+            let printWindow = window.open('', '_blank', 'width=850,height=1100');
             printWindow.document.write(`
                 <html>
-                    <head><title>Stampa Rapportino - Idrotech</title></head>
-                    <body style="font-family: sans-serif; padding: 20px;">
-                        <h2>Idrotech Varese - Rapportino Intervento</h2>
-                        <hr>
-                        <p><b>Data:</b> ${report.data}</p>
-                        <p><b>Cantiere / Cliente:</b> ${cantieriDB[cantiereIdx].cliente} (${cantieriDB[cantiereIdx].indirizzo})</p>
-                        <p><b>Dipendenti Coinvolti:</b> ${report.operai}</p>
-                        <p><b>Note / Lavori Eseguiti:</b> ${report.note}</p>
-                        <hr>
-                        <p style="font-size: 0.8rem; color: #666;">Documento generato dal pannello gestionale ufficio.</p>
+                    <head>
+                        <title>Rapportino Intervento - Idrotech Varese</title>
+                        <style>
+                            body { 
+                                font-family: 'Inter', Arial, sans-serif; 
+                                color: #1e293b; 
+                                margin: 0; 
+                                padding: 30px; 
+                                font-size: 13px; 
+                                display: flex;
+                                flex-direction: column;
+                                min-height: 92vh;
+                            }
+                            .header { 
+                                display: flex; 
+                                justify-content: space-between; 
+                                border-bottom: 3px solid #f28c1e; 
+                                padding-bottom: 20px; 
+                                margin-bottom: 25px; 
+                            }
+                            .logo h1 { margin: 0; font-size: 26px; color: #1e293b; text-transform: uppercase; font-weight: 800; }
+                            .logo h1 span { color: #f28c1e; }
+                            .logo p { margin: 4px 0 0 0; font-size: 12px; color: #64748b; letter-spacing: 1.5px; }
+                            .meta-info { text-align: right; font-size: 13px; color: #334155; line-height: 1.5; }
+                            
+                            .main-content {
+                                flex: 1;
+                                display: flex;
+                                flex-direction: column;
+                                gap: 15px;
+                            }
+
+                            .section-box { 
+                                border: 1.5px solid #cbd5e1; 
+                                border-radius: 10px; 
+                                padding: 16px 20px; 
+                                background: #f8fafc; 
+                            }
+                            .section-title { 
+                                font-weight: 800; 
+                                font-size: 13px; 
+                                text-transform: uppercase; 
+                                color: #1e293b; 
+                                margin-bottom: 10px; 
+                                border-bottom: 2px solid #e2e8f0; 
+                                padding-bottom: 6px; 
+                                letter-spacing: 0.5px;
+                            }
+                            .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+                            
+                            .notes-box { 
+                                min-height: 140px; 
+                                white-space: pre-wrap; 
+                                background: #ffffff;
+                                border: 1px solid #e2e8f0;
+                                padding: 12px;
+                                border-radius: 6px;
+                                font-size: 14px;
+                                line-height: 1.6;
+                            }
+
+                            .firme-container { 
+                                display: flex; 
+                                justify-content: space-between; 
+                                margin-top: 40px; 
+                                padding-top: 20px;
+                            }
+                            .firma-box { 
+                                width: 42%; 
+                                border-top: 2px solid #1e293b; 
+                                padding-top: 8px; 
+                                text-align: center; 
+                                font-size: 13px; 
+                                font-weight: 600;
+                                color: #1e293b; 
+                            }
+
+                            .footer-note {
+                                text-align: center;
+                                font-size: 11px;
+                                color: #94a3b8;
+                                margin-top: 20px;
+                                border-top: 1px solid #e2e8f0;
+                                padding-top: 10px;
+                            }
+
+                            @media print {
+                                body { padding: 10px; height: 100vh; }
+                                button { display: none; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <div class="logo">
+                                <h1>IDROTECH <span>VARESE</span></h1>
+                                <p>IMPIANTI TERMOIDRAULICI & SERVIZI TECNICI</p>
+                            </div>
+                            <div class="meta-info">
+                                <div><b>Data Intervento:</b> ${report.data}</div>
+                                <div><b>Rapportino N°:</b> ${storicoIdx + 1}</div>
+                                <div><b>Stato:</b> Confermato da Ufficio</div>
+                            </div>
+                        </div>
+
+                        <div class="main-content">
+                            <div class="section-box">
+                                <div class="section-title">📍 Dati Cantiere / Cliente</div>
+                                <div class="grid-2">
+                                    <div><b>Cliente:</b> ${cantiere.cliente}</div>
+                                    <div><b>Indirizzo Cantiere:</b> ${cantiere.indirizzo}</div>
+                                </div>
+                            </div>
+
+                            <div class="section-box">
+                                <div class="section-title">👷 Personale Tecnico Coinvolto</div>
+                                <div style="font-size: 14px; font-weight: 500;">${report.operai}</div>
+                            </div>
+
+                            <div class="section-box" style="flex: 1;">
+                                <div class="section-title">📝 Descrizione Lavori Eseguiti / Materiali Utilizzati</div>
+                                <div class="notes-box">${report.note || 'Nessuna nota aggiuntiva inserita per questo intervento.'}</div>
+                            </div>
+
+                            ${fotoHtml}
+                        </div>
+
+                        <div>
+                            <div class="firme-container">
+                                <div class="firma-box">Firma del Tecnico / Operatore</div>
+                                <div class="firma-box">Firma per Accettazione Cliente</div>
+                            </div>
+                            <div class="footer-note">
+                                Idrotech Varese — Documento ufficiale generato per uso interno e rendicontazione cantieri.
+                            </div>
+                        </div>
+
+                        <script>
+                            window.onload = function() {
+                                window.print();
+                            }
+                        </script>
                     </body>
                 </html>
             `);
             printWindow.document.close();
-            printWindow.print();
 
-            // Marca come stampato nel database
             cantieriDB[cantiereIdx].storico[storicoIdx].stampato = true;
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            
             aggiornaVistaUfficio();
         }
 
