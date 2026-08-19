@@ -34,7 +34,6 @@
         
         hr { border: 0; border-top: 1px solid var(--border); margin: 20px 0; }
         
-        /* Stile Cartelle Cantieri */
         .folder-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px; padding: 14px; box-sizing: border-box; }
         .folder-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
         .folder-info { display: flex; flex-direction: column; gap: 3px; }
@@ -46,8 +45,7 @@
         
         .delete-btn { background: #fee2e2; color: var(--danger); border: none; width: 32px; height: 32px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         
-        /* Storico Rapportini all'interno della cartella */
-        .storico-box { margin-top: 10px; background: #ffffff; border: 1px dashed var(--border); border-radius: 8px; padding: 10px; font-size: 0.85srem; }
+        .storico-box { margin-top: 10px; background: #ffffff; border: 1px dashed var(--border); border-radius: 8px; padding: 10px; }
         .storico-title { font-size: 0.75rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-bottom: 6px; }
         .rapportino-item { font-size: 0.85rem; padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
         .rapportino-item:last-child { border-bottom: none; }
@@ -88,7 +86,7 @@
                 cliente, 
                 indirizzo, 
                 stato: 'Attivo',
-                storico: [] // Qui dentro salveremo i rapportini futuri degli operai
+                storico: [] 
             });
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
 
@@ -105,8 +103,11 @@
             }
 
             container.innerHTML = cantieriDB.map((c, i) => {
+                // Se il cantiere non ha la proprietà storico (perché creato prima), gliela creiamo al volo
+                if (!c.storico) c.storico = [];
+
                 let storicoHtml = '';
-                if (c.storico && c.storico.length > 0) {
+                if (c.storico.length > 0) {
                     storicoHtml = `
                         <div class="storico-box">
                             <div class="storico-title">📁 Storico Lavori Eseguiti:</div>
