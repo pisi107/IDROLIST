@@ -55,7 +55,11 @@
         .btn-blue-light { background-color: #e0f2fe; color: #0369a1; border: 2px dashed #38bdf8; }
         .btn-gray { background-color: #e2e8f0; color: #334155; }
         
-        .preview-box { background: #f0fdf4; border: 2px solid #bbf7d0; padding: 8px; border-radius: 8px; font-size: 0.75rem; color: #166534; font-weight: 600; text-align: center; }
+        /* Griglia anteprime foto */
+        .grid-anteprime { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .thumb-container { position: relative; width: 70px; height: 70px; border-radius: 8px; overflow: hidden; border: 2px solid #bbf7d0; background: #f0fdf4; }
+        .thumb-container img { width: 100%; height: 100%; object-fit: cover; }
+        .thumb-delete { position: absolute; top: 2px; right: 2px; background: rgba(220, 38, 38, 0.9); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
         ul { list-style: none; padding: 0; margin: 0; max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
         li { background: #f8fafc; border: 1px solid var(--border); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; border-radius: 10px; font-size: 0.95rem; }
@@ -146,25 +150,23 @@
                     <textarea id="rapNote" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea>
                 </div>
 
+                <!-- SEZIONE FOTO BOLLA MULTIPLE -->
                 <div>
-                    <label>Allegati Fotografici Multipli</label>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div>
-                            <!-- Aggiunto multiple -->
-                            <input type="file" id="fotoBolla" accept="image/*" multiple style="display:none;" onchange="mostraStatoFoto('fotoBolla', 'statoBolla')">
-                            <button class="action-btn btn-blue-light" onclick="document.getElementById('fotoBolla').click()" style="margin:0; font-size:0.8rem;">📎 Foto Bolla (Più foto)</button>
-                        </div>
-                        <div>
-                            <!-- Aggiunto multiple -->
-                            <input type="file" id="fotoLavoro" accept="image/*" multiple style="display:none;" onchange="mostraStatoFoto('fotoLavoro', 'statoLavoro')">
-                            <button class="action-btn btn-blue-light" onclick="document.getElementById('fotoLavoro').click()" style="margin:0; font-size:0.8rem;">📸 Foto Lavoro (Più foto)</button>
-                        </div>
-                    </div>
-                    <div id="statoBolla" class="preview-box" style="display:none; margin-top: 5px;"></div>
-                    <div id="statoLavoro" class="preview-box" style="display:none; margin-top: 5px;"></div>
+                    <label>Foto Bolla / Documento (Aggiungi quante ne vuoi)</label>
+                    <input type="file" id="inputFotoBolla" accept="image/*" style="display:none;" onchange="aggiungiFoto('bolla')">
+                    <button class="action-btn btn-blue-light" onclick="document.getElementById('inputFotoBolla').click()" style="margin:0; font-size:0.9rem;">📎 + Aggiungi Foto Bolla</button>
+                    <div id="containerBolle" class="grid-anteprime"></div>
                 </div>
 
-                <button class="action-btn btn-green" onclick="salvaEConcludiCantiere()">✅ Salva e Segna Cantiere Concluso</button>
+                <!-- SEZIONE FOTO LAVORO MULTIPLE -->
+                <div style="margin-top: 5px;">
+                    <label>Foto Lavoro Eseguito (Aggiungi quante ne vuoi)</label>
+                    <input type="file" id="inputFotoLavoro" accept="image/*" style="display:none;" onchange="aggiungiFoto('lavoro')">
+                    <button class="action-btn btn-blue-light" onclick="document.getElementById('inputFotoLavoro').click()" style="margin:0; font-size:0.9rem;">📸 + Aggiungi Foto Lavoro</button>
+                    <div id="containerLavori" class="grid-anteprime"></div>
+                </div>
+
+                <button class="action-btn btn-green" onclick="salvaEConcludiCantiere()" style="margin-top: 15px;">✅ Salva e Segna Cantiere Concluso</button>
             </div>
 
             <!-- LISTA MATERIALI -->
@@ -218,6 +220,10 @@
         }
 
         let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+        
+        // Array globali per accumulare le immagini
+        let fotoBolleArray = [];
+        let fotoLavoriArray = [];
 
         function aggiornaTendinaCantieri() {
             cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
@@ -233,13 +239,51 @@
             });
         }
 
-        function mostraStatoFoto(inputId, statoId) {
-            const input = document.getElementById(inputId);
-            const stato = document.getElementById(statoId);
-            if(input.files && input.files.length > 0) {
-                stato.style.display = 'block';
-                stato.innerHTML = `✅ Selezionate n. ${input.files.length} foto`;
+        function aggiungiFoto(tipo) {
+            let inputId = tipo === 'bolla' ? 'inputFotoBolla' : 'inputFotoLavoro';
+            let input = document.getElementById(inputId);
+
+            if (input.files && input.files[0]) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    if (tipo === 'bolla') {
+                        fotoBolleArray.push(e.target.result);
+                        renderizzaMiniature('bolla');
+                    } else {
+                        fotoLavoriArray.push(e.target.result);
+                        renderizzaMiniature('lavoro');
+                    }
+                    // Reset input per consentire di riselezionare lo stesso file se serve
+                    input.value = '';
+                };
+                reader.readAsDataURL(input.files[0]);
             }
+        }
+
+        function rimuoviFoto(tipo, index) {
+            if (tipo === 'bolla') {
+                fotoBolleArray.splice(index, 1);
+                renderizzaMiniature('bolla');
+            } else {
+                fotoLavoriArray.splice(index, 1);
+                renderizzaMiniature('lavoro');
+            }
+        }
+
+        function renderizzaMiniature(tipo) {
+            let containerId = tipo === 'bolla' ? 'containerBolle' : 'containerLavori';
+            let container = document.getElementById(containerId);
+            let arrayDati = tipo === 'bolla' ? fotoBolleArray : fotoLavoriArray;
+
+            container.innerHTML = '';
+            arrayDati.forEach((imgSrc, idx) => {
+                container.innerHTML += `
+                    <div class="thumb-container">
+                        <img src="${imgSrc}" alt="Anteprima">
+                        <button class="thumb-delete" onclick="rimuoviFoto('${tipo}', ${idx})">✕</button>
+                    </div>
+                `;
+            });
         }
 
         const database = {
@@ -296,47 +340,9 @@
             window.open(`https://wa.me/?text=` + encodeURIComponent(text));
         }
 
-        // Funzione ricorsiva per convertire una lista di File in un array di stringhe Base64
-        function convertiFileInBase64(files, callback) {
-            let risultati = [];
-            if (!files || files.length === 0) {
-                callback(risultati);
-                return;
-            }
-            let index = 0;
-            function leggiProssimo() {
-                if (index >= files.length) {
-                    callback(risultati);
-                    return;
-                }
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    risultati.push(e.target.result);
-                    index++;
-                    leggiProssimo();
-                };
-                reader.readAsDataURL(files[index]);
-            }
-            leggiProssimo();
-        }
-
         function salvaEConcludiCantiere() {
             let indexCantiere = document.getElementById('selezionaCantiere').value;
             if(indexCantiere === "") return alert("Seleziona un cantiere dalla lista!");
-            
-            let filesBolla = document.getElementById('fotoBolla').files;
-            let filesLavoro = document.getElementById('fotoLavoro').files;
-
-            // Convertiamo prima tutte le bolle, poi tutti i lavori
-            convertiFileInBase64(filesBolla, function(arrayBolle) {
-                convertiFileInBase64(filesLavoro, function(arrayLavori) {
-                    salvaDatiNelDb(arrayBolle, arrayLavori);
-                });
-            });
-        }
-
-        function salvaDatiNelDb(arrayBolle, arrayLavori) {
-            let indexCantiere = document.getElementById('selezionaCantiere').value;
             
             if(!cantieriDB[indexCantiere].storico) {
                 cantieriDB[indexCantiere].storico = [];
@@ -348,23 +354,24 @@
                 operai: document.getElementById('rapOperai').value || 'Non specificato',
                 ore: document.getElementById('rapOre').value || 'Non specificate',
                 note: document.getElementById('rapNote').value,
-                fotoBolle: arrayBolle,    // Array di immagini bolla
-                fotoLavori: arrayLavori   // Array di immagini lavoro
+                fotoBolle: [...fotoBolleArray],
+                fotoLavori: [...fotoLavoriArray]
             });
             
             cantieriDB[indexCantiere].stato = 'Concluso';
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
 
-            alert("✅ Rapportino e foto multiple inviati all'ufficio!");
-            cambiaSezione('home');
+            alert("✅ Rapportino, foto multiple e chiusura cantiere inviati all'ufficio!");
             
-            // Pulisci i campi
+            // Pulisci tutto
+            fotoBolleArray = [];
+            fotoLavoriArray = [];
+            document.getElementById('containerBolle').innerHTML = '';
+            document.getElementById('containerLavori').innerHTML = '';
             document.getElementById('rapOperai').value = '';
             document.getElementById('rapNote').value = '';
-            document.getElementById('fotoBolla').value = '';
-            document.getElementById('fotoLavoro').value = '';
-            document.getElementById('statoBolla').style.display = 'none';
-            document.getElementById('statoLavoro').style.display = 'none';
+            
+            cambiaSezione('home');
         }
     </script>
 </body>
