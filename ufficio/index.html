@@ -52,6 +52,19 @@
         .tab-btn { flex: 1; padding: 12px; border: 2px solid var(--border); background: #f1f5f9; font-weight: 700; font-size: 0.85rem; border-radius: 10px; cursor: pointer; color: var(--text-light); text-align: center; }
         .tab-btn.active-da-fare { background: #fef3c7; border-color: #f59e0b; color: #b45309; }
         .tab-btn.active-terminati { background: #dcfce7; border-color: var(--success); color: #15803d; }
+
+        /* Stili gestione colleghi multipli */
+        .collega-card-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+        .collega-card-item label { margin: 0; font-size: 0.9rem; color: var(--text); text-transform: none; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .collega-card-item input[type="checkbox"] { width: 18px; height: 18px; }
+        .collega-card-item select { width: 110px; padding: 8px; font-size: 0.9rem; }
+        .container-colleghi-scroll { max-height: 220px; overflow-y: auto; background: #fff; padding: 8px; border: 1px solid var(--border); border-radius: 10px; }
+
+        /* Tabella riepilogo ore */
+        .riepilogo-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+        .riepilogo-table th, .riepilogo-table td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+        .riepilogo-table th { background: #1e293b; color: white; font-size: 0.75rem; text-transform: uppercase; }
+        .riepilogo-table tr:last-child td { border-bottom: none; }
     </style>
 </head>
 <body>
@@ -62,47 +75,30 @@
         </div>
 
         <div class="content-body">
-            <!-- SEZIONE INSERIMENTO RAPIDO UFFICIO PER CONTO DIPENDENTE -->
+            <!-- SEZIONE INSERIMENTO UFFICIO CON DIPENDENTI MULTIPLI -->
             <div class="card-box" style="border-color: var(--brand-orange);">
-                <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Registrazione per conto Dipendente</div>
-                <div>
-                    <label>Seleziona Dipendente</label>
-                    <select id="selectDipendenteUfficio">
-                        <option value="Assali Luca">Assali Luca</option>
-                        <option value="Bruno Nicola">Bruno Nicola</option>
-                        <option value="Comolli Alessandro">Comolli Alessandro</option>
-                        <option value="Concato Filippo">Concato Filippo</option>
-                        <option value="Coriglione Alessandro">Coriglione Alessandro</option>
-                        <option value="De Bosio Marcello">De Bosio Marcello</option>
-                        <option value="Denti Claudio">Denti Claudio</option>
-                        <option value="Doda Enjo">Doda Enjo</option>
-                        <option value="Giaccone Federico">Giaccone Federico</option>
-                        <option value="Gjyly Moris">Gjyly Moris</option>
-                        <option value="Marinoni Alessandro">Marinoni Alessandro</option>
-                        <option value="Rocchetto Fabio">Rocchetto Fabio</option>
-                        <option value="Rosini Jean Paul">Rosini Jean Paul</option>
-                        <option value="Saleh Mohamed">Saleh Mohamed</option>
-                    </select>
-                </div>
+                <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Registrazione per conto Dipendenti</div>
+                
                 <div>
                     <label>Seleziona Cantiere</label>
                     <select id="selectCantiereUfficio"></select>
                 </div>
+
                 <div>
                     <label>Data Intervento</label>
                     <input type="date" id="dataInterventoUfficio">
                 </div>
+
                 <div>
-                    <label>Ore Lavorate</label>
-                    <select id="oreInterventoUfficio">
-                        <!-- Popolato via JS da 0.5 a 10 ore -->
-                    </select>
+                    <label>Seleziona Dipendenti e Relative Ore</label>
+                    <div class="container-colleghi-scroll" id="listaDipendentiUfficioMultiplo"></div>
                 </div>
+
                 <div>
                     <label>Note / Lavori Eseguiti / Materiali</label>
                     <textarea id="noteUfficio" rows="2" placeholder="Inserisci dettagli..."></textarea>
                 </div>
-                <button class="action-btn btn-orange" onclick="registraUfficioPerDipendente()">Registra per conto del Dipendente</button>
+                <button class="action-btn btn-orange" onclick="registraUfficioMultiplo()">Registra per conto dei Dipendenti</button>
             </div>
 
             <!-- SEZIONE CREA NUOVO CANTIERE -->
@@ -123,7 +119,6 @@
             <div class="card-box">
                 <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Archivio Cantieri</div>
                 
-                <!-- Bottoni Tab Cartelle -->
                 <div class="tabs-container">
                     <button id="btnTabDaFare" class="tab-btn active-da-fare" onclick="cambiaCartella('da_fare')">📁 Da Terminare</button>
                     <button id="btnTabTerminati" class="tab-btn" onclick="cambiaCartella('terminati')">📁 Lavori Terminati</button>
@@ -131,25 +126,74 @@
 
                 <div id="listaCantieriUfficio"></div>
             </div>
+
+            <!-- SEZIONE TABELLA RIEPILOGO ORE TOTALI -->
+            <div class="card-box">
+                <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">📊 Tabella Riepilogo Ore per Dipendente</div>
+                <div style="overflow-x: auto;">
+                    <table class="riepilogo-table" id="tabellaRiepilogoOre">
+                        <thead>
+                            <tr>
+                                <th>Dipendente</th>
+                                <th>Cantiere</th>
+                                <th>Totale Ore</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoTabellaRiepilogo">
+                            <!-- Popolato via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        let cartellaCorrente = 'da_fare'; // 'da_fare' oppure 'terminati'
+        const elencoOperaiTotali = [
+            "Assali Luca", "Bruno Nicola", "Comolli Alessandro", "Concato Filippo", 
+            "Coriglione Alessandro", "De Bosio Marcello", "Denti Claudio", "Doda Enjo", 
+            "Giaccone Federico", "Gjyly Moris", "Marinoni Alessandro", "Rocchetto Fabio", 
+            "Rosini Jean Paul", "Saleh Mohamed"
+        ];
+
+        let cartellaCorrente = 'da_fare';
 
         window.onload = function() {
             document.getElementById('dataInterventoUfficio').value = new Date().toISOString().split('T')[0];
-            popolaSelectOreUfficio();
+            popolaDipendentiUfficioMultiplo();
             aggiornaVistaUfficio();
         };
 
-        function popolaSelectOreUfficio() {
-            let select = document.getElementById('oreInterventoUfficio');
-            if (!select) return;
-            select.innerHTML = '';
-            for (let i = 0.5; i <= 10; i += 0.5) {
-                let selected = (i === 8) ? 'selected' : '';
-                select.innerHTML += `<option value="${i}" ${selected}>${i} ${i === 1 ? 'Ora' : 'Ore'}</option>`;
+        function popolaDipendentiUfficioMultiplo() {
+            let container = document.getElementById('listaDipendentiUfficioMultiplo');
+            container.innerHTML = '';
+
+            elencoOperaiTotali.forEach(op => {
+                let idSelect = `ore_uff_op_${op.replace(/\s+/g, '_')}`;
+                let optionsHtml = '';
+                for (let i = 0.5; i <= 10; i += 0.5) {
+                    let sel = (i === 8) ? 'selected' : '';
+                    optionsHtml += `<option value="${i}" ${sel}>${i} ${i === 1 ? 'Ora' : 'Ore'}</option>`;
+                }
+
+                container.innerHTML += `
+                    <div class="collega-card-item">
+                        <label>
+                            <input type="checkbox" name="dipendenteUfficioCheckbox" value="${op}" onchange="toggleSelectDipUfficio('${idSelect}', this)">
+                            ${op}
+                        </label>
+                        <select id="${idSelect}" disabled>
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                `;
+            });
+        }
+
+        function toggleSelectDipUfficio(idSelect, checkbox) {
+            let selectEl = document.getElementById(idSelect);
+            if (selectEl) {
+                selectEl.disabled = !checkbox.checked;
             }
         }
 
@@ -201,16 +245,15 @@
             if (cantieriDB.length === 0) {
                 selectCantiere.innerHTML = '<option value="">Nessun cantiere disponibile</option>';
                 containerLista.innerHTML = '<div style="font-size: 0.85rem; color: var(--text-light); text-align: center; padding: 10px;">Nessun cantiere inserito nel database.</div>';
+                aggiornaTabellaRiepilogo([]);
                 return;
             }
 
             let cantieriFiltratiCount = 0;
 
             cantieriDB.forEach((c, idx) => {
-                // Popola sempre la select rapida per inserire ore
                 selectCantiere.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo} (${c.completato ? 'Terminato' : 'Da terminare'})</option>`;
 
-                // Filtra in base alla cartella attiva
                 let isCompletato = c.completato === true;
                 if ((cartellaCorrente === 'da_fare' && !isCompletato) || (cartellaCorrente === 'terminati' && isCompletato)) {
                     cantieriFiltratiCount++;
@@ -260,17 +303,78 @@
             if (cantieriFiltratiCount === 0) {
                 containerLista.innerHTML = `<div style="font-size: 0.85rem; color: var(--text-light); text-align: center; padding: 15px;">Nessun cantiere in questa cartella.</div>`;
             }
+
+            aggiornaTabellaRiepilogo(cantieriDB);
         }
 
-        function registraUfficioPerDipendente() {
-            let dipendente = document.getElementById('selectDipendenteUfficio').value;
+        function aggiornaTabellaRiepilogo(cantieriDB) {
+            let corpoTabella = document.getElementById('corpoTabellaRiepilogo');
+            corpoTabella.innerHTML = '';
+
+            // Mappa per sommare le ore: { "NomeDipendente_Cantiere": totaleOre }
+            let mappaAggregata = {};
+
+            cantieriDB.forEach(c => {
+                if (c.storico) {
+                    c.storico.forEach(s => {
+                        if (s.operai) {
+                            // Esempio stringa operai: "Assali Luca (8h), Bruno Nicola (4h)"
+                            let parti = s.operai.split(',');
+                            parti.forEach(p => {
+                                let match = p.trim().match(/^(.*?)\s*\(([\d.]+)h\)$/);
+                                if (match) {
+                                    let nomeOp = match.trim();
+                                    let oreOp = parseFloat(match) || 0;
+                                    let chiave = `${nomeOp}___${c.cliente}`;
+                                    
+                                    if (!mappaAggregata[chiave]) {
+                                        mappaAggregata[chiave] = { dipendente: nomeOp, cantiere: c.cliente, ore: 0 };
+                                    }
+                                    mappaAggregata[chiave].ore += oreOp;
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+            let chiavi = Object.keys(mappaAggregata);
+            if (chiaves.length === 0) {
+                corpoTabella.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-light);">Nessuna ora registrata finora.</td></tr>`;
+                return;
+            }
+
+            chiavi.forEach(k => {
+                let item = mappaAggregata[k];
+                corpoTabella.innerHTML += `
+                    <tr>
+                        <td><b>${item.dipendente}</b></td>
+                        <td>${item.cantiere}</td>
+                        <td><b>${item.ore} Ore</b></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function registraUfficioMultiplo() {
             let cantiereIdx = document.getElementById('selectCantiereUfficio').value;
             let data = document.getElementById('dataInterventoUfficio').value;
-            let ore = parseFloat(document.getElementById('oreInterventoUfficio').value) || 8;
             let note = document.getElementById('noteUfficio').value.trim();
 
             if (cantiereIdx === '') return alert("Seleziona un cantiere valido!");
             if (!data) return alert("Inserisci una data!");
+
+            let checkboxSelezionati = document.querySelectorAll('input[name="dipendenteUfficioCheckbox"]:checked');
+            if (checkboxSelezionati.length === 0) return alert("Seleziona almeno un dipendente!");
+
+            let stringaOperaiArray = [];
+            checkboxSelezionati.forEach(cb => {
+                let nomeOp = cb.value;
+                let idSelect = `ore_uff_op_${nomeOp.replace(/\s+/g, '_')}`;
+                let selectOre = document.getElementById(idSelect);
+                let oreOp = selectOre ? parseFloat(selectOre.value) || 8 : 8;
+                stringaOperaiArray.push(`${nomeOp} (${oreOp}h)`);
+            });
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
 
@@ -281,15 +385,24 @@
             cantieriDB[cantiereIdx].storico.push({
                 data: data,
                 tipo: "Inserito da Ufficio",
-                operai: `${dipendente} (${ore}h)`,
-                note: note ? note : "Inserito dall'ufficio per conto del dipendente",
+                operai: stringaOperaiArray.join(', '),
+                note: note ? note : "Inserito dall'ufficio",
                 statoIntervento: cantieriDB[cantiereIdx].completato ? "Terminato" : "Da terminare"
             });
 
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             document.getElementById('noteUfficio').value = '';
+            
+            // Resetta checkbox
+            document.querySelectorAll('input[name="dipendenteUfficioCheckbox"]').forEach(cb => {
+                cb.checked = false;
+                let idSelect = `ore_uff_op_${cb.value.replace(/\s+/g, '_')}`;
+                let sel = document.getElementById(idSelect);
+                if(sel) sel.disabled = true;
+            });
+
             aggiornaVistaUfficio();
-            alert(`✅ Registrato con successo (${ore}h) per ${dipendente} sul cantiere di ${cantieriDB[cantiereIdx].cliente}!`);
+            alert("✅ Intervento registrato con successo per i dipendenti selezionati!");
         }
 
         function cambiaStatoCantiere(idx) {
