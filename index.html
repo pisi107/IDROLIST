@@ -135,9 +135,13 @@
                         </select>
                     </div>
 
-                    <div style="text-align: left; margin-bottom: 15px;">
+                    <div style="text-align: left; margin-bottom: 8px;">
                         <label>Password *</label>
                         <input type="password" id="inputPasswordLoginOperaio" placeholder="Inserisci password...">
+                    </div>
+                    
+                    <div style="text-align: right; margin-bottom: 15px;">
+                        <a href="#" onclick="alert('ℹ️ Per recuperare la password contatta l\'Ufficio: provvederanno a resettarla in un click dal pannello amministrativo.'); return false;" style="font-size: 0.75rem; color: var(--brand-orange); text-decoration: none; font-weight: 600;">Password dimenticata?</a>
                     </div>
 
                     <button class="action-btn btn-orange" style="margin-bottom: 8px;" onclick="effettuaLoginOperaio()">Accedi</button>
@@ -157,9 +161,13 @@
                         </select>
                     </div>
 
-                    <div style="text-align: left; margin-bottom: 15px;">
+                    <div style="text-align: left; margin-bottom: 8px;">
                         <label>Password *</label>
                         <input type="password" id="inputPasswordLoginArtigiano" placeholder="Inserisci password...">
+                    </div>
+
+                    <div style="text-align: right; margin-bottom: 15px;">
+                        <a href="#" onclick="alert('ℹ️ Per recuperare la password contatta l\'Ufficio: provvederanno a resettarla in un click dal pannello amministrativo.'); return false;" style="font-size: 0.75rem; color: var(--brand-orange); text-decoration: none; font-weight: 600;">Password dimenticata?</a>
                     </div>
 
                     <button class="action-btn btn-artigiani" style="margin-bottom: 8px;" onclick="effettuaLoginArtigiano()">Accedi</button>
@@ -301,6 +309,18 @@
                             </thead>
                             <tbody id="corpoTabellaControlloMancanti"></tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- GESTIONE PASSWORD UTENTI (NUOVA SEZIONE) -->
+                <div>
+                    <div class="accordion-header" onclick="toggleAccordion('contentGestionePassword', this)">
+                        <span>🔑 Gestione Password Utenti</span>
+                        <span id="arrowGestionePassword">▼</span>
+                    </div>
+                    <div id="contentGestionePassword" class="accordion-content card-box" style="border-color: var(--brand-orange);">
+                        <div style="font-size: 0.8rem; color: var(--text-light);">Da qui puoi resettare la password di un operaio/artigiano (tornerà quella predefinita con il nome minuscolo) oppure impostarne una nuova.</div>
+                        <div class="container-colleghi-scroll" id="listaGestionePasswordUfficio" style="max-height: 250px;"></div>
                     </div>
                 </div>
 
@@ -464,6 +484,7 @@
                 sub.innerText = "Pannello Ufficio";
                 popolaDipendentiUfficioMultiplo();
                 popolaTabellaPresenzeUfficio();
+                popolaGestionePasswordUfficio();
                 popolaSelectFiltroDipendenti();
                 aggiornaVistaUfficio();
                 eseguiControlloMancantiUfficio();
@@ -566,6 +587,66 @@
             utenteCorrente = "";
             tipoUtenteCorrente = "";
             mostraVista('selezione');
+        }
+
+        // GESTIONE PASSWORD DALL'UFFICIO
+        function popolaGestionePasswordUfficio() {
+            let container = document.getElementById('listaGestionePasswordUfficio');
+            container.innerHTML = '';
+
+            let opPassDB = JSON.parse(localStorage.getItem('idra_password_operai')) || {};
+            let artPassDB = JSON.parse(localStorage.getItem('idra_password_artigiani')) || {};
+
+            let tutti = [
+                ...elencoOperaiTotali.map(n => ({ nome: n, tipo: 'operaio', dbKey: 'idra_password_operai' })),
+                ...elencoArtigianiTotali.map(n => ({ nome: n, tipo: 'artigiano', dbKey: 'idra_password_artigiani' }))
+            ];
+
+            tutti.forEach(item => {
+                let db = item.tipo === 'operaio' ? opPassDB : artPassDB;
+                let haPersonalizzato = !!db[item.nome];
+                let statoTxt = haPersonalizzato ? "Personalizzata" : "Predefinita (Nome)";
+                let safeId = item.nome.replace(/\s+/g, '_');
+
+                container.innerHTML += `
+                    <div class="collega-card-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                            <div><b>${item.nome}</b> <span style="font-size: 0.75rem; color: var(--text-light);">(${item.tipo})</span></div>
+                            <button class="action-btn btn-danger" style="padding: 4px 8px; font-size: 0.7rem;" onclick="resettaPasswordUtente('${item.nome}', '${item.tipo}')">Resetta a Predefinita</button>
+                        </div>
+                        <div style="font-size: 0.75rem; color: ${haPersonalizzato ? 'var(--success)' : 'var(--text-light)'};">Stato: <b>${statoTxt}</b></div>
+                        <div style="display: flex; gap: 6px; width: 100%;">
+                            <input type="text" id="new_pass_${safeId}" placeholder="Nuova password al volo..." style="padding: 6px 10px; font-size: 0.8rem;">
+                            <button class="action-btn btn-orange" style="width: auto; padding: 6px 12px; font-size: 0.8rem;" onclick="impostaPasswordAlVolo('${item.nome}', '${item.tipo}', '${safeId}')">Imposta</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function resettaPasswordUtente(nome, tipo) {
+            if (confirm(`Sei sicuro di voler azzerare la password di ${nome}?`)) {
+                let dbKey = tipo === 'operaio' ? 'idra_password_operai' : 'idra_password_artigiani';
+                let db = JSON.parse(localStorage.getItem(dbKey)) || {};
+                delete db[nome];
+                localStorage.setItem(dbKey, JSON.stringify(db));
+                alert(`✅ Password di ${nome} resettata con successo! Ora tornerà a usare il suo nome tutto minuscolo al primo accesso.`);
+                popolaGestionePasswordUfficio();
+            }
+        }
+
+        function impostaPasswordAlVolo(nome, tipo, safeId) {
+            let inputVal = document.getElementById(`new_pass_${safeId}`).value.trim();
+            if (inputVal.length < 4) return alert("⚠️ La password deve avere almeno 4 caratteri!");
+
+            let dbKey = tipo === 'operaio' ? 'idra_password_operai' : 'idra_password_artigiani';
+            let db = JSON.parse(localStorage.getItem(dbKey)) || {};
+            db[nome] = inputVal;
+            localStorage.setItem(dbKey, JSON.stringify(db));
+
+            document.getElementById(`new_pass_${safeId}`).value = '';
+            alert(`✅ Nuova password impostata con successo per ${nome}!`);
+            popolaGestionePasswordUfficio();
         }
 
         // FUNZIONE CREAZIONE CANTIERE AL VOLO
