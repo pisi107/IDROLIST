@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Idrotech Varese - Pannello Ufficio</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Script Google Maps Places per i suggerimenti degli indirizzi -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=INSERISCI_QUI_LA_TUA_GOOGLE_MAPS_API_KEY&libraries=places"></script>
     <style>
         :root {
             --brand-orange: #f28c1e;
@@ -34,26 +32,6 @@
         label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
         input, select, textarea { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; background-color: #f8fafc; color: var(--text); font-family: 'Inter', sans-serif; outline: none; }
         input[type="date"] { appearance: none; -webkit-appearance: none; }
-
-        /* CORREZIONE PER LA TENDINA DI GOOGLE MAPS SU MOBILE */
-        .pac-container {
-            z-index: 999999 !important;
-            background-color: #ffffff !important;
-            border-radius: 10px !important;
-            border: 2px solid var(--border) !important;
-            margin-top: 4px !important;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
-            font-family: 'Inter', sans-serif !important;
-        }
-        .pac-item {
-            padding: 10px 14px !important;
-            font-size: 0.95rem !important;
-            cursor: pointer !important;
-            border-top: 1px solid #f1f5f9 !important;
-        }
-        .pac-item:first-child { border-top: none !important; }
-        .pac-item:hover { background-color: #f8fafc !important; }
-        .pac-item-query { font-size: 0.95rem !important; font-weight: 700 !important; color: var(--brand-dark) !important; }
 
         .action-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
         .btn-green { background-color: var(--success); color: white; }
@@ -193,8 +171,8 @@
                     <input type="text" id="nuovoCliente" placeholder="Es. Mario Rossi">
                 </div>
                 <div>
-                    <label>Indirizzo Cantiere (Suggerito da Google Maps)</label>
-                    <input type="text" id="nuovoIndirizzo" placeholder="Inizia a scrivere la via..." autocomplete="off">
+                    <label>Indirizzo Cantiere</label>
+                    <input type="text" id="nuovoIndirizzo" placeholder="Es. Via Roma 10, Varese">
                 </div>
                 <button class="action-btn btn-green" onclick="creaCantiereUfficio()">Crea Cantiere</button>
             </div>
@@ -311,46 +289,20 @@
         ];
 
         let cartellaCorrente = 'da_fare';
-        let autocompleteGoogle = null;
 
         window.onload = function() {
             try {
                 let oggiInput = document.getElementById('dataInterventoUfficio');
                 if(oggiInput) oggiInput.value = new Date().toISOString().split('T')[0];
-                
                 popolaDipendentiUfficioMultiplo();
                 popolaTabellaPresenzeUfficio();
                 popolaSelectFiltroDipendenti();
                 aggiornaVistaUfficio();
                 eseguiControlloMancantiUfficio();
-                
-                // Inizializzazione Google Maps Autocomplete sull'input indirizzo
-                inizializzaGoogleAutocomplete();
             } catch (e) {
                 console.error("Errore nell'avvio:", e);
             }
         };
-
-        function inizializzaGoogleAutocomplete() {
-            let inputIndirizzo = document.getElementById('nuovoIndirizzo');
-            if (inputIndirizzo && window.google && google.maps && google.maps.places) {
-                autocompleteGoogle = new google.maps.places.Autocomplete(inputIndirizzo, {
-                    types: ['address'],
-                    componentRestrictions: { country: 'it' }
-                });
-
-                // Evita che la tendina si chiuda improvvisamente su dispositivi mobili
-                google.maps.event.addListener(autocompleteGoogle, 'place_changed', function() {
-                    // Selezionato l'indirizzo
-                });
-
-                inputIndirizzo.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                    }
-                });
-            }
-        }
 
         function apriModaleCartellaClienti() {
             let m = document.getElementById('modalCartellaClienti');
@@ -645,6 +597,7 @@
             let clienteNorm = cliente.toLowerCase().replace(/\s+/g, ' ');
             let indirizzoNorm = indirizzo.toLowerCase().replace(/\s+/g, ' ');
 
+            // Cerchiamo se esiste già un cantiere con lo stesso nome e indirizzo
             let cantiereEsistente = cantieriDB.find(c => 
                 c.cliente.toLowerCase().replace(/\s+/g, ' ') === clienteNorm && 
                 c.indirizzo.toLowerCase().replace(/\s+/g, ' ') === indirizzoNorm
@@ -654,6 +607,7 @@
                 let conferma = confirm(`⚠️ Esiste già una cartella per "${cantiereEsistente.cliente}" in "${cantiereEsistente.indirizzo}".\n\nÈ un nuovo intervento/foglio di lavoro per questo cantiere?\n\n(Premi OK per aggiungere un nuovo foglio di lavoro a questo cliente, oppure Annulla se è un omonimo / nuovo cliente con altra via).`);
                 
                 if (conferma) {
+                    // L'utente vuole aggiungere un nuovo intervento nello storico di questo cantiere
                     if (!cantiereEsistente.storico || !Array.isArray(cantiereEsistente.storico)) {
                         cantiereEsistente.storico = [];
                     }
@@ -671,6 +625,7 @@
                         dataStampa: ""
                     });
 
+                    // Se il cantiere era archiviato come terminato, lo rimettiamo in "Da Terminare"
                     cantiereEsistente.completato = false;
                     
                     localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
@@ -680,6 +635,7 @@
                     alert("✅ È stato aggiunto un nuovo foglio di lavoro nello storico del cantiere esistente! Lo trovi nella cartella 'Da Terminare'.");
                     return;
                 } else {
+                    // L'utente ha premuto Annulla -> Crea un nuovo cantiere separato (omonimo / nuovo indirizzo)
                     cantieriDB.push({
                         cliente: cliente,
                         indirizzo: indirizzo,
