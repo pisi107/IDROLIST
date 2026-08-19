@@ -40,7 +40,6 @@
         .btn-green { background-color: var(--success); color: white; }
         .btn-orange { background: linear-gradient(135deg, #f28c1e, #d97712); color: white; }
 
-        /* Banner Notifiche Ore Mancanti per Dipendente */
         .banner-ore-mancanti { background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
         .banner-title { font-size: 0.95rem; font-weight: 800; color: #b91c1c; display: flex; align-items: center; gap: 6px; }
         .banner-text { font-size: 0.85rem; color: #7f1d1d; line-height: 1.4; }
@@ -52,18 +51,18 @@
     <div class="app-container">
         <div class="header-app">
             <h1>IDROTECH <span>VARESE</span></h1>
-            <p>Portale Dipendenti</p>
+            <p>Portale Dipendenti - Sicurezza</p>
         </div>
 
         <div class="content-body">
-            <!-- SEZIONE LOGIN DIPENDENTE -->
+            <!-- 1. SEZIONE LOGIN -->
             <div id="sezione-login" class="app-section active">
-                <div class="card-box" style="margin-top: 20px;">
-                    <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); text-align: center;">Identificazione Dipendente</div>
+                <div class="card-box" style="margin-top: 10px;">
+                    <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); text-align: center;">Autenticazione Dipendente</div>
                     <div>
                         <label>Seleziona il tuo Profilo</label>
                         <select id="selettoreOperaio">
-                            <option value="">-- Scegli il tuo nome --</option>
+                            <option value="">-- Seleziona il tuo nome --</option>
                             <option value="Assali Luca">Assali Luca</option>
                             <option value="Bruno Nicola">Bruno Nicola</option>
                             <option value="Comolli Alessandro">Comolli Alessandro</option>
@@ -80,11 +79,32 @@
                             <option value="Saleh Mohamed">Saleh Mohamed</option>
                         </select>
                     </div>
-                    <button class="action-btn btn-orange" onclick="effettuaLogin()" style="margin-top: 10px;">Accedi alla mia Area</button>
+                    <div>
+                        <label>Password (Iniziale = il tuo nome, es: assaliluca)</label>
+                        <input type="password" id="inputPassword" placeholder="Inserisci la password">
+                    </div>
+                    <button class="action-btn btn-orange" onclick="effettuaLogin()" style="margin-top: 5px;">Accedi</button>
                 </div>
             </div>
 
-            <!-- SEZIONE PRINCIPALE OPERAIO -->
+            <!-- 2. SEZIONE CAMBIO PASSWORD OBBLIGATORIO -->
+            <div id="sezione-cambio-password" class="app-section">
+                <div class="card-box" style="margin-top: 10px; border-color: var(--brand-orange);">
+                    <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); text-align: center;">Modifica Password Obbligatoria</div>
+                    <div style="font-size: 0.85rem; color: var(--text-light); line-height: 1.4;">È il tuo primo accesso o è stata richiesta una modifica. Per motivi di sicurezza, devi impostare una nuova password personale prima di procedere.</div>
+                    <div>
+                        <label>Nuova Password Personale</label>
+                        <input type="password" id="nuovaPassword1" placeholder="Inserisci la nuova password">
+                    </div>
+                    <div>
+                        <label>Conferma Nuova Password</label>
+                        <input type="password" id="nuovaPassword2" placeholder="Ripeti la nuova password">
+                    </div>
+                    <button class="action-btn btn-orange" onclick="salvaNuovaPassword()" style="margin-top: 5px;">Salva e Accedi</button>
+                </div>
+            </div>
+
+            <!-- 3. SEZIONE DASHBOARD PRINCIPALE -->
             <div id="sezione-dashboard" class="app-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border);">
                     <div>
@@ -130,30 +150,98 @@
         window.onload = function() {
             document.getElementById('dataIntervento').value = new Date().toISOString().split('T')[0];
             if (utenteCorrente) {
-                avviaDashboard(utenteCorrente);
+                // Se c'è un utente salvato, verifichiamo che non debba cambiare la password
+                let dbPassword = JSON.parse(localStorage.getItem('idra_db_password')) || {};
+                if (dbPassword[utenteCorrente] && dbPassword[utenteCorrente].deveCambiare) {
+                    mostraCambioPassword(utenteCorrente);
+                } else {
+                    avviaDashboard(utenteCorrente);
+                }
             }
         };
+
+        // Genera la password predefinita iniziale (es. "Assali Luca" diventa "assaliluca")
+        function getPasswordIniziale(nome) {
+            return nome.toLowerCase().replace(/\s+/g, '');
+        }
 
         function effettuaLogin() {
             let select = document.getElementById('selettoreOperaio');
             let nome = select.value;
+            let passwordInput = document.getElementById('inputPassword').value.trim();
+
             if(!nome) return alert("Seleziona il tuo nome dalla lista!");
-            
+            if(!passwordInput) return alert("Inserisci la password!");
+
+            let dbPassword = JSON.parse(localStorage.getItem('idra_db_password')) || {};
+            let datiUtente = dbPassword[nome];
+
+            let pwdSalvata = datiUtente ? datiUtente.password : getPasswordIniziale(nome);
+            let deveCambiare = datiUtente ? datiUtente.deveCambiare : true;
+
+            if (passwordInput === pwdSalvata) {
+                document.getElementById('inputPassword').value = '';
+                
+                if (deveCambiare) {
+                    // Primo accesso o cambio obbligato: reindirizza alla schermata di cambio password
+                    mostraCambioPassword(nome);
+                } else {
+                    // Login regolare
+                    localStorage.setItem('idra_utente_corrente', nome);
+                    utenteCorrente = nome;
+                    avviaDashboard(nome);
+                }
+            } else {
+                alert("❌ Password errata!");
+            }
+        }
+
+        function mostraCambioPassword(nome) {
+            window.tempNomeCambioPwd = nome;
+            document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
+            document.getElementById('sezione-cambio-password').classList.add('active');
+        }
+
+        function salvaNuovaPassword() {
+            let p1 = document.getElementById('nuovaPassword1').value.trim();
+            let p2 = document.getElementById('nuovaPassword2').value.trim();
+            let nome = window.tempNomeCambioPwd;
+
+            if(!p1 || !p2) return alert("Compila entrambi i campi!");
+            if(p1 !== p2) return alert("Le password non coincidono!");
+            if(p1.length < 4) return alert("La password deve essere di almeno 4 caratteri.");
+
+            let pwdIniziale = getPasswordIniziale(nome);
+            if(p1 === pwdIniziale) {
+                return alert("⚠️ La nuova password non può essere uguale a quella iniziale basata sul nome. Scegline una diversa.");
+            }
+
+            let dbPassword = JSON.parse(localStorage.getItem('idra_db_password')) || {};
+            dbPassword[nome] = {
+                password: p1,
+                deveCambiare: false // password aggiornata con successo
+            };
+            localStorage.setItem('idra_db_password', JSON.stringify(dbPassword));
+
+            document.getElementById('nuovaPassword1').value = '';
+            document.getElementById('nuovaPassword2').value = '';
+
             localStorage.setItem('idra_utente_corrente', nome);
             utenteCorrente = nome;
+            alert("✅ Password aggiornata con successo!");
             avviaDashboard(nome);
         }
 
         function esciProfilo() {
             localStorage.removeItem('idra_utente_corrente');
             utenteCorrente = '';
-            document.getElementById('sezione-dashboard').classList.remove('active');
+            document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
             document.getElementById('sezione-login').classList.add('active');
         }
 
         function avviaDashboard(nome) {
             document.getElementById('labelUtenteCorrente').innerText = nome;
-            document.getElementById('sezione-login').classList.remove('active');
+            document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
             document.getElementById('sezione-dashboard').classList.add('active');
             
             caricaCantieriPerOperaio();
@@ -181,7 +269,6 @@
             let oggi = new Date();
             let notificheHtml = '';
 
-            // Controlla gli ultimi 2 giorni (oggi e ieri)
             for (let i = 0; i < 2; i++) {
                 let d = new Date();
                 d.setDate(oggi.getDate() - i);
@@ -190,7 +277,6 @@
                 let chiaveAssenza = `${nomeOperaio}_${dataStr}`;
                 let eAssente = assenzeDB[chiaveAssenza] === true;
 
-                // Se non è segnato come assente, calcoliamo le ore fatte
                 if (!eAssente) {
                     let oreTotData = 0;
                     cantieriDB.forEach(c => {
@@ -209,13 +295,12 @@
                         }
                     });
 
-                    // Se le ore totali sono inferiori a 8, calcoliamo esattamente quante ore mancano
                     if (oreTotData < 8) {
                         let oreMancanti = 8 - oreTotData;
                         notificheHtml += `
                             <div class="banner-ore-mancanti">
                                 <div class="banner-title">⚠️ Attenzione: Ore Mancanti</div>
-                                <div class="banner-text">Per la giornata del <b>${dataStr}</b> hai registrato ${oreTotData} ore su 8.<br>Ti mancano esattamente <b>${oreMancanti} ore</b> per completare la giornata lavorativa. Ti invitiamo ad aggiornare il registro o a segnalare l'assenza.</div>
+                                <div class="banner-text">Per la giornata del <b>${dataStr}</b> hai registrato ${oreTotData} ore su 8.<br>Ti mancano esattamente <b>${oreMancanti} ore</b> per completare la giornata lavorativa.</div>
                             </div>
                         `;
                     }
@@ -244,7 +329,6 @@
                 localStorage.setItem('idra_assenze_db', JSON.stringify(assenzeDB));
                 alert(`✅ Giornata del ${data} registrata come Assenza per ${utenteCorrente}.`);
             } else {
-                // Rimuoviamo eventuale assenza se l'utente compila ore lavorative
                 if (assenzeDB[chiaveAssenza]) {
                     delete assenzeDB[chiaveAssenza];
                     localStorage.setItem('idra_assenze_db', JSON.stringify(assenzeDB));
@@ -266,7 +350,6 @@
                 alert(`✅ Registrate ${ore} ore sul cantiere di ${cantieriDB[cantiereIdx].cliente}!`);
             }
 
-            // Aggiorna le notifiche personali in tempo reale
             verificaOreMancantiPersonali(utenteCorrente);
         }
     </script>
