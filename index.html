@@ -112,6 +112,11 @@
                     <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">✏️ Compila Foglio di Lavoro</div>
                     
                     <div>
+                        <label>Cerca Cantiere Aperto</label>
+                        <input type="text" id="inputRicercaCantiereOperaio" placeholder="Scrivi per filtrare i cantieri..." oninput="filtraSelectCantieriOperaio()">
+                    </div>
+
+                    <div>
                         <label>Seleziona Cantiere *</label>
                         <select id="selectCantiereOperaio">
                             <option value="">Caricamento cantieri...</option>
@@ -320,12 +325,32 @@
 
         function popolaCantieriOperaio() {
             let select = document.getElementById('selectCantiereOperaio');
+            let inputRicerca = document.getElementById('inputRicercaCantiereOperaio');
             if (!select) return;
-            select.innerHTML = '<option value="">Seleziona un cantiere...</option>';
+
+            let query = inputRicerca ? inputRicerca.value.toLowerCase().trim() : '';
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            select.innerHTML = '';
+
+            let countAperti = 0;
             cantieriDB.forEach((c, idx) => {
-                select.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo}</option>`;
+                // Filtra SOLO i cantieri aperti (non completati)
+                if (!c.completato) {
+                    let testoCompleto = `${c.cliente} - ${c.indirizzo}`.toLowerCase();
+                    if (query === '' || testoCompleto.includes(query)) {
+                        select.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo}</option>`;
+                        countAperti++;
+                    }
+                }
             });
+
+            if (countAperti === 0) {
+                select.innerHTML = '<option value="">Nessun cantiere aperto trovato</option>';
+            }
+        }
+
+        function filtraSelectCantieriOperaio() {
+            popolaCantieriOperaio();
         }
 
         function popolaColleghiOperaio() {
@@ -411,7 +436,6 @@
                 participantiArray.push(`${nomeCollega} (${oreCollega}h)`);
             });
 
-            // Gestione Foto Multiple
             let fileBolle = document.getElementById('fotoBolleInput').files;
             let fileLavori = document.getElementById('fotoLavoriInput').files;
 
@@ -427,8 +451,8 @@
                 operai: partecipantiArray.join(', '),
                 note: note,
                 statoIntervento: statoCantiereIntervento,
-                fotoBolle: bolleBase64Array,     // Array di immagini bolle
-                fotoLavori: lavoriBase64Array   // Array di immagini lavori
+                fotoBolle: bolleBase64Array,
+                fotoLavori: lavoriBase64Array
             });
 
             if (statoCantiereIntervento === "Terminato") {
@@ -446,6 +470,10 @@
             document.getElementById('mieOreLavorate').value = '8';
             document.getElementById('fotoBolleInput').value = '';
             document.getElementById('fotoLavoriInput').value = '';
+            if(document.getElementById('inputRicercaCantiereOperaio')) document.getElementById('inputRicercaCantiereOperaio').value = '';
+            
+            popolaCantieriOperaio();
+
             document.querySelectorAll('input[name="collegaCheckbox"]').forEach(cb => {
                 cb.checked = false;
                 let idSelect = `ore_collega_${cb.value.replace(/\s+/g, '_')}`;
