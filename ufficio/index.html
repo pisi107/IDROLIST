@@ -81,7 +81,7 @@
 
         <div class="content-body">
             
-            <!-- SEZIONE NOTIFICHE / CONTROLLO DIPENDENTI SENZA ORE (ULTIMI 2 GIORNI) -->
+            <!-- SEZIONE NOTIFICHE / CONTROLLO DIPENDENTI SENZA ORE -->
             <div class="card-box" style="border-color: #ef4444; background: #fff5f5;">
                 <div style="font-size: 1.05rem; font-weight: 800; color: #b91c1c;">🚨 Controllo Ufficio: Mancati Fogli Lavoro (Ultimi 2 Giorni)</div>
                 <div style="font-size: 0.8rem; color: #7f1d1d; line-height: 1.4;">Elenco dipendenti che negli ultimi 2 giorni non hanno raggiunto le 8 ore o non hanno compilato il report (esclusi assenti giustificati):</div>
@@ -94,9 +94,7 @@
                                 <th>Ore Registrate</th>
                             </tr>
                         </thead>
-                        <tbody id="corpoTabellaControlloMancanti">
-                            <!-- Popolato via JS -->
-                        </tbody>
+                        <tbody id="corpoTabellaControlloMancanti"></tbody>
                     </table>
                 </div>
             </div>
@@ -109,9 +107,7 @@
                 </div>
                 <div id="contentPresenze" class="accordion-content card-box" style="border-color: var(--brand-orange);">
                     <div style="font-size: 0.85rem; color: var(--text-light);">Imposta qui sotto se un dipendente è assente (Ferie, Malattia, Permesso), specificando la data di fine assenza.</div>
-                    <div class="container-colleghi-scroll" id="listaPresenzeUfficio" style="max-height: 300px;">
-                        <!-- Popolato via JS -->
-                    </div>
+                    <div class="container-colleghi-scroll" id="listaPresenzeUfficio" style="max-height: 300px;"></div>
                     <button class="action-btn btn-orange" onclick="salvaPresenzeUfficio()">Salva Stato Assenze</button>
                 </div>
             </div>
@@ -160,7 +156,7 @@
                 <button class="action-btn btn-green" onclick="creaCantiereUfficio()">Crea Cantiere</button>
             </div>
 
-            <!-- SEZIONE CARTELLE CANTIERI (DA TERMINARE / TERMINATI) -->
+            <!-- SEZIONE CARTELLE CANTIERI -->
             <div class="card-box">
                 <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Archivio Cantieri</div>
                 
@@ -172,21 +168,20 @@
                 <div id="listaCantieriUfficio"></div>
             </div>
 
-            <!-- SEZIONE TABELLA RIEPILOGO ORE TOTALI -->
+            <!-- SEZIONE TABELLA RIEPILOGO ORE TOTALI (AGGIORNATA CON COLONNA DATA) -->
             <div class="card-box">
                 <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">📊 Tabella Riepilogo Ore per Dipendente</div>
                 <div style="overflow-x: auto;">
                     <table class="riepilogo-table" id="tabellaRiepilogoOre">
                         <thead>
                             <tr>
+                                <th>Data</th>
                                 <th>Dipendente</th>
                                 <th>Cantiere / Stato</th>
-                                <th>Totale Ore</th>
+                                <th>Ore</th>
                             </tr>
                         </thead>
-                        <tbody id="corpoTabellaRiepilogo">
-                            <!-- Popolato via JS -->
-                        </tbody>
+                        <tbody id="corpoTabellaRiepilogo"></tbody>
                     </table>
                 </div>
             </div>
@@ -320,12 +315,9 @@
             let datiOp = assenzeDB[nomeOp];
             if (!datiOp || datiOp.stato !== 'Assente') return false;
 
-            // Confronta la data del giorno passato con l'intervallo di assenza impostato (fino alla data 'finoA')
             let dataVerifica = new Date(dataStr);
             let dataFineAssenza = new Date(datiOp.finoA);
 
-            // Per sicurezza consideriamo l'assenza valida dal giorno impostato indietro fino a 30 giorni o direttamente se la data è <= finoA
-            // Qui verifichiamo se la data da controllare non supera la data di fine assenza inserita dall'ufficio
             if (dataVerifica <= dataFineAssenza) {
                 return true;
             }
@@ -377,7 +369,6 @@
             let oggi = new Date();
             let righeTrovate = 0;
 
-            // Controlla gli ultimi 2 giorni precedenti
             for (let i = 1; i <= 2; i++) {
                 let d = new Date();
                 d.setDate(oggi.getDate() - i);
@@ -386,7 +377,6 @@
                 elencoOperaiTotali.forEach(nomeOp => {
                     let eAssente = isOperaioAssenteInData(nomeOp, dataStr);
 
-                    // Se NON è assente in quella data, verifichiamo se ha registrato le ore
                     if (!eAssente) {
                         let oreTotData = 0;
                         cantieriDB.forEach(c => {
@@ -498,11 +488,12 @@
             aggiornaTabellaRiepilogo(cantieriDB);
         }
 
+        // FUNZIONE AGGIORNATA PER MOSTRARE ANCHE LA DATA NELLA TABELLA RIEPILOGO
         function aggiornaTabellaRiepilogo(cantieriDB) {
             let corpoTabella = document.getElementById('corpoTabellaRiepilogo');
             corpoTabella.innerHTML = '';
 
-            let mappaAggregata = {};
+            let listaRigheRiepilogo = [];
 
             cantieriDB.forEach(c => {
                 if (c.storico) {
@@ -514,12 +505,13 @@
                                 if (match) {
                                     let nomeOp = match[1].trim();
                                     let oreOp = parseFloat(match[2]) || 0;
-                                    let chiave = `${nomeOp}___${c.cliente}`;
                                     
-                                    if (!mappaAggregata[chiave]) {
-                                        mappaAggregata[chiave] = { dipendente: nomeOp, cantiere: c.cliente, ore: 0 };
-                                    }
-                                    mappaAggregata[chiave].ore += oreOp;
+                                    listaRigheRiepilogo.push({
+                                        data: s.data || 'N/D',
+                                        dipendente: nomeOp,
+                                        cantiere: c.cliente,
+                                        ore: `${oreOp} Ore`
+                                    });
                                 }
                             });
                         }
@@ -537,29 +529,31 @@
                     let oggiDate = new Date(oggiStr);
                     
                     if (oggiDate <= dataFineAssenza) {
-                        let chiaveAssenza = `${op}___ASSENZA_${datiOp.tipo}`;
-                        mappaAggregata[chiaveAssenza] = {
+                        listaRigheRiepilogo.push({
+                            data: `Oggi / Fino al ${datiOp.finoA}`,
                             dipendente: op,
-                            cantiere: `<span class="badge badge-assenza">🔴 ${datiOp.tipo} (fino al ${datiOp.finoA})</span>`,
-                            ore: 0
-                        };
+                            cantiere: `<span class="badge badge-assenza">🔴 ${datiOp.tipo}</span>`,
+                            ore: `0 Ore`
+                        });
                     }
                 }
             });
 
-            let chiavi = Object.keys(mappaAggregata);
-            if (chiavi.length === 0) {
-                corpoTabella.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-light);">Nessuna ora registrata finora.</td></tr>`;
+            if (listaRigheRiepilogo.length === 0) {
+                corpoTabella.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-light);">Nessuna ora registrata finora.</td></tr>`;
                 return;
             }
 
-            chiavi.forEach(k => {
-                let item = mappaAggregata[k];
+            // Ordina per data decrescente (dalla più recente alla meno recente)
+            listaRigheRiepilogo.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+            listaRigheRiepilogo.forEach(item => {
                 corpoTabella.innerHTML += `
                     <tr>
+                        <td><b>${item.data}</b></td>
                         <td><b>${item.dipendente}</b></td>
                         <td>${item.cantiere}</td>
-                        <td><b>${item.ore} Ore</b></td>
+                        <td><b>${item.ore}</b></td>
                     </tr>
                 `;
             });
