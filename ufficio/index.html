@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Idrotech Varese - Gestione Operaio</title>
+    <title>Idrotech Varese - Pannello Ufficio</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -29,166 +29,142 @@
 
         .content-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 16px; }
 
-        .app-section { display: none; }
-        .app-section.active { display: flex; flex-direction: column; gap: 14px; }
-
         label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
         input, select, textarea { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; background-color: #f8fafc; color: var(--text); font-family: 'Inter', sans-serif; outline: none; }
         input[type="date"] { appearance: none; -webkit-appearance: none; }
-        input[type="file"] { padding: 10px; font-size: 0.85rem; background: #fff; }
 
         .action-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
         .btn-green { background-color: var(--success); color: white; }
         .btn-orange { background: linear-gradient(135deg, #f28c1e, #d97712); color: white; }
-
-        .banner-ore-mancanti { background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
-        .banner-title { font-size: 0.95rem; font-weight: 800; color: #b91c1c; display: flex; align-items: center; gap: 6px; }
-        .banner-text { font-size: 0.85rem; color: #7f1d1d; line-height: 1.4; }
+        .btn-danger { background-color: var(--danger); color: white; padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; box-shadow: none; width: auto; }
 
         .card-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
         
+        .cantiere-card { background: #fff; border: 2px solid var(--border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+        .cantiere-card.terminato { border-color: var(--success); background: #f0fdf4; }
+        
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .badge-da-fare { background: #fef3c7; color: #b45309; }
+        .badge-fatto { background: #dcfce7; color: #15803d; }
+        .badge-alert { background: #fee2e2; color: #b91c1c; }
+
+        /* Stili per le cartelle / tab */
+        .tabs-container { display: flex; gap: 8px; margin-bottom: 8px; }
+        .tab-btn { flex: 1; padding: 12px; border: 2px solid var(--border); background: #f1f5f9; font-weight: 700; font-size: 0.85rem; border-radius: 10px; cursor: pointer; color: var(--text-light); text-align: center; }
+        .tab-btn.active-da-fare { background: #fef3c7; border-color: #f59e0b; color: #b45309; }
+        .tab-btn.active-terminati { background: #dcfce7; border-color: var(--success); color: #15803d; }
+
+        /* Stili gestione colleghi multipli */
         .collega-card-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
         .collega-card-item label { margin: 0; font-size: 0.9rem; color: var(--text); text-transform: none; display: flex; align-items: center; gap: 8px; cursor: pointer; }
         .collega-card-item input[type="checkbox"] { width: 18px; height: 18px; }
         .collega-card-item select { width: 110px; padding: 8px; font-size: 0.9rem; }
-        
         .container-colleghi-scroll { max-height: 220px; overflow-y: auto; background: #fff; padding: 8px; border: 1px solid var(--border); border-radius: 10px; }
-        
-        .preview-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
-        .preview-thumb { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); }
+
+        /* Tabelle riepilogo */
+        .riepilogo-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+        .riepilogo-table th, .riepilogo-table td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+        .riepilogo-table th { background: #1e293b; color: white; font-size: 0.75rem; text-transform: uppercase; }
+        .riepilogo-table tr:last-child td { border-bottom: none; }
     </style>
 </head>
 <body>
     <div class="app-container">
         <div class="header-app">
             <h1>IDROTECH <span>VARESE</span></h1>
-            <p>Portale Dipendenti - Foglio Lavoro</p>
+            <p>Pannello Gestione Ufficio</p>
         </div>
 
         <div class="content-body">
-            <!-- 1. SEZIONE LOGIN -->
-            <div id="sezione-login" class="app-section active">
-                <div class="card-box" style="margin-top: 10px;">
-                    <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); text-align: center;">Autenticazione Dipendente</div>
-                    <div>
-                        <label>Seleziona il tuo Profilo</label>
-                        <select id="selettoreOperaio">
-                            <option value="">-- Seleziona il tuo nome --</option>
-                            <option value="Assali Luca">Assali Luca</option>
-                            <option value="Bruno Nicola">Bruno Nicola</option>
-                            <option value="Comolli Alessandro">Comolli Alessandro</option>
-                            <option value="Concato Filippo">Concato Filippo</option>
-                            <option value="Coriglione Alessandro">Coriglione Alessandro</option>
-                            <option value="De Bosio Marcello">De Bosio Marcello</option>
-                            <option value="Denti Claudio">Denti Claudio</option>
-                            <option value="Doda Enjo">Doda Enjo</option>
-                            <option value="Giaccone Federico">Giaccone Federico</option>
-                            <option value="Gjyly Moris">Gjyly Moris</option>
-                            <option value="Marinoni Alessandro">Marinoni Alessandro</option>
-                            <option value="Rocchetto Fabio">Rocchetto Fabio</option>
-                            <option value="Rosini Jean Paul">Rosini Jean Paul</option>
-                            <option value="Saleh Mohamed">Saleh Mohamed</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Password</label>
-                        <input type="password" id="inputPassword" placeholder="Inserisci la password">
-                    </div>
-                    <button class="action-btn btn-orange" onclick="effettuaLogin()" style="margin-top: 5px;">Accedi</button>
+            
+            <!-- SEZIONE NOTIFICHE / CONTROLLO DIPENDENTI SENZA ORE (ULTIMI 2 GIORNI) -->
+            <div class="card-box" style="border-color: #ef4444; background: #fff5f5;">
+                <div style="font-size: 1.05rem; font-weight: 800; color: #b91c1c;">🚨 Controllo Ufficio: Mancati Fogli Lavoro (Ultimi 2 Giorni)</div>
+                <div style="font-size: 0.8rem; color: #7f1d1d; line-height: 1.4;">Elenco dipendenti che negli ultimi 2 giorni non hanno raggiunto le 8 ore o non hanno compilato il report (esclusi assenti giustificati/esenti):</div>
+                <div style="overflow-x: auto;">
+                    <table class="riepilogo-table" id="tabellaControlloMancanti">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Dipendente</th>
+                                <th>Ore Registrate</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoTabellaControlloMancanti">
+                            <!-- Popolato via JS -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- 2. SEZIONE CAMBIO PASSWORD -->
-            <div id="sezione-cambio-password" class="app-section">
-                <div class="card-box" style="margin-top: 10px; border-color: var(--brand-orange);">
-                    <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); text-align: center;">Modifica Password Obbligatoria</div>
-                    <div>
-                        <label>Nuova Password Personale</label>
-                        <input type="password" id="nuovaPassword1" placeholder="Nuova password">
-                    </div>
-                    <div>
-                        <label>Conferma Nuova Password</label>
-                        <input type="password" id="nuovaPassword2" placeholder="Ripeti password">
-                    </div>
-                    <button class="action-btn btn-orange" onclick="salvaNuovaPassword()" style="margin-top: 5px;">Salva e Accedi</button>
+            <!-- SEZIONE INSERIMENTO UFFICIO CON DIPENDENTI MULTIPLI -->
+            <div class="card-box" style="border-color: var(--brand-orange);">
+                <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Registrazione per conto Dipendenti</div>
+                
+                <div>
+                    <label>Seleziona Cantiere</label>
+                    <select id="selectCantiereUfficio"></select>
                 </div>
+
+                <div>
+                    <label>Data Intervento</label>
+                    <input type="date" id="dataInterventoUfficio">
+                </div>
+
+                <div>
+                    <label>Seleziona Dipendenti e Relative Ore</label>
+                    <div class="container-colleghi-scroll" id="listaDipendentiUfficioMultiplo"></div>
+                </div>
+
+                <div>
+                    <label>Note / Lavori Eseguiti / Materiali</label>
+                    <textarea id="noteUfficio" rows="2" placeholder="Inserisci dettagli..."></textarea>
+                </div>
+                <button class="action-btn btn-orange" onclick="registraUfficioMultiplo()">Registra per conto dei Dipendenti</button>
             </div>
 
-            <!-- 3. SEZIONE DASHBOARD / FOGLIO LAVORO COMPLETO -->
-            <div id="sezione-dashboard" class="app-section">
-                <div style="display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border);">
-                    <div>
-                        <div style="font-size: 0.75rem; color: var(--text-light); font-weight: 700; text-transform: uppercase;">Utente Collegato</div>
-                        <div id="labelUtenteCorrente" style="font-size: 1rem; font-weight: 800; color: var(--brand-dark);"></div>
-                    </div>
-                    <button onclick="esciProfilo()" style="background: #fee2e2; color: var(--danger); border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer;">Esci</button>
+            <!-- SEZIONE CREA NUOVO CANTIERE -->
+            <div class="card-box">
+                <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Inserisci Nuovo Cantiere</div>
+                <div>
+                    <label>Nome Cliente</label>
+                    <input type="text" id="nuovoCliente" placeholder="Es. Mario Rossi">
+                </div>
+                <div>
+                    <label>Indirizzo Cantiere</label>
+                    <input type="text" id="nuovoIndirizzo" placeholder="Es. Via Roma 10, Varese">
+                </div>
+                <button class="action-btn btn-green" onclick="creaCantiereUfficio()">Crea Cantiere</button>
+            </div>
+
+            <!-- SEZIONE CARTELLE CANTIERI (DA TERMINARE / TERMINATI) -->
+            <div class="card-box">
+                <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Archivio Cantieri</div>
+                
+                <div class="tabs-container">
+                    <button id="btnTabDaFare" class="tab-btn active-da-fare" onclick="cambiaCartella('da_fare')">📁 Da Terminare</button>
+                    <button id="btnTabTerminati" class="tab-btn" onclick="cambiaCartella('terminati')">📁 Lavori Terminati</button>
                 </div>
 
-                <!-- NOTIFICA ORE MANCANTI DEGLI ULTIMI 2 GIORNI -->
-                <div id="boxNotificaOrePersonale"></div>
+                <div id="listaCantieriUfficio"></div>
+            </div>
 
-                <div class="card-box">
-                    <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">📝 Compila Foglio di Lavoro</div>
-                    
-                    <div>
-                        <label>Seleziona Cantiere</label>
-                        <select id="selectCantiereOperaio"></select>
-                    </div>
-
-                    <div>
-                        <label>Stato Cantiere per questo Intervento</label>
-                        <select id="selectStatoIntervento">
-                            <option value="Da terminare">Cantiere Da Terminare</option>
-                            <option value="Terminato">Cantiere Terminato</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label>Data Intervento</label>
-                        <input type="date" id="dataIntervento">
-                    </div>
-
-                    <div>
-                        <label>Tipo di Lavoro</label>
-                        <select id="tipoLavoroOperaio">
-                            <option value="Nuovo Lavoro / Installazione">Nuovo Lavoro / Installazione</option>
-                            <option value="Manutenzione / Riparazione">Manutenzione / Riparazione</option>
-                            <option value="Sopralluogo / Preventivo">Sopralluogo / Preventivo</option>
-                            <option value="Assenza (Ferie/Malattia)">Assenza (Ferie/Malattia)</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label>Le Tue Ore Lavorate</label>
-                        <select id="selectOreUtentePrincipale"></select>
-                    </div>
-
-                    <div>
-                        <label>Colleghi Presenti e Ore Dedicate</label>
-                        <div class="container-colleghi-scroll" id="listaColleghiConOre"></div>
-                    </div>
-
-                    <div>
-                        <label>Note / Lavori Eseguiti</label>
-                        <textarea id="noteIntervento" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea>
-                    </div>
-
-                    <!-- SEZIONE FOTO BOLLA E FOTO LAVORI -->
-                    <div style="background: #fff; padding: 12px; border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; gap: 12px;">
-                        <div>
-                            <label>📷 Foto Bolla (1 o più)</label>
-                            <input type="file" id="fotoBollaInput" accept="image/*" multiple onchange="mostraAnteprima(this, 'previewBolla')">
-                            <div id="previewBolla" class="preview-container"></div>
-                        </div>
-
-                        <div>
-                            <label>📸 Foto Lavori Eseguiti (Più foto)</label>
-                            <input type="file" id="fotoLavoriInput" accept="image/*" multiple onchange="mostraAnteprima(this, 'previewLavori')">
-                            <div id="previewLavori" class="preview-container"></div>
-                        </div>
-                    </div>
-
-                    <button class="action-btn btn-green" onclick="salvaFoglioLavoroOperaio()" style="margin-top: 10px;">Salva e Invia Rapportino</button>
+            <!-- SEZIONE TABELLA RIEPILOGO ORE TOTALI -->
+            <div class="card-box">
+                <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">📊 Tabella Riepilogo Ore per Dipendente</div>
+                <div style="overflow-x: auto;">
+                    <table class="riepilogo-table" id="tabellaRiepilogoOre">
+                        <thead>
+                            <tr>
+                                <th>Dipendente</th>
+                                <th>Cantiere</th>
+                                <th>Totale Ore</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoTabellaRiepilogo">
+                            <!-- Popolato via JS -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -202,182 +178,96 @@
             "Rosini Jean Paul", "Saleh Mohamed"
         ];
 
-        let utenteCorrente = localStorage.getItem('idra_utente_corrente') || '';
+        // Dipendenti esenti dai controlli mancanti (se necessario)
+        const dipendentiSenzaNotifiche = ["Bruno Nicola", "Coriglione Alessandro", "Marinoni Alessandro"];
+
+        let cartellaCorrente = 'da_fare';
 
         window.onload = function() {
-            document.getElementById('dataIntervento').value = new Date().toISOString().split('T')[0];
-            popolaSelectOre('selectOreUtentePrincipale');
-            
-            if (utenteCorrente) {
-                let dbPassword = JSON.parse(localStorage.getItem('idra_db_password')) || {};
-                if (dbPassword[utenteCorrente] && dbPassword[utenteCorrente].deveCambiare) {
-                    mostraCambioPassword(utenteCorrente);
-                } else {
-                    avviaDashboard(utenteCorrente);
-                }
-            }
+            document.getElementById('dataInterventoUfficio').value = new Date().toISOString().split('T')[0];
+            popolaDipendentiUfficioMultiplo();
+            aggiornaVistaUfficio();
+            eseguiControlloMancantiUfficio();
         };
 
-        function popolaSelectOre(elementId, valoreDefault = 8) {
-            let select = document.getElementById(elementId);
-            if (!select) return;
-            select.innerHTML = '';
-            for (let i = 0.5; i <= 10; i += 0.5) {
-                let selected = (i === valoreDefault) ? 'selected' : '';
-                select.innerHTML += `<option value="${i}" ${selected}>${i} ${i === 1 ? 'Ora' : 'Ore'}</option>`;
-            }
-        }
-
-        function getPasswordIniziale(nome) {
-            return nome.toLowerCase().replace(/\s+/g, '');
-        }
-
-        function effettuaLogin() {
-            let select = document.getElementById('selettoreOperaio');
-            let nome = select.value;
-            let passwordInput = document.getElementById('inputPassword').value.trim();
-
-            if(!nome) return alert("Seleziona il tuo nome dalla lista!");
-            if(!passwordInput) return alert("Inserisci la password!");
-
-            let dbPassword = JSON.parse(localStorage.getItem('idra_db_password')) || {};
-            let datiUtente = dbPassword[nome];
-            let pwdSalvata = datiUtente ? datiUtente.password : getPasswordIniziale(nome);
-            let deveCambiare = datiUtente ? datiUtente.deveCambiare : true;
-
-            if (passwordInput === pwdSalvata) {
-                document.getElementById('inputPassword').value = '';
-                if (deveCambiare) {
-                    mostraCambioPassword(nome);
-                } else {
-                    localStorage.setItem('idra_utente_corrente', nome);
-                    utenteCorrente = nome;
-                    avviaDashboard(nome);
-                }
-            } else {
-                alert("❌ Password errata!");
-            }
-        }
-
-        function mostraCambioPassword(nome) {
-            window.tempNomeCambioPwd = nome;
-            document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
-            document.getElementById('sezione-cambio-password').classList.add('active');
-        }
-
-        function salvaNuovaPassword() {
-            let p1 = document.getElementById('nuovaPassword1').value.trim();
-            let p2 = document.getElementById('nuovaPassword2').value.trim();
-            let nome = window.tempNomeCambioPwd;
-
-            if(!p1 || !p2) return alert("Compila entrambi i campi!");
-            if(p1 !== p2) return alert("Le password non coincidono!");
-            if(p1.length < 4) return alert("La password deve essere di almeno 4 caratteri.");
-
-            let dbPassword = JSON.parse(localStorage.getItem('idra_db_password')) || {};
-            dbPassword[nome] = { password: p1, deveCambiare: false };
-            localStorage.setItem('idra_db_password', JSON.stringify(dbPassword));
-
-            document.getElementById('nuovaPassword1').value = '';
-            document.getElementById('nuovaPassword2').value = '';
-            localStorage.setItem('idra_utente_corrente', nome);
-            utenteCorrente = nome;
-            alert("✅ Password aggiornata con successo!");
-            avviaDashboard(nome);
-        }
-
-        function esciProfilo() {
-            localStorage.removeItem('idra_utente_corrente');
-            utenteCorrente = '';
-            document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
-            document.getElementById('sezione-login').classList.add('active');
-        }
-
-        function avviaDashboard(nome) {
-            document.getElementById('labelUtenteCorrente').innerText = nome;
-            document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
-            document.getElementById('sezione-dashboard').classList.add('active');
-            
-            caricaCantieriPerOperaio();
-            popolaColleghiConOre(nome);
-            verificaOreMancantiPersonali(nome);
-        }
-
-        function caricaCantieriPerOperaio() {
-            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            let select = document.getElementById('selectCantiereOperaio');
-            select.innerHTML = '';
-
-            if (cantieriDB.length === 0) {
-                select.innerHTML = '<option value="">Nessun cantiere disponibile</option>';
-                return;
-            }
-
-            cantieriDB.forEach((c, idx) => {
-                select.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo} (${c.completato ? 'Terminato' : 'Da terminare'})</option>`;
-            });
-        }
-
-        function popolaColleghiConOre(utenteEscluso) {
-            let container = document.getElementById('listaColleghiConOre');
+        function popolaDipendentiUfficioMultiplo() {
+            let container = document.getElementById('listaDipendentiUfficioMultiplo');
             container.innerHTML = '';
 
             elencoOperaiTotali.forEach(op => {
-                if (op !== utenteEscluso) {
-                    let idSelect = `ore_collega_${op.replace(/\s+/g, '_')}`;
-                    let optionsHtml = '';
-                    for (let i = 0.5; i <= 10; i += 0.5) {
-                        let sel = (i === 8) ? 'selected' : '';
-                        optionsHtml += `<option value="${i}" ${sel}>${i} ${i === 1 ? 'Ora' : 'Ore'}</option>`;
-                    }
-
-                    container.innerHTML += `
-                        <div class="collega-card-item">
-                            <label>
-                                <input type="checkbox" name="collegaCheckbox" value="${op}" onchange="toggleSelectCollega('${idSelect}', this)">
-                                ${op}
-                            </label>
-                            <select id="${idSelect}" disabled>
-                                ${optionsHtml}
-                            </select>
-                        </div>
-                    `;
+                let idSelect = `ore_uff_op_${op.replace(/\s+/g, '_')}`;
+                let optionsHtml = '';
+                for (let i = 0.5; i <= 10; i += 0.5) {
+                    let sel = (i === 8) ? 'selected' : '';
+                    optionsHtml += `<option value="${i}" ${sel}>${i} ${i === 1 ? 'Ora' : 'Ore'}</option>`;
                 }
+
+                container.innerHTML += `
+                    <div class="collega-card-item">
+                        <label>
+                            <input type="checkbox" name="dipendenteUfficioCheckbox" value="${op}" onchange="toggleSelectDipUfficio('${idSelect}', this)">
+                            ${op}
+                        </label>
+                        <select id="${idSelect}" disabled>
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                `;
             });
         }
 
-        function toggleSelectCollega(idSelect, checkbox) {
+        function toggleSelectDipUfficio(idSelect, checkbox) {
             let selectEl = document.getElementById(idSelect);
             if (selectEl) {
                 selectEl.disabled = !checkbox.checked;
             }
         }
 
-        function mostraAnteprima(input, containerId) {
-            let container = document.getElementById(containerId);
-            container.innerHTML = '';
-            if (input.files) {
-                Array.from(input.files).forEach(file => {
-                    let reader = new FileReader();
-                    reader.onload = function(e) {
-                        container.innerHTML += `<img src="${e.target.result}" class="preview-thumb">`;
-                    }
-                    reader.readAsDataURL(file);
-                });
+        function cambiaCartella(tipo) {
+            cartellaCorrente = tipo;
+            let btnDaFare = document.getElementById('btnTabDaFare');
+            let btnTerminati = document.getElementById('btnTabTerminati');
+
+            if (tipo === 'da_fare') {
+                btnDaFare.className = "tab-btn active-da-fare";
+                btnTerminati.className = "tab-btn";
+            } else {
+                btnDaFare.className = "tab-btn";
+                btnTerminati.className = "tab-btn active-terminati";
             }
+            aggiornaVistaUfficio();
         }
 
-        function verificaOreMancantiPersonali(nomeOperaio) {
-            const dipendentiSenzaNotifiche = ["Bruno Nicola", "Coriglione Alessandro", "Marinoni Alessandro"];
-            if (dipendentiSenzaNotifiche.includes(nomeOperaio)) {
-                document.getElementById('boxNotificaOrePersonale').innerHTML = '';
-                return;
-            }
+        function creaCantiereUfficio() {
+            let cliente = document.getElementById('nuovoCliente').value.trim();
+            let indirizzo = document.getElementById('nuovoIndirizzo').value.trim();
+
+            if(!cliente || !indirizzo) return alert("Inserisci nome cliente e indirizzo!");
+
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            cantieriDB.push({
+                cliente: cliente,
+                indirizzo: indirizzo,
+                completato: false,
+                storico: []
+            });
+
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+            document.getElementById('nuovoCliente').value = '';
+            document.getElementById('nuovoIndirizzo').value = '';
+            
+            aggiornaVistaUfficio();
+            alert("✅ Cantiere creato con successo!");
+        }
+
+        function eseguiControlloMancantiUfficio() {
+            let corpoTabella = document.getElementById('corpoTabellaControlloMancanti');
+            corpoTabella.innerHTML = '';
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_db')) || {};
             let oggi = new Date();
-            let notificheHtml = '';
+            let righeTrovate = 0;
 
             // Controlla gli ultimi 2 giorni precedenti
             for (let i = 1; i <= 2; i++) {
@@ -385,104 +275,234 @@
                 d.setDate(oggi.getDate() - i);
                 let dataStr = d.toISOString().split('T')[0];
 
-                let chiaveAssenza = `${nomeOperaio}_${dataStr}`;
-                let eAssente = assenzeDB[chiaveAssenza] === true;
+                elencoOperaiTotali.forEach(nomeOp => {
+                    if (!dipendentiSenzaNotifiche.includes(nomeOp)) {
+                        let chiaveAssenza = `${nomeOp}_${dataStr}`;
+                        let eAssente = assenzeDB[chiaveAssenza] === true;
 
-                if (!eAssente) {
-                    let oreTotData = 0;
-                    cantieriDB.forEach(c => {
-                        if (c.storico) {
-                            c.storico.forEach(s => {
-                                if (s.data === dataStr && s.operai && s.operai.includes(nomeOperaio)) {
-                                    let matchOre = s.operai.match(new RegExp(`${nomeOperaio} \\(([^)]+h)\\)`));
-                                    if (matchOre && matchOre[1]) {
-                                        let val = parseFloat(matchOre[1]);
-                                        if (!isNaN(val)) oreTotData += val;
-                                    } else {
-                                        oreTotData += 8;
+                        if (!eAssente) {
+                            let oreTotData = 0;
+                            cantieriDB.forEach(c => {
+                                if (c.storico) {
+                                    c.storico.forEach(s => {
+                                        if (s.data === dataStr && s.operai && s.operai.includes(nomeOp)) {
+                                            let matchOre = s.operai.match(new RegExp(`${nomeOp} \\(([^)]+h)\\)`));
+                                            if (matchOre && matchOre[1]) {
+                                                let val = parseFloat(matchOre[1]);
+                                                if (!isNaN(val)) oreTotData += val;
+                                            } else {
+                                                oreTotData += 8;
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+
+                            if (oreTotData < 8) {
+                                righeTrovate++;
+                                let oreMancanti = 8 - oreTotData;
+                                corpoTabella.innerHTML += `
+                                    <tr>
+                                        <td><b>${dataStr}</b></td>
+                                        <td>${nomeOp}</td>
+                                        <td><span class="badge badge-alert">${oreTotData}h (Mancano ${oreMancanti}h)</span></td>
+                                    </tr>
+                                `;
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (righeTrovate === 0) {
+                corpoTabella.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--success); font-weight: 700;">Tutti i dipendenti sono in regola negli ultimi 2 giorni! 🎉</td></tr>`;
+            }
+        }
+
+        function aggiornaVistaUfficio() {
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            let selectCantiere = document.getElementById('selectCantiereUfficio');
+            let containerLista = document.getElementById('listaCantieriUfficio');
+
+            selectCantiere.innerHTML = '';
+            containerLista.innerHTML = '';
+
+            if (cantieriDB.length === 0) {
+                selectCantiere.innerHTML = '<option value="">Nessun cantiere disponibile</option>';
+                containerLista.innerHTML = '<div style="font-size: 0.85rem; color: var(--text-light); text-align: center; padding: 10px;">Nessun cantiere inserito nel database.</div>';
+                aggiornaTabellaRiepilogo([]);
+                return;
+            }
+
+            let cantieriFiltratiCount = 0;
+
+            cantieriDB.forEach((c, idx) => {
+                selectCantiere.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo} (${c.completato ? 'Terminato' : 'Da terminare'})</option>`;
+
+                let isCompletato = c.completato === true;
+                if ((cartellaCorrente === 'da_fare' && !isCompletato) || (cartellaCorrente === 'terminati' && isCompletato)) {
+                    cantieriFiltratiCount++;
+
+                    let storicoHtml = '';
+                    if (c.storico && c.storico.length > 0) {
+                        c.storico.forEach((s) => {
+                            storicoHtml += `
+                                <div style="font-size: 0.8rem; background: #f1f5f9; padding: 8px; border-radius: 6px; margin-top: 4px;">
+                                    <b>${s.data}</b> - ${s.operai}<br>
+                                    <i>Note: ${s.note}</i>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        storicoHtml = '<div style="font-size: 0.75rem; color: var(--text-light);">Nessun intervento registrato.</div>';
+                    }
+
+                    let badgeStato = isCompletato ? '<span class="badge badge-fatto">Terminato</span>' : '<span class="badge badge-da-fare">Da terminare</span>';
+                    let btnStatoTesto = isCompletato ? 'Segna come Da Terminare' : 'Segna come Terminato';
+                    let classeCard = isCompletato ? 'cantiere-card terminato' : 'cantiere-card';
+                    let btnStatoClasse = isCompletato ? 'action-btn btn-green' : 'action-btn btn-orange';
+
+                    containerLista.innerHTML += `
+                        <div class="${classeCard}">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div>
+                                    <div style="font-weight: 800; font-size: 1rem; color: var(--brand-dark);">${c.cliente}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-light);">${c.indirizzo}</div>
+                                </div>
+                                ${badgeStato}
+                            </div>
+                            <div style="font-size: 0.8rem; font-weight: 700; color: var(--brand-orange);">Totale Interventi Registrati: ${c.storico ? c.storico.length : 0}</div>
+                            <div style="margin-top: 5px;">
+                                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-bottom: 4px;">Storico Rapportini:</div>
+                                ${storicoHtml}
+                            </div>
+                            <div style="display: flex; gap: 8px; margin-top: 10px;">
+                                <button class="${btnStatoClasse}" style="padding: 8px; font-size: 0.8rem;" onclick="cambiaStatoCantiere(${idx})">${btnStatoTesto}</button>
+                                <button class="action-btn btn-danger" onclick="eliminaCantiere(${idx})">Elimina</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            if (cantieriFiltratiCount === 0) {
+                containerLista.innerHTML = `<div style="font-size: 0.85rem; color: var(--text-light); text-align: center; padding: 15px;">Nessun cantiere in questa cartella.</div>`;
+            }
+
+            aggiornaTabellaRiepilogo(cantieriDB);
+        }
+
+        function aggiornaTabellaRiepilogo(cantieriDB) {
+            let corpoTabella = document.getElementById('corpoTabellaRiepilogo');
+            corpoTabella.innerHTML = '';
+
+            let mappaAggregata = {};
+
+            cantieriDB.forEach(c => {
+                if (c.storico) {
+                    c.storico.forEach(s => {
+                        if (s.operai) {
+                            let parti = s.operai.split(',');
+                            parti.forEach(p => {
+                                let match = p.trim().match(/^(.*?)\s*\(([\d.]+)h\)$/);
+                                if (match) {
+                                    let nomeOp = match[1].trim();
+                                    let oreOp = parseFloat(match[2]) || 0;
+                                    let chiave = `${nomeOp}___${c.cliente}`;
+                                    
+                                    if (!mappaAggregata[chiave]) {
+                                        mappaAggregata[chiave] = { dipendente: nomeOp, cantiere: c.cliente, ore: 0 };
                                     }
+                                    mappaAggregata[chiave].ore += oreOp;
                                 }
                             });
                         }
                     });
-
-                    if (oreTotData < 8) {
-                        let oreMancanti = 8 - oreTotData;
-                        notificheHtml += `
-                            <div class="banner-ore-mancanti">
-                                <div class="banner-title">⚠️ Attenzione: Foglio Lavoro Incompleto</div>
-                                <div class="banner-text">Per la giornata del <b>${dataStr}</b> (2 giorni fa / ieri) risultano registrate solo ${oreTotData} ore su 8.<br>Ti mancano ancora <b>${oreMancanti} ore</b>. Ti invitiamo a regolarizzare al più presto!</div>
-                            </div>
-                        `;
-                    }
                 }
+            });
+
+            let chiavi = Object.keys(mappaAggregata);
+            if (chiavi.length === 0) {
+                corpoTabella.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-light);">Nessuna ora registrata finora.</td></tr>`;
+                return;
             }
-            document.getElementById('boxNotificaOrePersonale').innerHTML = notificheHtml;
+
+            chiavi.forEach(k => {
+                let item = mappaAggregata[k];
+                corpoTabella.innerHTML += `
+                    <tr>
+                        <td><b>${item.dipendente}</b></td>
+                        <td>${item.cantiere}</td>
+                        <td><b>${item.ore} Ore</b></td>
+                    </tr>
+                `;
+            });
         }
 
-        function salvaFoglioLavoroOperaio() {
-            let cantiereIdx = document.getElementById('selectCantiereOperaio').value;
-            let statoIntervento = document.getElementById('selectStatoIntervento').value;
-            let data = document.getElementById('dataIntervento').value;
-            let tipoLavoro = document.getElementById('tipoLavoroOperaio').value;
-            let oreUtente = parseFloat(document.getElementById('selectOreUtentePrincipale').value) || 8;
-            let note = document.getElementById('noteIntervento').value.trim();
+        function registraUfficioMultiplo() {
+            let cantiereIdx = document.getElementById('selectCantiereUfficio').value;
+            let data = document.getElementById('dataInterventoUfficio').value;
+            let note = document.getElementById('noteUfficio').value.trim();
 
             if (cantiereIdx === '') return alert("Seleziona un cantiere valido!");
-            if (!data) return alert("Inserisci una data valida!");
+            if (!data) return alert("Inserisci una data!");
 
-            let stringaOperaiArray = [`${utenteCorrente} (${oreUtente}h)`];
+            let checkboxSelezionati = document.querySelectorAll('input[name="dipendenteUfficioCheckbox"]:checked');
+            if (checkboxSelezionati.length === 0) return alert("Seleziona almeno un dipendente!");
 
-            document.querySelectorAll('input[name="collegaCheckbox"]:checked').forEach(cb => {
-                let nomeCollega = cb.value;
-                let idSelect = `ore_collega_${nomeCollega.replace(/\s+/g, '_')}`;
-                let selectOreCollega = document.getElementById(idSelect);
-                let oreCollega = selectOreCollega ? parseFloat(selectOreCollega.value) || 8 : 8;
-                
-                stringaOperaiArray.push(`${nomeCollega} (${oreCollega}h)`);
+            let stringaOperaiArray = [];
+            checkboxSelezionati.forEach(cb => {
+                let nomeOp = cb.value;
+                let idSelect = `ore_uff_op_${nomeOp.replace(/\s+/g, '_')}`;
+                let selectOre = document.getElementById(idSelect);
+                let oreOp = selectOre ? parseFloat(selectOre.value) || 8 : 8;
+                stringaOperaiArray.push(`${nomeOp} (${oreOp}h)`);
             });
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_db')) || {};
-            let chiaveAssenza = `${utenteCorrente}_${data}`;
 
-            if (tipoLavoro.includes('Assenza')) {
-                assenzeDB[chiaveAssenza] = true;
-                localStorage.setItem('idra_assenze_db', JSON.stringify(assenzeDB));
-                alert(`✅ Giornata del ${data} registrata come Assenza.`);
-            } else {
-                if (assenzeDB[chiaveAssenza]) {
-                    delete assenzeDB[chiaveAssenza];
-                    localStorage.setItem('idra_assenze_db', JSON.stringify(assenzeDB));
-                }
-
-                if (!cantieriDB[cantiereIdx].storico) {
-                    cantieriDB[cantiereIdx].storico = [];
-                }
-
-                cantieriDB[cantiereIdx].completato = (statoIntervento === "Terminato");
-
-                cantieriDB[cantiereIdx].storico.push({
-                    data: data,
-                    tipo: tipoLavoro,
-                    operai: stringaOperaiArray.join(', '),
-                    note: note ? note : "Foglio lavoro compilato da dipendente",
-                    statoIntervento: statoIntervento,
-                    haBolla: document.getElementById('fotoBollaInput').files.length > 0,
-                    numFotoLavori: document.getElementById('fotoLavoriInput').files.length
-                });
-
-                localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-                alert(`✅ Foglio lavoro salvato! Cantiere impostato come: ${statoIntervento}.`);
+            if (!cantieriDB[cantiereIdx].storico) {
+                cantieriDB[cantiereIdx].storico = [];
             }
 
-            document.getElementById('noteIntervento').value = '';
-            document.getElementById('fotoBollaInput').value = '';
-            document.getElementById('fotoLavoriInput').value = '';
-            document.getElementById('previewBolla').innerHTML = '';
-            document.getElementById('previewLavori').innerHTML = '';
-            caricaCantieriPerOperaio();
-            verificaOreMancantiPersonali(utenteCorrente);
+            cantieriDB[cantiereIdx].storico.push({
+                data: data,
+                tipo: "Inserito da Ufficio",
+                operai: stringaOperaiArray.join(', '),
+                note: note ? note : "Inserito dall'ufficio",
+                statoIntervento: cantieriDB[cantiereIdx].completato ? "Terminato" : "Da terminare"
+            });
+
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+            document.getElementById('noteUfficio').value = '';
+            
+            document.querySelectorAll('input[name="dipendenteUfficioCheckbox"]').forEach(cb => {
+                cb.checked = false;
+                let idSelect = `ore_uff_op_${cb.value.replace(/\s+/g, '_')}`;
+                let sel = document.getElementById(idSelect);
+                if(sel) sel.disabled = true;
+            });
+
+            aggiornaVistaUfficio();
+            eseguiControlloMancantiUfficio();
+            alert("✅ Intervento registrato con successo per i dipendenti selezionati!");
+        }
+
+        function cambiaStatoCantiere(idx) {
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            cantieriDB[idx].completato = !cantieriDB[idx].completato;
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+            aggiornaVistaUfficio();
+        }
+
+        function eliminaCantiere(idx) {
+            if(confirm("Sei sicuro di voler eliminare questo cantiere?")) {
+                let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+                cantieriDB.splice(idx, 1);
+                localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+                aggiornaVistaUfficio();
+                eseguiControlloMancantiUfficio();
+            }
         }
     </script>
 </body>
