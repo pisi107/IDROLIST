@@ -107,6 +107,9 @@
         <div class="content-body">
             
             <button class="action-btn btn-orange" style="font-size: 1.05rem; padding: 18px;" onclick="apriModaleCartellaClienti()">📁 Apri Archivio Cartella Clienti & Foto Lavori</button>
+            
+            <!-- NUOVO PULSANTE GARANZIE -->
+            <button class="action-btn btn-green" style="font-size: 1.05rem; padding: 18px;" onclick="apriModaleGaranzie()">🛡️ Gestione Garanzie Divise per Clienti</button>
 
             <div class="card-box" style="border-color: #ef4444; background: #fff5f5;">
                 <div style="font-size: 1.05rem; font-weight: 800; color: #b91c1c;">🚨 Controllo Ufficio: Mancati Fogli Lavoro (Ultimi 2 Giorni)</div>
@@ -216,6 +219,7 @@
         </div>
     </div>
 
+    <!-- MODALE ARCHIVIO CARTELLA CLIENTI -->
     <div class="modal-overlay" id="modalCartellaClienti">
         <div class="modal-card" style="max-width: 580px;">
             <div class="modal-header">
@@ -234,6 +238,26 @@
         </div>
     </div>
 
+    <!-- NUOVA MODALE GARANZIE DIVISE PER CLIENTE -->
+    <div class="modal-overlay" id="modalGaranzieClienti">
+        <div class="modal-card" style="max-width: 580px;">
+            <div class="modal-header">
+                <span>🛡️ Garanzie Divise per Clienti</span>
+                <button class="close-modal-btn" onclick="chiudiModaleGaranzie()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <label>Cerca per Cliente o Indirizzo</label>
+                    <input type="text" id="inputCercaGaranziaCliente" placeholder="Filtra garanzie..." oninput="renderizzaGaranziePerClienti()">
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-light);">Qui l'ufficio può controllare lo stato delle garanzie di ogni cliente e verificare le relative foto degli interventi.</div>
+                
+                <div id="contenitoreGaranzieClienti" style="display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE FILTRI -->
     <div class="modal-overlay" id="modalFiltri">
         <div class="modal-card">
             <div class="modal-header">
@@ -280,6 +304,7 @@
         </div>
     </div>
 
+    <!-- MODALE ZOOM FOTO -->
     <div class="modal-overlay" id="modalFotoZoom" onclick="chiudiZoomFoto()">
         <div style="max-width: 90%; max-height: 90%; display: flex; justify-content: center; align-items: center;" onclick="event.stopPropagation()">
             <img id="imgZoomFull" src="" style="max-width: 100%; max-height: 85vh; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
@@ -310,6 +335,7 @@
             }
         };
 
+        // GESTIONE MODALE CARTELLA CLIENTI
         function apriModaleCartellaClienti() {
             let m = document.getElementById('modalCartellaClienti');
             if(m) m.classList.add('open');
@@ -319,6 +345,99 @@
         function chiudiModaleCartellaClienti() {
             let m = document.getElementById('modalCartellaClienti');
             if(m) m.classList.remove('open');
+        }
+
+        // GESTIONE NUOVA MODALE GARANZIE
+        function apriModaleGaranzie() {
+            let m = document.getElementById('modalGaranzieClienti');
+            if(m) m.classList.add('open');
+            renderizzaGaranziePerClienti();
+        }
+
+        function chiudiModaleGaranzie() {
+            let m = document.getElementById('modalGaranzieClienti');
+            if(m) m.classList.remove('open');
+        }
+
+        function renderizzaGaranziePerClienti() {
+            let container = document.getElementById('contenitoreGaranzieClienti');
+            let query = document.getElementById('inputCercaGaranziaCliente').value.toLowerCase().trim();
+            if(!container) return;
+            container.innerHTML = '';
+
+            let cantieriDB = ottieniCantieriAggiornati();
+            let trovati = 0;
+
+            cantieriDB.forEach((c, cIdx) => {
+                let nomeClienteTesto = `${c.cliente} - ${c.indirizzo}`.toLowerCase();
+                if (query === '' || nomeClienteTesto.includes(query)) {
+                    trovati++;
+                    let idCorpoGaranzia = `folder_garanzia_body_${cIdx}`;
+                    let garanziaChecked = c.garanziaGestita === true ? 'checked' : '';
+                    let badgeGaranzia = c.garanziaGestita ? '<span class="badge badge-garanzia-ok">🛡️ Garanzia Gestita / Chiusa</span>' : '<span class="badge badge-garanzia-no">🛡️ Garanzia Aperta</span>';
+
+                    let interventiHtml = '';
+                    if (c.storico && Array.isArray(c.storico) && c.storico.length > 0) {
+                        c.storico.forEach((s) => {
+                            let lavoriArr = s.fotoLavori || s.lavori || [];
+                            if(!Array.isArray(lavoriArr)) lavoriArr = [];
+
+                            let fotoHtml = '';
+                            if (lavoriArr.length > 0) {
+                                fotoHtml = `<div class="foto-thumb-container">`;
+                                lavoriArr.forEach(imgB64 => {
+                                    fotoHtml += `<img src="${imgB64}" class="foto-thumb" onclick="apriZoomFoto('${imgB64}')">`;
+                                });
+                                fotoHtml += `</div>`;
+                            } else {
+                                fotoHtml = `<div style="font-size: 0.75rem; color: var(--text-light); font-style: italic;">Nessuna foto lavori allegata.</div>`;
+                            }
+
+                            interventiHtml += `
+                                <div class="folder-intervento-box">
+                                    <div style="font-size: 0.85rem; font-weight: 700; color: var(--brand-dark);">📅 Data: ${s.data || 'N/D'}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-light);"><b>Operai:</b> ${s.operai || s.dipendente || 'N/D'}</div>
+                                    <div style="font-size: 0.8rem;"><b>Note:</b> ${s.note || 'Nessuna nota'}</div>
+                                    <div style="margin-top: 4px;">
+                                        <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-light); margin-bottom: 2px;">Foto Operai / Lavori:</div>
+                                        ${fotoHtml}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        interventiHtml = `<div style="font-size: 0.8rem; color: var(--text-light); font-style: italic; padding: 5px;">Nessun intervento registrato.</div>`;
+                    }
+
+                    container.innerHTML += `
+                        <div class="folder-cliente-box">
+                            <div class="folder-cliente-header" onclick="toggleFolderCliente('${idCorpoGaranzia}', this)">
+                                <div style="display: flex; flex-direction: column; gap: 2px;">
+                                    <span>📁 ${c.cliente} <span style="font-size:0.75rem; font-weight:400; color:#94a3b8;">(${c.indirizzo})</span></span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    ${badgeGaranzia}
+                                    <span id="arrow_garanzia_${cIdx}">▼</span>
+                                </div>
+                            </div>
+                            <div id="${idCorpoGaranzia}" class="folder-cliente-body">
+                                <div class="garanzia-box">
+                                    <label>
+                                        <input type="checkbox" ${garanziaChecked} onchange="toggleGaranziaCantiere(${cIdx}, this); renderizzaGaranziePerClienti();">
+                                        Segna Garanzia come Gestita / Chiusa
+                                    </label>
+                                </div>
+                                <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-top: 4px;">Storico Interventi e Foto:</div>
+                                ${interventiHtml}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            if (trovati === 0) {
+                container.innerHTML = `<div style="text-align: center; color: var(--text-light); padding: 20px; font-size: 0.9rem;">Nessun cliente trovato.</div>`;
+            }
         }
 
         function renderizzaAlberoCartellaClienti() {
@@ -338,7 +457,7 @@
 
                     let interventiHtml = '';
                     if (c.storico && Array.isArray(c.storico) && c.storico.length > 0) {
-                        c.storico.forEach((s, sIdx) => {
+                        c.storico.forEach((s) => {
                             let lavoriArr = s.fotoLavori || s.lavori || [];
                             if(!Array.isArray(lavoriArr)) lavoriArr = [];
 
@@ -612,7 +731,7 @@
             clienteEl.value = '';
             indirizzoEl.value = '';
             aggiornaVistaUfficio();
-            alert("✅ Cantiere creato con successo! Rimarrà disponibile per gli operai finché l'ufficio non lo segnerà come completato.");
+            alert("✅ Cantiere creato con successo!");
         }
 
         function eseguiControlloMancantiUfficio() {
@@ -879,7 +998,6 @@
 
             let countAperti = 0;
             cantieriDB.forEach((c, idx) => {
-                // IL CANTIERE RESTA DISPONIBILE FINCHÈ L'UFFICIO NON CLICCA "LAVORO CONCLUSO" (!c.completato)
                 if (!c.completato) {
                     let testoCompleto = `${c.cliente} - ${c.indirizzo}`.toLowerCase();
                     if (query === '' || testoCompleto.includes(query)) {
@@ -1117,7 +1235,7 @@
                 if(cantieriDB[idx]) {
                     cantieriDB.splice(idx, 1);
                     localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-                    aggiornaVistaWfficio = aggiornaVistaUfficio();
+                    aggiornaVistaUfficio();
                     eseguiControlloMancantiUfficio();
                 }
             }
