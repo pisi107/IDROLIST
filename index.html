@@ -711,17 +711,17 @@
             });
         }
 
-        // ================= INTEGRAZIONE GEMINI AI =================
+        // ================= INTEGRAZIONE GEMINI AI (PIÙ PERMISSIVA) =================
         async function analizzaImmagineConGemini(base64Data) {
             if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("INSERISCI")) {
-                return "SCONOSCIUTO";
+                return "BOLLA"; // Se manca la chiave per sicurezza la consideriamo valida
             }
 
             try {
                 let cleanBase64 = base64Data.split(',')[1] || base64Data;
                 let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
                 
-                let promptTesto = "Analizza questa immagine aziendale. Cerca la presenza di sezioni di firma o scritte come 'firma destinatario', 'firma incaricato del trasporto' o 'causale'. Rispondi ESCLUSIVAMENTE con una di queste tre parole, senza aggiungere altro: BOLLA (se l'immagine mostra un documento, DDT, bolla, fattura, modulo stampato o facsimile con campi di firma/destinatario), LAVORO (se l'immagine mostra impianti, tubazioni, cantieri o attività lavorativa), SCARTO (se è un selfie, un paesaggio o un oggetto del tutto estraneo al lavoro).";
+                let promptTesto = "Analizza questa immagine. Cerca se contiene un documento di trasporto, una bolla, un DDT, una fattura, una ricevuta, oppure la scritta 'firma destinatario', 'destinazione', 'codice', 'quantità' o un cantiere/impianto/lavoro idraulico. Se c'è un documento o un lavoro rispondi esattamente BOLLA o LAVORO. Rispondi SCARTO solo se l'immagine è chiaramente un selfie, una foto mossa o un soggetto totalmente estraneo (es. cibo, animali, paesaggi). Sii molto permissivo con documenti e bolle.";
 
                 let response = await fetch(url, {
                     method: "POST",
@@ -746,7 +746,7 @@
             } catch (err) {
                 console.error("Errore chiamata Gemini:", err);
             }
-            return "SCARTO";
+            return "BOLLA"; // In caso di errore di rete o timeout, diamo via libera per non bloccare l'utente
         }
 
         async function gestisciCaricamentoFotoAI(inputElement, tipoSelezionato) {
