@@ -711,7 +711,7 @@
             });
         }
 
-        // ================= INTEGRAZIONE GEMINI AI (AGGIORNATA CON REGOLA "FIRMA DESTINATARIO") =================
+        // ================= INTEGRAZIONE GEMINI AI =================
         async function analizzaImmagineConGemini(base64Data) {
             if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("INSERISCI")) {
                 return "SCONOSCIUTO";
@@ -800,7 +800,6 @@
             dt.items.add(fileDaAggiungere);
             inputDestinazione.files = dt.files;
         }
-        // ===========================================================================
 
         async function elaboraListaFile(fileList) {
             let arr = [];
