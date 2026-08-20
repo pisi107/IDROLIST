@@ -42,7 +42,6 @@
         .btn-danger { background-color: var(--danger); color: white; padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; box-shadow: none; width: auto; }
         .btn-dark { background: var(--brand-dark); color: white; }
         .btn-artigiani { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; }
-        .btn-small { padding: 6px 10px; font-size: 0.75rem; border-radius: 8px; width: auto; box-shadow: none; }
 
         .card-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
         
@@ -75,11 +74,8 @@
         .presenza-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px; }
         .user-logged-box { display: flex; justify-content: space-between; align-items: center; background: #e2e8f0; padding: 10px 14px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; }
 
-        .folder-preview-box { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-top: 6px; }
-        .folder-title { font-size: 0.8rem; font-weight: 800; color: var(--brand-dark); text-transform: uppercase; display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
-        
-        .item-card-preview { display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1px solid var(--border); padding: 8px; border-radius: 8px; margin-bottom: 6px; }
-        .item-card-preview img { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; }
+        .foto-thumb-container { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+        .foto-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; }
 
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 999; justify-content: center; align-items: center; padding: 15px; }
         .modal-overlay.open { display: flex; }
@@ -219,31 +215,15 @@
                     <div><label>Colleghi presenti e ore dedicate</label><div class="container-colleghi-scroll" id="listaColleghiUtente"></div></div>
                     <div><label>Note / Lavori Eseguiti *</label><textarea id="noteInterventoUtente" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea></div>
                     
+                    <!-- SEZIONI SEPARATE MANUALI (SENZA IA) -->
                     <div>
-                        <label>📷 Carica Foto e DDT</label>
-                        <input type="file" id="fotoGenericheInput" accept="image/*" multiple onchange="anteprimaElaborazioneIA(this)">
-                        <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 4px;">💡 Carica tutto insieme: l'IA analizzerà i file dividendoli nelle due cartelle sottostanti. Se sbaglia, potrai spostarli con un clic!</div>
+                        <label>📄 Carica DDT / Bolle</label>
+                        <input type="file" id="inputBolleManuale" accept="image/*" multiple>
                     </div>
 
-                    <!-- LE DUE CARTELLINE DI CONTROLLO CON PULSANTI DI SPOSTAMENTO -->
-                    <div id="containerCartelleAnteprima" style="display: none; flex-direction: column; gap: 10px; background: #e2e8f0; padding: 12px; border-radius: 12px;">
-                        <div style="font-size: 0.8rem; font-weight: 800; color: var(--brand-dark);">🔍 Verifica e Correzione Divisione:</div>
-                        
-                        <!-- Cartella DDT -->
-                        <div class="folder-preview-box">
-                            <div class="folder-title">📁 DDT (Bolle e Documenti Riconosciuti)</div>
-                            <div id="anteprimaCartellaDDT" style="display: flex; flex-direction: column; gap: 6px;">
-                                <span style="font-size: 0.8rem; color: var(--text-light);">Nessun DDT rilevato.</span>
-                            </div>
-                        </div>
-
-                        <!-- Cartella Foto Lavori -->
-                        <div class="folder-preview-box">
-                            <div class="folder-title">📁 Fogli Lavoro / Foto Cantiere</div>
-                            <div id="anteprimaCartellaFoto" style="display: flex; flex-direction: column; gap: 6px;">
-                                <span style="font-size: 0.8rem; color: var(--text-light);">Nessuna foto lavori.</span>
-                            </div>
-                        </div>
+                    <div>
+                        <label>📷 Carica Foto Lavori / Cantiere</label>
+                        <input type="file" id="inputFotoManuale" accept="image/*" multiple>
                     </div>
 
                     <button class="action-btn btn-orange" id="btnSalvaFoglio" onclick="salvaFoglioLavoroUtente()">Salva Foglio di Lavoro</button>
@@ -357,8 +337,6 @@
     </div>
 
     <script>
-        const GEMINI_API_KEY = "AQ.Ab8RN6KoCUPsAcMvjdL4laf6g9FCSYOajo_6r0zlaIsir9Tc9w";
-
         const elencoOperaiTotali = [
             "Assali Luca", "Bruno Nicola", "Comolli Alessandro", "Concato Filippo", 
             "Coriglione Alessandro", "De Bosio Marcello", "Denti Claudio", "Doda Enjo", 
@@ -371,13 +349,6 @@
         let utenteCorrente = "";
         let tipoUtenteCorrente = ""; 
         let cartellaCorrente = 'da_fare';
-        
-        // Struttura dati locale per gestire i file separati in tempo reale
-        let fileSmistatiIA = {
-            ddtList: [],   //Oggetti con { id, src, testoEstratto }
-            fotoList: []   //Oggetti con { id, src }
-        };
-        let counterFileId = 0;
 
         window.onload = function() {
             let oggiStr = new Date().toISOString().split('T')[0];
@@ -629,115 +600,13 @@
             });
         }
 
-        async function anteprimaElaborazioneIA(input) {
-            if (!input.files || input.files.length === 0) return;
-            let containerCartelle = document.getElementById('containerCartelleAnteprima');
-            containerCartelle.style.display = 'flex';
-            
-            document.getElementById('anteprimaCartellaDDT').innerHTML = "🤖 Analisi IA in corso...";
-            document.getElementById('anteprimaCartellaFoto').innerHTML = "Attendere...";
-
-            fileSmistatiIA = { ddtList: [], fotoList: [] };
-
-            for (let i = 0; i < input.files.length; i++) {
-                let base64Full = await comprimiEConvertiImmagine(input.files[i]);
-                let base64Data = base64Full.split(',')[1];
-                let fileId = counterFileId++;
-
-                try {
-                    // Prompt rigoroso per distinguere DDT/Bolle da foto cantiere
-                    let promptRigido = "Sei un assistente per Idrotech Varese. Analizza questa immagine con estrema attenzione.\n" +
-                        "Determina se si tratta di un DDT (Documento di Trasporto), bolla di consegna, fattura, foglio di carta con tabulati scritti o documento cartaceo.\n" +
-                        "Rispondi ESATTAMENTE con la parola 'SI_DDT' se è un DDT o un documento cartaceo/bolla. " +
-                        "Rispondi ESATTAMENTE con la parola 'FOTOCANTIERE' se è una foto scattata in cantiere, di un impianto, di tubi, caldaie o lavori.\n" +
-                        "Se è un DDT, aggiungi dopo un trattino una breve descrizione (es. 'SI_DDT - Bolla Fornitore XYZ').";
-
-                    let response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{
-                                parts: [
-                                    { text: promptRigido },
-                                    { inline_data: { mime_type: "image/jpeg", data: base64Data } }
-                                ]
-                            }]
-                        })
-                    });
-
-                    let data = await response.json();
-                    if (data.candidates && data.candidates[0].content) {
-                        let rispostaIA = data.candidates[0].content.parts[0].text.trim().toUpperCase();
-                        if (rispostaIA.includes("SI_DDT")) {
-                            fileSmistatiIA.ddtList.push({ id: fileId, src: base64Full, testo: rispostaIA });
-                        } else {
-                            fileSmistatiIA.fotoList.push({ id: fileId, src: base64Full });
-                        }
-                    } else {
-                        fileSmistatiIA.fotoList.push({ id: fileId, src: base64Full });
-                    }
-                } catch (err) {
-                    console.error("Errore IA:", err);
-                    fileSmistatiIA.fotoList.push({ id: fileId, src: base64Full });
-                }
+        async function elaboraFileList(files) {
+            let arr = [];
+            for (let i = 0; i < files.length; i++) {
+                let base64 = await comprimiEConvertiImmagine(files[i]);
+                arr.push(base64);
             }
-            renderizzaCartelleAnteprima();
-        }
-
-        // Funzione per spostare manualmente un file da una cartella all'altra in caso di errore dell'IA
-        function spostaFile(id, destinazione) {
-            let trovato;
-            if (destinazione === 'foto') {
-                // Cerca in DDT e sposta in foto
-                let idx = fileSmistatiIA.ddtList.findIndex(item => item.id === id);
-                if (idx !== -1) {
-                    trovato = fileSmistatiIA.ddtList.splice(idx, 1)[0];
-                    fileSmistatiIA.fotoList.push({ id: trovato.id, src: trovato.src });
-                }
-            } else {
-                // Cerca in foto e sposta in DDT
-                let idx = fileSmistatiIA.fotoList.findIndex(item => item.id === id);
-                if (idx !== -1) {
-                    trovato = fileSmistatiIA.fotoList.splice(idx, 1)[0];
-                    fileSmistatiIA.ddtList.push({ id: trovato.id, src: trovato.src, testo: "DDT Spostato Manualmente" });
-                }
-            }
-            renderizzaCartelleAnteprima();
-        }
-
-        function renderizzaCartelleAnteprima() {
-            let boxDDT = document.getElementById('anteprimaCartellaDDT');
-            let boxFoto = document.getElementById('anteprimaCartellaFoto');
-
-            // Render DDT
-            if (fileSmistatiIA.ddtList.length > 0) {
-                boxDDT.innerHTML = fileSmistatiIA.ddtList.map(item => `
-                    <div class="item-card-preview">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <img src="${item.src}" onclick="apriZoomFoto('${item.src}')">
-                            <span style="font-size: 0.8rem; font-weight: 600;">📄 Bolla / DDT Riconosciuto</span>
-                        </div>
-                        <button class="action-btn btn-dark btn-small" onclick="spostaFile(${item.id}, 'foto')">Sposta in Lavori →</button>
-                    </div>
-                `).join('');
-            } else {
-                boxDDT.innerHTML = `<span style="font-size: 0.8rem; color: var(--text-light);">Nessun DDT. (Trascina qui sopra se necessario)</span>`;
-            }
-
-            // Render Foto Lavori
-            if (fileSmistatiIA.fotoList.length > 0) {
-                boxFoto.innerHTML = fileSmistatiIA.fotoList.map(item => `
-                    <div class="item-card-preview">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <img src="${item.src}" onclick="apriZoomFoto('${item.src}')">
-                            <span style="font-size: 0.8rem; font-weight: 600;">📷 Foto Cantiere</span>
-                        </div>
-                        <button class="action-btn btn-dark btn-small" onclick="spostaFile(${item.id}, 'ddt')">← Sposta in DDT</button>
-                    </div>
-                `).join('');
-            } else {
-                boxFoto.innerHTML = `<span style="font-size: 0.8rem; color: var(--text-light);">Nessuna foto lavori.</span>`;
-            }
+            return arr;
         }
 
         async function salvaFoglioLavoroUtente() {
@@ -750,20 +619,17 @@
 
             if (cIdx === "" || stato === "" || !note) return alert("⚠️ Compila tutti i campi obbligatori!");
 
-            let noteFinali = note;
-            if (fileSmistatiIA.ddtList.length > 0) {
-                let infoDdt = fileSmistatiIA.ddtList.map(d => d.testo || "DDT allegato").join('; ');
-                noteFinali += `\n\n[DDT e Materiali Riconosciuti]: ${infoDdt}`;
-            }
+            let inputBolle = document.getElementById('inputBolleManuale').files;
+            let inputFoto = document.getElementById('inputFotoManuale').files;
+
+            let fotoBolleBase64 = await elaboraFileList(inputBolle);
+            let fotoLavoriBase64 = await elaboraFileList(inputFoto);
 
             let partecipanti = [`${utenteCorrente} (${ore}h)`];
             document.querySelectorAll('input[name="collegaCheckbox"]:checked').forEach(cb => {
                 let oCollega = document.getElementById(`ore_collega_${cb.value.replace(/\s+/g, '_')}`).value;
                 participanti.push(`${cb.value} (${oCollega}h)`);
             });
-
-            let fotoLavoriBase64 = fileSmistatiIA.fotoList.map(f => f.src);
-            let fotoBolleBase64 = fileSmistatiIA.ddtList.map(d => d.src);
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             if (!cantieriDB[cIdx].storico) cantieriDB[cIdx].storico = [];
@@ -772,7 +638,7 @@
                 data, 
                 tipo, 
                 operai: partecipanti.join(', '), 
-                note: noteFinali, 
+                note, 
                 statoIntervento: stato, 
                 fotoBolle: fotoBolleBase64, 
                 fotoLavori: fotoLavoriBase64 
@@ -783,9 +649,8 @@
             alert("✅ Foglio di lavoro salvato con successo!");
             
             document.getElementById('noteInterventoUtente').value = '';
-            document.getElementById('fotoGenericheInput').value = '';
-            document.getElementById('containerCartelleAnteprima').style.display = 'none';
-            fileSmistatiIA = { ddtList: [], fotoList: [] };
+            document.getElementById('inputBolleManuale').value = '';
+            document.getElementById('inputFotoManuale').value = '';
             popolaCantieriUtente();
         }
 
