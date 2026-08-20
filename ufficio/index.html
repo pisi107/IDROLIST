@@ -600,68 +600,19 @@
                 cantieriDB = [];
             }
 
-            let clienteNorm = cliente.toLowerCase().replace(/\s+/g, ' ');
-            let indirizzoNorm = indirizzo.toLowerCase().replace(/\s+/g, ' ');
-
-            let cantiereEsistente = cantieriDB.find(c => 
-                c.cliente.toLowerCase().replace(/\s+/g, ' ') === clienteNorm && 
-                c.indirizzo.toLowerCase().replace(/\s+/g, ' ') === indirizzoNorm
-            );
-
-            if (cantiereEsistente) {
-                let conferma = confirm(`⚠️ Esiste già una cartella per "${cantiereEsistente.cliente}" in "${cantiereEsistente.indirizzo}".\n\nÈ un nuovo intervento/foglio di lavoro per questo cantiere?\n\n(Premi OK per aggiungere un nuovo foglio di lavoro a questo cliente, oppure Annulla se è un omonimo / nuovo cliente con altra via).`);
-                
-                if (conferma) {
-                    if (!cantiereEsistente.storico || !Array.isArray(cantiereEsistente.storico)) {
-                        cantiereEsistente.storico = [];
-                    }
-                    
-                    let dataOggi = new Date().toISOString().split('T')[0];
-                    cantiereEsistente.storico.push({
-                        data: dataOggi,
-                        tipo: "Inserito da Ufficio (Ritorno)",
-                        operai: "Da compilare / Registrato da Ufficio",
-                        note: "Nuovo intervento aperto per ritorno in cantiere",
-                        statoIntervento: "Da terminare",
-                        fotoBolle: [],
-                        fotoLavori: [],
-                        stampato: false,
-                        dataStampa: ""
-                    });
-
-                    cantiereEsistente.completato = false;
-                    
-                    localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-                    clienteEl.value = '';
-                    indirizzoEl.value = '';
-                    cambiaCartella('da_fare');
-                    alert("✅ È stato aggiunto un nuovo foglio di lavoro nello storico del cantiere esistente! Lo trovi nella cartella 'Da Terminare'.");
-                    return;
-                } else {
-                    cantieriDB.push({
-                        cliente: cliente,
-                        indirizzo: indirizzo,
-                        completato: false,
-                        garanziaGestita: false,
-                        storico: []
-                    });
-                    alert("✅ È stata creata una nuova scheda cantiere separata.");
-                }
-            } else {
-                cantieriDB.push({
-                    cliente: cliente,
-                    indirizzo: indirizzo,
-                    completato: false,
-                    garanziaGestita: false,
-                    storico: []
-                });
-                alert("✅ Cantiere creato con successo!");
-            }
+            cantieriDB.push({
+                cliente: cliente,
+                indirizzo: indirizzo,
+                completato: false,
+                garanziaGestita: false,
+                storico: []
+            });
 
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             clienteEl.value = '';
             indirizzoEl.value = '';
             aggiornaVistaUfficio();
+            alert("✅ Cantiere creato con successo! Rimarrà disponibile per gli operai finché l'ufficio non lo segnerà come completato.");
         }
 
         function eseguiControlloMancantiUfficio() {
@@ -799,7 +750,7 @@
                     }
 
                     let badgeStato = isCompletato ? '<span class="badge badge-fatto">Terminato</span>' : '<span class="badge badge-da-fare">Da terminare</span>';
-                    let btnStatoTesto = isCompletato ? 'Segna come Da Terminare' : 'Segna come Terminato';
+                    let btnStatoTesto = isCompletato ? 'Segna come Da Terminare' : 'Segna come Lavoro Concluso';
                     let classeCard = isCompletato ? 'cantiere-card terminato' : 'cantiere-card';
                     let btnStatoClasse = isCompletato ? 'action-btn btn-green' : 'action-btn btn-orange';
 
@@ -928,6 +879,7 @@
 
             let countAperti = 0;
             cantieriDB.forEach((c, idx) => {
+                // IL CANTIERE RESTA DISPONIBILE FINCHÈ L'UFFICIO NON CLICCA "LAVORO CONCLUSO" (!c.completato)
                 if (!c.completato) {
                     let testoCompleto = `${c.cliente} - ${c.indirizzo}`.toLowerCase();
                     if (query === '' || testoCompleto.includes(query)) {
@@ -1165,7 +1117,7 @@
                 if(cantieriDB[idx]) {
                     cantieriDB.splice(idx, 1);
                     localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-                    aggiornaVistaUfficio();
+                    aggiornaVistaWfficio = aggiornaVistaUfficio();
                     eseguiControlloMancantiUfficio();
                 }
             }
