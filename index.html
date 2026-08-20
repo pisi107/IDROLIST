@@ -606,10 +606,10 @@
                     body: JSON.stringify({
                         contents: [{
                             parts: [
-                                { text: "Sei un assistente per un'azienda idraulica e termoidraulica. Analizza attentamente questa foto e classificala in una di queste tre categorie:\n" +
-                                        "- BOLLA: se l'immagine mostra un documento cartaceo, un DDT (Documento di Trasporto), una fattura, un blocco notes con annotazioni di numeri o una bolla di consegna.\n" +
-                                        "- LAVORO: se l'immagine mostra tubature, caldaie, impianti di riscaldamento, radiatori, bagni in costruzione, scavi, cantieri, operai al lavoro o componenti idraulici installati o da installare.\n" +
-                                        "- SCARTO: se l'immagine è completamente sfocata, nera o non c'entra nulla con il lavoro o i documenti d'ufficio.\n\n" +
+                                { text: "Sei un assistente per un'azienda idraulica e termoidraulica. Analizza attentamente questa foto e classificala rigorosamente in base a questi criteri:\n" +
+                                        "- BOLLA: SOLO se l'immagine mostra un documento cartaceo leggibile, un DDT (Documento di Trasporto), una fattura, un foglio di consegna con timbri/firme o un modulo compilato.\n" +
+                                        "- LAVORO: se l'immagine mostra tubature, caldaie, impianti di riscaldamento, radiatori, bagni in costruzione, scavi, cantieri, operai al lavoro o componenti idraulici. ATTENZIONE: se ti viene caricata una foto generica, un foglio bianco senza scritte chiare, una foto mossa o un ambiente di lavoro, classificala SEMPRE come LAVORO.\n" +
+                                        "- SCARTO: se l'immagine è completamente nera o non c'entra nulla.\n\n" +
                                         "Rispondi unicamente con una di queste tre parole: BOLLA, LAVORO o SCARTO." },
                                 { inline_data: { mime_type: "image/jpeg", data: cleanBase64 } }
                             ]
@@ -639,30 +639,23 @@
             let bolleInput = document.getElementById('fotoBolleInput');
             let lavoriInput = document.getElementById('fotoLavoriInput');
             let fileListValidi = [];
+            let spostaEffettuato = false;
             
             for (let i = 0; i < files.length; i++) {
                 let fileCorrente = files[i];
                 let base64 = await comprimiEConvertiImmagine(fileCorrente);
                 let verdetto = await analizzaImmagineConGemini(base64);
 
-                if ((tipoSelezionato === 'lavori' && verdetto === 'LAVORO') || (tipoSelezionato === 'bolle' && verdetto === 'BOLLA')) {
-                    fileListValidi.push(fileCorrente);
-                } else if (tipoSelezionato === 'lavori' && verdetto === "BOLLA") {
-                    let sposta = confirm("🤖 L'IA ha rilevato che questa foto sembra una BOLLA / FATTURA.\n\nVuoi spostarla automaticamente nella sezione Foto Bolle?");
-                    if (sposta) {
-                        aggiungiFileAInput(fileCorrente, bolleInput);
-                    } else {
-                        fileListValidi.push(fileCorrente);
-                    }
-                } else if (tipoSelezionato === 'bolle' && verdetto === "LAVORO") {
-                    let sposta = confirm("🤖 L'IA ha rilevato che questa foto sembra un CANTIERE / LAVORO.\n\nVuoi spostarla automaticamente nella sezione Foto Lavori?");
-                    if (sposta) {
-                        aggiungiFileAInput(fileCorrente, lavoriInput);
-                    } else {
-                        fileListValidi.push(fileCorrente);
-                    }
+                if (tipoSelezionato === 'bolle' && verdetto === 'LAVORO') {
+                    // Spostamento automatico se caricata in bolle ma è un lavoro (senza paroline/documenti)
+                    aggiungiFileAInput(fileCorrente, lavoriInput);
+                    spostaEffettuato = true;
+                } else if (tipoSelezionato === 'lavori' && verdetto === 'BOLLA') {
+                    // Spostamento automatico se caricata in lavori ma è una bolla/documento
+                    aggiungiFileAInput(fileCorrente, bolleInput);
+                    spostaEffettuato = true;
                 } else if (verdetto === "SCARTO") {
-                    alert("🚫 Questa foto è stata scartata perché non sembra né un lavoro né un documento valido.");
+                    alert("🚫 Questa foto è stata scartata perché non valida.");
                 } else {
                     fileListValidi.push(fileCorrente);
                 }
@@ -672,8 +665,12 @@
             fileListValidi.forEach(f => dtNuovo.items.add(f));
             inputElement.files = dtNuovo.files;
             
-            spanStato.innerText = "✅ Verificato";
-            setTimeout(() => spanStato.innerText = "", 3000);
+            if (spostaEffettuato) {
+                spanStato.innerText = "🔄 Foto riposizionata dall'IA!";
+            } else {
+                spanStato.innerText = "✅ Verificato";
+            }
+            setTimeout(() => spanStato.innerText = "", 4000);
         }
 
         function aggiungiFileAInput(fileDaAggiungere, inputDestinazione) {
@@ -922,7 +919,7 @@
                     }
                 });
             }
-            if(trovati === 0) tb.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var::success);Tutti in regola! 🎉</td></tr>`;
+            if(trovati === 0) tb.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--success);">Tutti in regola! 🎉</td></tr>`;
         }
     </script>
 </body>
