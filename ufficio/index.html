@@ -392,29 +392,38 @@
             } catch(e) { return []; }
         }
 
-        // Funzione universale per estrarre le foto da qualsiasi struttura salvata dagli operai
-        function estraiFotoDaIntervento(s) {
-            if (!s) return [];
+        // Estrae esclusivamente le foto del singolo reparto.
+        // Le foto GARANZIE vengono salvate dagli operai in c.garanzie.
+        // Le foto FOTOGRAFIE vengono salvate dagli operai in c.fotoImpianti.
+        function estraiFotoDaValore(val) {
             let listaFoto = [];
-            // Legge le foto inviate dagli operai senza spostarle o modificarle.
-            // Le associa direttamente allo stesso intervento/cantiere in cui sono state salvate.
-            let possibiliCampi = ['fotoLavori', 'fotoBolle', 'foto', 'immagini', 'allegati', 'images', 'fotoGaranzia'];
-
-            const aggiungiValoreFoto = (val) => {
-                if (typeof val === 'string' && (val.startsWith('data:image') || val.startsWith('http') || val.length > 100)) {
-                    listaFoto.push(val);
-                } else if (Array.isArray(val)) {
-                    val.forEach(aggiungiValoreFoto);
-                } else if (val && typeof val === 'object') {
-                    Object.values(val).forEach(aggiungiValoreFoto);
+            const aggiungi = (v) => {
+                if (typeof v === 'string' && (v.startsWith('data:image') || v.startsWith('http') || v.length > 100)) {
+                    listaFoto.push(v);
+                } else if (Array.isArray(v)) {
+                    v.forEach(aggiungi);
+                } else if (v && typeof v === 'object') {
+                    Object.values(v).forEach(aggiungi);
                 }
             };
-
-            possibiliCampi.forEach(campo => aggiungiValoreFoto(s[campo]));
-            // La firma del cliente viene mostrata insieme alla documentazione dell'intervento.
-            aggiungiValoreFoto(s.firmaCliente);
-
+            aggiungi(val);
             return [...new Set(listaFoto)];
+        }
+
+        function estraiFotoGaranzie(c) {
+            if (!c || !Array.isArray(c.garanzie)) return [];
+            return estraiFotoDaValore(c.garanzie);
+        }
+
+        function estraiFotoFotografie(c) {
+            if (!c || !Array.isArray(c.fotoImpianti)) return [];
+            return estraiFotoDaValore(c.fotoImpianti);
+        }
+
+        // Mantiene la gestione delle foto dell'intervento/rapportino già esistente.
+        function estraiFotoDaIntervento(s) {
+            if (!s) return [];
+            return estraiFotoDaValore([s.fotoLavori, s.fotoBolle, s.foto, s.immagini, s.allegati, s.images, s.fotoGaranzia, s.firmaCliente]);
         }
 
         // Funzione unificata per estrarre il testo degli operai e delle ore
@@ -442,6 +451,13 @@
                     let idCorpoGaranzia = `folder_garanzia_body_${cIdx}`;
                     let garanziaChecked = c.garanziaGestita === true ? 'checked' : '';
                     let badgeGaranzia = c.garanziaGestita ? '<span class="badge badge-garanzia-ok">🛡️ Garanzia Chiusa</span>' : '<span class="badge badge-garanzia-no">🛡️ Garanzia Aperta</span>';
+
+                    // FOTO INSERITE DAGLI OPERAI NEL REPARTO "GARANZIE"
+                    // Sono salvate direttamente nel cantiere, in c.garanzie.
+                    let fotoGaranzie = estraiFotoGaranzie(c);
+                    let fotoGaranzieHtml = fotoGaranzie.length > 0
+                        ? `<div class="foto-thumb-container">${fotoGaranzie.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('')}</div>`
+                        : `<div style="font-size:0.75rem;color:var(--text-light);font-style:italic;">Nessuna foto garanzia inviata dagli operai.</div>`;
 
                     let interventiHtml = '';
                     if (c.storico && Array.isArray(c.storico) && c.storico.length > 0) {
@@ -471,6 +487,10 @@
                                 <div style="display: flex; align-items: center; gap: 10px;">${badgeGaranzia}<span>▼</span></div>
                             </div>
                             <div id="${idCorpoGaranzia}" class="folder-cliente-body">
+                                <div class="folder-intervento-box" style="border-left-color:#7c3aed;">
+                                    <div style="font-size:0.85rem;font-weight:800;color:#5b21b6;margin-bottom:6px;">🛡️ Foto Etichette / Garanzia degli Operai</div>
+                                    ${fotoGaranzieHtml}
+                                </div>
                                 <div style="background: #fefce8; border: 1px solid #facc15; border-radius: 8px; padding: 10px; display: flex; align-items: center; gap: 10px;">
                                     <input type="checkbox" ${garanziaChecked} style="width:18px;height:18px;cursor:pointer;" onchange="toggleGaranziaCantiere(${cIdx}, this); renderizzaGaranziePerClienti();">
                                     <label style="margin:0; font-weight:700; color:#713f12; cursor:pointer; text-transform:none;">Segna Garanzia come Gestita / Chiusa</label>
@@ -501,6 +521,13 @@
                     let idCorpo = `folder_body_${cIdx}`;
                     let interventiHtml = '';
 
+                    // FOTO INSERITE DAGLI OPERAI NEL REPARTO "FOTOGRAFIE"
+                    // Sono salvate in c.fotoImpianti e devono comparire qui, nella Cartella Clienti.
+                    let fotoFotografie = estraiFotoFotografie(c);
+                    let fotoFotografieHtml = fotoFotografie.length > 0
+                        ? `<div class="foto-thumb-container">${fotoFotografie.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('')}</div>`
+                        : `<div style="font-size:0.75rem;color:var(--text-light);font-style:italic;">Nessuna fotografia impianto inviata dagli operai.</div>`;
+
                     if (c.storico && c.storico.length > 0) {
                         c.storico.forEach((s, sIdx) => {
                             let fotoArr = estraiFotoDaIntervento(s);
@@ -530,7 +557,13 @@
                                 <div><b>${c.cliente}</b> <span style="font-size:0.8rem; color:var(--text-light);">(${c.indirizzo})</span></div>
                                 <span>▼</span>
                             </div>
-                            <div id="${idCorpo}" class="folder-cliente-body">${interventiHtml}</div>
+                            <div id="${idCorpo}" class="folder-cliente-body">
+                                <div class="folder-intervento-box" style="border-left-color:#0284c7;">
+                                    <div style="font-size:0.85rem;font-weight:800;color:var(--brand-dark);margin-bottom:6px;">📷 Fotografie Impianto degli Operai</div>
+                                    ${fotoFotografieHtml}
+                                </div>
+                                ${interventiHtml}
+                            </div>
                         </div>
                     `;
                 }
@@ -567,21 +600,35 @@
             let container = document.getElementById('listaDipendentiUfficioMultiplo');
             if(!container) return;
             container.innerHTML = '';
-            elencoOperaiTotali.forEach(op => {
-                let idSelect = `ore_uff_op_${op.replace(/\s+/g, '_')}`;
+
+            elencoOperaiTotali.forEach((op, index) => {
+                // ID numerico sicuro: evita problemi se il nome dell'operaio contiene
+                // apostrofi, caratteri speciali o altri simboli.
+                let idSelect = `ore_uff_op_${index}`;
                 let optionsHtml = '';
-                for (let i = 0.5; i <= 10; i += 0.5) {
-                    optionsHtml += `<option value="${i}" ${i === 8 ? 'selected' : ''}>${i} ${i === 1 ? 'Ora' : 'Ore'}</option>`;
+                for (let i = 0.5; i <= 10.0001; i += 0.5) {
+                    let valore = Number(i.toFixed(1));
+                    optionsHtml += `<option value="${valore}" ${valore === 8 ? 'selected' : ''}>${valore} ${valore === 1 ? 'Ora' : 'Ore'}</option>`;
                 }
+
                 container.innerHTML += `
                     <div class="collega-card-item">
-                        <label><input type="checkbox" name="dipendenteUfficioCheckbox" value="${op}" onchange="toggleSelectDipUfficio('${idSelect}', this)">${op}</label>
-                        <select id="${idSelect}" disabled>${optionsHtml}</select>
+                        <label>
+                            <input type="checkbox" name="dipendenteUfficioCheckbox" value="${String(op).replace(/"/g, '&quot;')}">
+                            ${op}
+                        </label>
+                        <select id="${idSelect}">${optionsHtml}</select>
                     </div>
                 `;
             });
         }
-        function toggleSelectDipUfficio(idSelect, cb) { document.getElementById(idSelect).disabled = !cb.checked; }
+
+        // Le ore sono sempre selezionabili; il checkbox decide quali dipendenti
+        // vengono effettivamente registrati nell'intervento.
+        function toggleSelectDipUfficio(idSelect, cb) {
+            let select = document.getElementById(idSelect);
+            if (select) select.disabled = false;
+        }
 
         function popolaTabellaPresenzeUfficio() {
             let container = document.getElementById('listaPresenzeUfficio');
@@ -861,7 +908,10 @@
 
             let arrOps = [];
             chks.forEach(cb => {
-                let ore = parseFloat(document.getElementById(`ore_uff_op_${cb.value.replace(/\s+/g, '_')}`).value) || 8;
+                let allChks = Array.from(document.querySelectorAll('input[name="dipendenteUfficioCheckbox"]'));
+                let opIndex = allChks.indexOf(cb);
+                let selectOre = document.getElementById(`ore_uff_op_${opIndex}`);
+                let ore = selectOre ? (parseFloat(selectOre.value) || 8) : 8;
                 arrOps.push(`${cb.value} (${ore}h)`);
             });
 
@@ -878,6 +928,7 @@
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             if(noteInp) noteInp.value = '';
             document.querySelectorAll('input[name="dipendenteUfficioCheckbox"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('#listaDipendentiUfficioMultiplo select').forEach(sel => sel.value = '8');
             aggiornaVistaUfficio();
             eseguiControlloMancantiUfficio();
             alert("✅ Intervento registrato con successo!");
