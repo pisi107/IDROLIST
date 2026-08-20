@@ -908,8 +908,17 @@
             let ore = document.getElementById('mieOreLavorate').value;
             let note = document.getElementById('noteInterventoUtente').value.trim();
 
-            if (cIdx === "" || stato === "" || !note) {
-                alert("⚠️ Compila tutti i campi obbligatori (Cantiere, Stato e Note)!");
+            // CONTROLLI AGGIORNATI
+            if (cIdx === "") {
+                alert("⚠️ Seleziona un cantiere valido!");
+                return;
+            }
+            if (stato === "") {
+                alert("⚠️ Seleziona lo stato del cantiere per questo intervento (In Corso o Terminato)!");
+                return;
+            }
+            if (!note) {
+                alert("⚠️ Inserisci le note dei lavori eseguiti!");
                 return;
             }
             if (!hasFirma || !firmaTempBase64) {
