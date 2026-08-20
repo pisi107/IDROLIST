@@ -763,9 +763,9 @@
         // ================= CALENDARIO PRESENZE =================
         // ==================== GESTIONE PRESENZE ====================
         // Struttura dati:
-        // db[nome][YYYY-MM-DD] = { stato: 'Presente'|'Ferie'|'Malattia', oreAssenza: 0..8 }
+        // db[nome][YYYY-MM-DD] = { stato: 'Presente'|'Ferie'|'Malattia'|'Straordinario', oreAssenza: 0..8, oreStraordinario: 0..24 }
         // Dal lunedì al venerdì il default è Presente con 0 ore di assenza.
-        // Sabato e domenica sono Weekend e non richiedono registrazione.
+        // Sabato e domenica sono selezionabili come Straordinario con relative ore.
 
         function getDBPresenzeCalendario() {
             try { return JSON.parse(localStorage.getItem('idra_presenze_calendario_db')) || {}; }
@@ -792,27 +792,34 @@
         function statoDefaultGiorno(dataISO) {
             const d = new Date(dataISO + 'T12:00:00');
             const giorno = d.getDay();
-            return (giorno >= 1 && giorno <= 5) ? 'Presente' : 'Weekend';
+            return (giorno >= 1 && giorno <= 5) ? 'Presente' : 'Straordinario';
         }
 
         function normalizzaGiornoPresenza(valore, dataISO) {
             const def = statoDefaultGiorno(dataISO);
-            if (def === 'Weekend') return { stato:'Weekend', oreAssenza:0 };
+            const d = new Date(dataISO + 'T12:00:00');
+            const weekend = d.getDay() === 0 || d.getDay() === 6;
 
-            // Nuovo formato
             if (valore && typeof valore === 'object') {
+                if (weekend) {
+                    const stato = valore.stato === 'Straordinario' ? 'Straordinario' : 'Straordinario';
+                    let ore = Number(valore.oreStraordinario ?? valore.oreAssenza ?? 0);
+                    if (!Number.isFinite(ore)) ore = 0;
+                    ore = Math.max(0, Math.min(24, ore));
+                    return { stato, oreAssenza:0, oreStraordinario:ore };
+                }
                 let stato = ['Presente','Ferie','Malattia'].includes(valore.stato) ? valore.stato : 'Presente';
                 let ore = Number(valore.oreAssenza);
                 if (!Number.isFinite(ore)) ore = stato === 'Presente' ? 0 : 8;
                 ore = Math.max(0, Math.min(8, ore));
                 if (stato === 'Presente') ore = 0;
-                return { stato, oreAssenza: ore };
+                return { stato, oreAssenza: ore, oreStraordinario:0 };
             }
 
-            // Compatibilità con la precedente versione che salvava "Presente"/"Assente"
-            if (valore === 'Assente') return { stato:'Ferie', oreAssenza:8 };
-            if (valore === 'Presente') return { stato:'Presente', oreAssenza:0 };
-            return { stato:'Presente', oreAssenza:0 };
+            if (weekend) return { stato:'Straordinario', oreAssenza:0, oreStraordinario:0 };
+            if (valore === 'Assente') return { stato:'Ferie', oreAssenza:8, oreStraordinario:0 };
+            if (valore === 'Presente') return { stato:'Presente', oreAssenza:0, oreStraordinario:0 };
+            return { stato:'Presente', oreAssenza:0, oreStraordinario:0 };
         }
 
         function apriCalendarioPresenze() {
@@ -861,16 +868,36 @@
             for (let giorno=1; giorno<=giorniNelMese; giorno++) {
                 const data = dataISOCalendario(anno, mese, giorno);
                 const dati = normalizzaGiornoPresenza(db[nome][data], data);
-                const weekend = dati.stato === 'Weekend';
+                const d = new Date(data + 'T12:00:00');
+                const weekend = d.getDay() === 0 || d.getDay() === 6;
 
-                // Inizializza automaticamente i feriali come Presenti.
-                if (!db[nome][data] && !weekend) db[nome][data] = { stato:'Presente', oreAssenza:0 };
+                if (!db[nome][data]) {
+                    db[nome][data] = weekend
+                        ? { stato:'Straordinario', oreAssenza:0, oreStraordinario:0 }
+                        : { stato:'Presente', oreAssenza:0, oreStraordinario:0 };
+                }
 
                 if (weekend) {
+                    const ore = Number(dati.oreStraordinario || 0);
                     html += `
-                    <div style="border:1px solid #e2e8f0;border-radius:8px;padding:10px;min-height:126px;background:#f8fafc;color:#94a3b8;">
-                        <div style="font-size:1.05rem;font-weight:800;">${giorno}</div>
-                        <div style="font-size:.76rem;margin-top:8px;font-weight:700;">⚪ Weekend</div>
+                    <div style="border:1px solid #f59e0b;border-radius:8px;padding:10px;min-height:150px;background:#fffbeb;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <div style="font-size:1.05rem;font-weight:800;">${giorno}</div>
+                            <span style="font-size:.72rem;font-weight:700;color:#b45309;">Weekend</span>
+                        </div>
+                        <select id="stato_cal_${data}" onchange="aggiornaGiornoPresenzaUI('${data}')"
+                            style="width:100%;margin-top:8px;padding:6px;border:1px solid #fbbf24;border-radius:6px;font-weight:700;">
+                            <option value="Straordinario" selected>⏱️ Straordinario</option>
+                        </select>
+                        <div style="margin-top:7px;">
+                            <label style="font-size:.70rem;font-weight:700;margin:0 0 2px;">Ore straordinario</label>
+                            <input id="ore_straordinario_${data}" type="number" min="0" max="24" step="0.5" value="${ore}"
+                                onchange="salvaGiornoPresenzaUI('${data}')"
+                                style="width:100%;padding:6px;border:1px solid #fbbf24;border-radius:6px;">
+                        </div>
+                        <div id="riepilogo_ore_${data}" style="font-size:.70rem;margin-top:6px;font-weight:700;color:#92400e;">
+                            Straordinario: ${ore}h
+                        </div>
                     </div>`;
                     continue;
                 }
@@ -911,16 +938,26 @@
             const statoEl = document.getElementById(`stato_cal_${data}`);
             const wrap = document.getElementById(`assenza_ore_wrap_${data}`);
             const oreEl = document.getElementById(`ore_assenza_${data}`);
+            const straEl = document.getElementById(`ore_straordinario_${data}`);
             const riepilogo = document.getElementById(`riepilogo_ore_${data}`);
-            if (!statoEl || !wrap) return;
+            if (!statoEl) return;
 
             const stato = statoEl.value;
+            const d = new Date(data + 'T12:00:00');
+            const weekend = d.getDay() === 0 || d.getDay() === 6;
+
+            if (weekend) {
+                if (riepilogo) riepilogo.textContent = `Straordinario: ${Math.max(0, Number(straEl ? straEl.value : 0) || 0)}h`;
+                salvaGiornoPresenzaUI(data);
+                return;
+            }
+
             if (stato === 'Presente') {
-                wrap.style.display = 'none';
+                if (wrap) wrap.style.display = 'none';
                 if (oreEl) oreEl.value = 0;
                 if (riepilogo) riepilogo.textContent = 'Presenza attesa: 8h';
             } else {
-                wrap.style.display = 'block';
+                if (wrap) wrap.style.display = 'block';
                 if (oreEl && (!oreEl.value || Number(oreEl.value) === 0)) oreEl.value = 8;
                 const ore = Math.max(0, Math.min(8, Number(oreEl ? oreEl.value : 8) || 0));
                 if (riepilogo) riepilogo.textContent = `Presenza attesa: ${8-ore}h`;
@@ -932,22 +969,34 @@
             const sel = document.getElementById('calendarioDipendentePresenze');
             const statoEl = document.getElementById(`stato_cal_${data}`);
             const oreEl = document.getElementById(`ore_assenza_${data}`);
+            const straEl = document.getElementById(`ore_straordinario_${data}`);
             if (!sel || !statoEl) return;
 
             const stato = statoEl.value;
-            let ore = stato === 'Presente' ? 0 : Number(oreEl ? oreEl.value : 8);
-            if (!Number.isFinite(ore)) ore = 8;
-            ore = Math.max(0, Math.min(8, ore));
-
+            const d = new Date(data + 'T12:00:00');
+            const weekend = d.getDay() === 0 || d.getDay() === 6;
             const db = getDBPresenzeCalendario();
             if (!db[sel.value]) db[sel.value] = {};
-            db[sel.value][data] = { stato, oreAssenza: ore };
-            setDBPresenzeCalendario(db);
 
-            const riepilogo = document.getElementById(`riepilogo_ore_${data}`);
-            if (riepilogo) riepilogo.textContent = stato === 'Presente'
-                ? 'Presenza attesa: 8h'
-                : `Presenza attesa: ${8-ore}h`;
+            if (weekend) {
+                let oreStraordinario = Number(straEl ? straEl.value : 0);
+                if (!Number.isFinite(oreStraordinario)) oreStraordinario = 0;
+                oreStraordinario = Math.max(0, Math.min(24, oreStraordinario));
+                db[sel.value][data] = { stato:'Straordinario', oreAssenza:0, oreStraordinario };
+                const riepilogo = document.getElementById(`riepilogo_ore_${data}`);
+                if (riepilogo) riepilogo.textContent = `Straordinario: ${oreStraordinario}h`;
+            } else {
+                let ore = stato === 'Presente' ? 0 : Number(oreEl ? oreEl.value : 8);
+                if (!Number.isFinite(ore)) ore = 8;
+                ore = Math.max(0, Math.min(8, ore));
+                db[sel.value][data] = { stato, oreAssenza: ore, oreStraordinario:0 };
+
+                const riepilogo = document.getElementById(`riepilogo_ore_${data}`);
+                if (riepilogo) riepilogo.textContent = stato === 'Presente'
+                    ? 'Presenza attesa: 8h'
+                    : `Presenza attesa: ${8-ore}h`;
+            }
+            setDBPresenzeCalendario(db);
         }
 
         // Mantiene il vecchio nome funzione per compatibilità con eventuali pulsanti già presenti.
@@ -1053,7 +1102,7 @@
                     if (operaiEsclusi.includes(nomeOp)) return;
 
                     const presenza = getDatiPresenza(nomeOp, dataStr);
-                    if (presenza.stato === 'Weekend') return;
+                    if (presenza.stato === 'Straordinario') return;
 
                     const oreLavorate = getOreLavorateDipendenteData(nomeOp, dataStr);
                     const oreAssenza = Number(presenza.oreAssenza || 0);
