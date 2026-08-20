@@ -42,6 +42,8 @@
         .btn-danger { background-color: var(--danger); color: white; padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; box-shadow: none; width: auto; }
         .btn-dark { background: var(--brand-dark); color: white; }
         .btn-artigiani { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; }
+        .btn-blue-light { background: linear-gradient(135deg, #0284c7, #0284c7); color: white; }
+        .btn-purple { background: linear-gradient(135deg, #7c3aed, #6d28d9); color: white; }
 
         .card-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
         
@@ -183,16 +185,30 @@
                 </div>
             </div>
 
-            <!-- FOGLIO LAVORO UTENTE -->
-            <div id="viewFormUtente" class="view-section">
+            <!-- MENU PRINCIPALE UTENTE (3 PULSANTI) -->
+            <div id="viewMenuUtente" class="view-section">
                 <div class="user-logged-box">
-                    <span id="labelUtenteConnesso">Utente: -</span>
+                    <span id="labelUtenteConnessoMenu">Utente: -</span>
                     <button class="action-btn btn-dark" style="width: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="esciLoginUtente()">Esci</button>
                 </div>
 
-                <div class="card-box" style="border-color: var(--brand-orange);">
-                    <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">✏️ Compila Foglio di Lavoro</div>
+                <div class="card-box" style="border-color: var(--brand-orange); text-align: center; padding: 25px 15px;">
+                    <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 15px;">Seleziona operazione:</div>
                     
+                    <button class="action-btn btn-orange" style="margin-bottom: 12px;" onclick="apriSchermata('foglio')">📋 FOGLIO DI LAVORO</button>
+                    <button class="action-btn btn-blue-light" style="margin-bottom: 12px;" onclick="apriSchermata('fotografie')">📷 FOTOGRAFIE</button>
+                    <button class="action-btn btn-purple" onclick="apriSchermata('garanzie')">🛡️ GARANZIE</button>
+                </div>
+            </div>
+
+            <!-- 1. FOGLIO DI LAVORO (SOLO FOTO DDT) -->
+            <div id="viewFormUtente" class="view-section">
+                <div class="user-logged-box">
+                    <span>📋 Foglio di Lavoro</span>
+                    <button class="action-btn btn-dark" style="width: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="tornaAlMenuUtente()">← Menu</button>
+                </div>
+
+                <div class="card-box" style="border-color: var(--brand-orange);">
                     <div>
                         <label>Cerca Cantiere Aperto</label>
                         <input type="text" id="inputRicercaCantiereUtente" placeholder="Scrivi per filtrare i cantieri..." oninput="popolaCantieriUtente()">
@@ -215,18 +231,51 @@
                     <div><label>Colleghi presenti e ore dedicate</label><div class="container-colleghi-scroll" id="listaColleghiUtente"></div></div>
                     <div><label>Note / Lavori Eseguiti *</label><textarea id="noteInterventoUtente" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea></div>
                     
-                    <!-- SEZIONI SEPARATE MANUALI (SENZA IA) -->
+                    <!-- UNICA FOTO RICHIESTA: FOTO DDT -->
                     <div>
-                        <label>📄 Carica DDT / Bolle</label>
+                        <label>📄 Carica Foto DDT</label>
                         <input type="file" id="inputBolleManuale" accept="image/*" multiple>
                     </div>
 
-                    <div>
-                        <label>📷 Carica Foto Lavori / Cantiere</label>
-                        <input type="file" id="inputFotoManuale" accept="image/*" multiple>
-                    </div>
+                    <button class="action-btn btn-orange" onclick="salvaFoglioLavoroUtente()">Salva Foglio di Lavoro</button>
+                </div>
+            </div>
 
-                    <button class="action-btn btn-orange" id="btnSalvaFoglio" onclick="salvaFoglioLavoroUtente()">Salva Foglio di Lavoro</button>
+            <!-- 2. FOTOGRAFIE (FOTO IMPIANTI) -->
+            <div id="viewFotoImpianti" class="view-section">
+                <div class="user-logged-box">
+                    <span>📷 Fotografie Impianti</span>
+                    <button class="action-btn btn-dark" style="width: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="tornaAlMenuUtente()">← Menu</button>
+                </div>
+
+                <div class="card-box" style="border-color: #0284c7;">
+                    <div><label>Seleziona Cantiere *</label><select id="selectCantiereFoto"><option value="">Caricamento cantieri...</option></select></div>
+                    <div>
+                        <label>📷 Carica Foto Impianti *</label>
+                        <input type="file" id="inputFotoImpiantiExtra" accept="image/*" multiple>
+                    </div>
+                    <div><label>Note Opzionali</label><textarea id="noteFotoImpianti" rows="2" placeholder="Dettagli sulle foto..."></textarea></div>
+
+                    <button class="action-btn btn-blue-light" onclick="salvaFotoImpianti()">Salva Fotografie Impianto</button>
+                </div>
+            </div>
+
+            <!-- 3. GARANZIE (FOTO ETICHETTE MACCHINE) -->
+            <div id="viewGaranzie" class="view-section">
+                <div class="user-logged-box">
+                    <span>🛡️ Garanzie - Etichette Macchine</span>
+                    <button class="action-btn btn-dark" style="width: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="tornaAlMenuUtente()">← Menu</button>
+                </div>
+
+                <div class="card-box" style="border-color: #7c3aed;">
+                    <div><label>Seleziona Cantiere *</label><select id="selectCantiereGaranzie"><option value="">Caricamento cantieri...</option></select></div>
+                    <div>
+                        <label>🛡️ Carica Foto Etichette (Condizionatori, PDC, ecc.) *</label>
+                        <input type="file" id="inputFotoGaranzieExtra" accept="image/*" multiple>
+                    </div>
+                    <div><label>Note / Modello Macchina</label><textarea id="noteGaranzie" rows="2" placeholder="Es. Condizionatore Daikin / PDC..."></textarea></div>
+
+                    <button class="action-btn btn-purple" onclick="salvaGaranzie()">Salva Etichette Garanzia</button>
                 </div>
             </div>
 
@@ -463,18 +512,47 @@
         function avviaSessioneUtente(nome, tipo) {
             utenteCorrente = nome;
             tipoUtenteCorrente = tipo;
-            document.getElementById('labelUtenteConnesso').innerText = `Utente: ${utenteCorrente} (${tipo === 'operaio' ? 'Operaio' : 'Artigiano'})`;
+            document.getElementById('labelUtenteConnessoMenu').innerText = `Utente: ${utenteCorrente} (${tipo === 'operaio' ? 'Operaio' : 'Artigiano'})`;
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById('viewFormUtente').classList.add('active');
+            document.getElementById('viewMenuUtente').classList.add('active');
             document.getElementById('sottotitoloHeader').innerText = tipo === 'operaio' ? "Portale Operai" : "Portale Artigiani";
-            popolaCantieriUtente();
-            popolaColleghiUtente();
+        }
+
+        function tornaAlMenuUtente() {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('viewMenuUtente').classList.add('active');
         }
 
         function esciLoginUtente() {
             utenteCorrente = "";
             tipoUtenteCorrente = "";
             mostraVista('selezione');
+        }
+
+        function apriSchermata(tipoSchermata) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            if (tipoSchermata === 'foglio') {
+                document.getElementById('viewFormUtente').classList.add('active');
+                popolaCantieriUtente();
+                popolaColleghiUtente();
+            } else if (tipoSchermata === 'fotografie') {
+                document.getElementById('viewFotoImpianti').classList.add('active');
+                popolaSelectCantieriGenerico('selectCantiereFoto');
+            } else if (tipoSchermata === 'garanzie') {
+                document.getElementById('viewGaranzie').classList.add('active');
+                popolaSelectCantieriGenerico('selectCantiereGaranzie');
+            }
+        }
+
+        function popolaSelectCantieriGenerico(elementId) {
+            let select = document.getElementById(elementId);
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            select.innerHTML = '<option value="">-- Seleziona Cantiere --</option>';
+            cantieriDB.forEach((c, idx) => {
+                if (!c.completato) {
+                    select.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo}</option>`;
+                }
+            });
         }
 
         function popolaGestionePasswordUfficio() {
@@ -538,7 +616,7 @@
             if (!cliente || !indirizzo) return alert("⚠️ Inserisci cliente e indirizzo!");
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            cantieriDB.push({ cliente: cliente, indirizzo: indirizzo, completato: false, storico: [] });
+            cantieriDB.push({ cliente: cliente, indirizzo: indirizzo, completato: false, storico: [], fotoImpianti: [], garanzie: [] });
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
 
             document.getElementById('nuovoClienteUtente').value = '';
@@ -620,10 +698,7 @@
             if (cIdx === "" || stato === "" || !note) return alert("⚠️ Compila tutti i campi obbligatori!");
 
             let inputBolle = document.getElementById('inputBolleManuale').files;
-            let inputFoto = document.getElementById('inputFotoManuale').files;
-
             let fotoBolleBase64 = await elaboraFileList(inputBolle);
-            let fotoLavoriBase64 = await elaboraFileList(inputFoto);
 
             let partecipanti = [`${utenteCorrente} (${ore}h)`];
             document.querySelectorAll('input[name="collegaCheckbox"]:checked').forEach(cb => {
@@ -641,7 +716,7 @@
                 note, 
                 statoIntervento: stato, 
                 fotoBolle: fotoBolleBase64, 
-                fotoLavori: fotoLavoriBase64 
+                fotoLavori: [] 
             });
             cantieriDB[cIdx].completato = (stato === "Terminato");
 
@@ -650,8 +725,57 @@
             
             document.getElementById('noteInterventoUtente').value = '';
             document.getElementById('inputBolleManuale').value = '';
-            document.getElementById('inputFotoManuale').value = '';
-            popolaCantieriUtente();
+            tornaAlMenuUtente();
+        }
+
+        async function salvaFotoImpianti() {
+            let cIdx = document.getElementById('selectCantiereFoto').value;
+            let files = document.getElementById('inputFotoImpiantiExtra').files;
+            let note = document.getElementById('noteFotoImpianti').value.trim();
+
+            if (cIdx === "" || files.length === 0) return alert("⚠️ Seleziona un cantiere e almeno una foto degli impianti!");
+
+            let fotoBase64 = await elaboraFileList(files);
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            if (!cantieriDB[cIdx].fotoImpianti) cantieriDB[cIdx].fotoImpianti = [];
+
+            cantieriDB[cIdx].fotoImpianti.push({
+                data: new Date().toISOString().split('T')[0],
+                utente: utenteCorrente,
+                note: note,
+                foto: fotoBase64
+            });
+
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+            alert("✅ Foto impianti salvate con successo!");
+            document.getElementById('inputFotoImpiantiExtra').value = '';
+            document.getElementById('noteFotoImpianti').value = '';
+            tornaAlMenuUtente();
+        }
+
+        async function salvaGaranzie() {
+            let cIdx = document.getElementById('selectCantiereGaranzie').value;
+            let files = document.getElementById('inputFotoGaranzieExtra').files;
+            let note = document.getElementById('noteGaranzie').value.trim();
+
+            if (cIdx === "" || files.length === 0) return alert("⚠️ Seleziona un cantiere e almeno una foto dell'etichetta!");
+
+            let fotoBase64 = await elaboraFileList(files);
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            if (!cantieriDB[cIdx].garanzie) cantieriDB[cIdx].garanzie = [];
+
+            cantieriDB[cIdx].garanzie.push({
+                data: new Date().toISOString().split('T')[0],
+                utente: utenteCorrente,
+                note: note,
+                foto: fotoBase64
+            });
+
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+            alert("✅ Foto etichette garanzia salvate con successo!");
+            document.getElementById('inputFotoGaranzieExtra').value = '';
+            document.getElementById('noteGaranzie').value = '';
+            tornaAlMenuUtente();
         }
 
         function popolaSelectFiltroDipendenti() {
@@ -710,7 +834,7 @@
             let indirizzo = document.getElementById('nuovoIndirizzo').value.trim();
             if (!cliente || !indirizzo) return alert("Inserisci cliente e indirizzo!");
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            cantieriDB.push({ cliente, indirizzo, completato: false, storico: [] });
+            cantieriDB.push({ cliente, indirizzo, completato: false, storico: [], fotoImpianti: [], garanzie: [] });
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             document.getElementById('nuovoCliente').value = ''; 
             document.getElementById('nuovoIndirizzo').value = '';
@@ -768,20 +892,46 @@
                     let stHtml = '';
                     if (c.storico) {
                         c.storico.forEach(s => {
-                            let fl = s.fotoLavori && s.fotoLavori.length > 0 ? s.fotoLavori.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('') : '<span style="font-size:0.75rem; color:var(--text-light);">Nessuna foto</span>';
                             let fb = s.fotoBolle && s.fotoBolle.length > 0 ? s.fotoBolle.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('') : '';
-                            
                             stHtml += `
                                 <div style="background:#f1f5f9; padding:10px; border-radius:8px; margin-top:8px; font-size:0.8rem; border: 1px solid var(--border);">
                                     <div><b>📅 ${s.data}</b> (${s.tipo}) - ${s.operai}</div>
                                     <div style="margin-top:4px;"><i>${s.note.replace(/\n/g, '<br>')}</i></div>
-                                    ${fb ? `<div style="margin-top:6px; font-weight:700; color:var(--brand-dark); font-size:0.75rem; text-transform:uppercase;">📁 DDT e Bolle:</div><div class="foto-thumb-container">${fb}</div>` : ''}
-                                    <div style="margin-top:6px; font-weight:700; color:var(--brand-dark); font-size:0.75rem; text-transform:uppercase;">📸 Foto Lavori:</div>
-                                    <div class="foto-thumb-container">${fl}</div>
+                                    ${fb ? `<div style="margin-top:6px; font-weight:700; color:var(--brand-dark); font-size:0.75rem; text-transform:uppercase;">📄 Foto DDT:</div><div class="foto-thumb-container">${fb}</div>` : ''}
                                 </div>`;
                         });
                     }
-                    cont.innerHTML += `<div class="cantiere-card ${c.completato?'terminato':''}"><div style="font-weight:800;">${c.cliente}</div><div style="font-size:0.8rem; color:var(--text-light);">${c.indirizzo}</div>${stHtml}<div style="display:flex; gap:6px; margin-top:8px;"><button class="action-btn ${c.completato?'btn-green':'btn-orange'}" style="padding:6px; font-size:0.8rem;" onclick="toggleStato(${idx})">${c.completato?'Riapri':'Termina'}</button><button class="action-btn btn-danger" onclick="eliminaCantiere(${idx})">Elimina</button></div></div>`;
+
+                    // Sezione Foto Impianti nell'ufficio
+                    let fotoImpiantiHtml = '';
+                    if (c.fotoImpianti && c.fotoImpianti.length > 0) {
+                        c.fotoImpianti.forEach(fi => {
+                            let fList = fi.foto.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('');
+                            fotoImpiantiHtml += `<div style="background:#e0f2fe; padding:8px; border-radius:8px; margin-top:6px; font-size:0.8rem;"><div><b>📷 Impianto (${fi.data})</b> - ${fi.utente}</div>${fi.note ? `<div><i>${fi.note}</i></div>` : ''}<div class="foto-thumb-container">${fList}</div></div>`;
+                        });
+                    }
+
+                    // Sezione Garanzie nell'ufficio
+                    let garanzieHtml = '';
+                    if (c.garanzie && c.garanzie.length > 0) {
+                        c.garanzie.forEach(g => {
+                            let gList = g.foto.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('');
+                            garanzieHtml += `<div style="background:#f3e8ff; padding:8px; border-radius:8px; margin-top:6px; font-size:0.8rem;"><div><b>🛡️ Garanzia / Etichetta (${g.data})</b> - ${g.utente}</div>${g.note ? `<div><i>${g.note}</i></div>` : ''}<div class="foto-thumb-container">${gList}</div></div>`;
+                        });
+                    }
+
+                    cont.innerHTML += `
+                        <div class="cantiere-card ${c.completato?'terminato':''}">
+                            <div style="font-weight:800;">${c.cliente}</div>
+                            <div style="font-size:0.8rem; color:var(--text-light);">${c.indirizzo}</div>
+                            ${stHtml}
+                            ${fotoImpiantiHtml}
+                            ${garanzieHtml}
+                            <div style="display:flex; gap:6px; margin-top:8px;">
+                                <button class="action-btn ${c.completato?'btn-green':'btn-orange'}" style="padding:6px; font-size:0.8rem;" onclick="toggleStato(${idx})">${c.completato?'Riapri':'Termina'}</button>
+                                <button class="action-btn btn-danger" onclick="eliminaCantiere(${idx})">Elimina</button>
+                            </div>
+                        </div>`;
                 }
             });
             aggiornaTabellaRiepilogo(db);
