@@ -85,6 +85,10 @@
         .modal-header { background: #1e293b; color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 1.1rem; }
         .modal-body { padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
         .close-modal-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+
+        /* Stili per la Firma Digitale */
+        .signature-pad-container { border: 2px dashed var(--border); border-radius: 12px; background: #fff; position: relative; overflow: hidden; margin-top: 5px; }
+        canvas.signature-canvas { width: 100%; height: 160px; touch-action: none; display: block; background: #fff; cursor: crosshair; }
     </style>
 </head>
 <body>
@@ -185,7 +189,7 @@
                 </div>
             </div>
 
-            <!-- MENU PRINCIPALE UTENTE (3 PULSANTI) -->
+            <!-- MENU PRINCIPALE UTENTE -->
             <div id="viewMenuUtente" class="view-section">
                 <div class="user-logged-box">
                     <span id="labelUtenteConnessoMenu">Utente: -</span>
@@ -201,7 +205,7 @@
                 </div>
             </div>
 
-            <!-- 1. FOGLIO DI LAVORO (SOLO FOTO DDT) -->
+            <!-- 1. FOGLIO DI LAVORO -->
             <div id="viewFormUtente" class="view-section">
                 <div class="user-logged-box">
                     <span>📋 Foglio di Lavoro</span>
@@ -231,17 +235,28 @@
                     <div><label>Colleghi presenti e ore dedicate</label><div class="container-colleghi-scroll" id="listaColleghiUtente"></div></div>
                     <div><label>Note / Lavori Eseguiti *</label><textarea id="noteInterventoUtente" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea></div>
                     
-                    <!-- UNICA FOTO RICHIESTA: FOTO DDT -->
                     <div>
                         <label>📄 Carica Foto DDT</label>
                         <input type="file" id="inputBolleManuale" accept="image/*" multiple>
                     </div>
 
-                    <button class="action-btn btn-orange" onclick="salvaFoglioLavoroUtente()">Salva Foglio di Lavoro</button>
+                    <!-- SEZIONE FIRMA DEL CLIENTE -->
+                    <div style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px;">
+                        <label>✍️ Firma del Cliente *</label>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span id="labelStatoFirma" style="font-size: 0.75rem; color: var(--danger); font-weight: 700;">Nessuna firma inserita</span>
+                            <button type="button" class="action-btn btn-dark" style="width: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="pulisciFirmaCanvas()">Pulisci Firma</button>
+                        </div>
+                        <div class="signature-pad-container">
+                            <canvas id="canvasFirmaCliente" class="signature-canvas"></canvas>
+                        </div>
+                    </div>
+
+                    <button class="action-btn btn-orange" onclick="salvaFoglioLavoroUtente()" style="margin-top: 10px;">Salva Foglio di Lavoro</button>
                 </div>
             </div>
 
-            <!-- 2. FOTOGRAFIE (FOTO IMPIANTI) -->
+            <!-- 2. FOTOGRAFIE -->
             <div id="viewFotoImpianti" class="view-section">
                 <div class="user-logged-box">
                     <span>📷 Fotografie Impianti</span>
@@ -249,18 +264,32 @@
                 </div>
 
                 <div class="card-box" style="border-color: #0284c7;">
+                    <div>
+                        <label>Cerca Cantiere Aperto</label>
+                        <input type="text" id="inputRicercaCantiereFoto" placeholder="Scrivi per filtrare i cantieri..." oninput="popolaSelectCantieriGenerico('selectCantiereFoto', 'inputRicercaCantiereFoto')">
+                    </div>
+
+                    <div style="background: #f1f5f9; padding: 12px; border-radius: 10px; border: 1px dashed #0284c7;">
+                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--brand-dark); margin-bottom: 6px;">➕ Cantiere non trovato? Crealo subito:</div>
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <input type="text" id="nuovoClienteFoto" placeholder="Nome Cliente..." style="padding: 10px; font-size: 0.9rem;">
+                            <input type="text" id="nuovoIndirizzoFoto" placeholder="Indirizzo Cantiere..." style="padding: 10px; font-size: 0.9rem;">
+                            <button type="button" class="action-btn btn-dark" style="padding: 10px; font-size: 0.85rem;" onclick="creaCantiereAlVoloGenerico('nuovoClienteFoto', 'nuovoIndirizzoFoto', 'selectCantiereFoto', 'inputRicercaCantiereFoto')">Crea e Seleziona Cantiere</button>
+                        </div>
+                    </div>
+
                     <div><label>Seleziona Cantiere *</label><select id="selectCantiereFoto"><option value="">Caricamento cantieri...</option></select></div>
                     <div>
                         <label>📷 Carica Foto Impianti *</label>
                         <input type="file" id="inputFotoImpiantiExtra" accept="image/*" multiple>
                     </div>
-                    <div><label>Note Opzionali</label><textarea id="noteFotoImpianti" rows="2" placeholder="Dettagli sulle foto..."></textarea></div>
+                    <div><label>Descrizione Impianto / Note *</label><textarea id="noteFotoImpianti" rows="2" placeholder="Descrizione obbligatoria delle foto impianti..."></textarea></div>
 
                     <button class="action-btn btn-blue-light" onclick="salvaFotoImpianti()">Salva Fotografie Impianto</button>
                 </div>
             </div>
 
-            <!-- 3. GARANZIE (FOTO ETICHETTE MACCHINE) -->
+            <!-- 3. GARANZIE -->
             <div id="viewGaranzie" class="view-section">
                 <div class="user-logged-box">
                     <span>🛡️ Garanzie - Etichette Macchine</span>
@@ -268,12 +297,25 @@
                 </div>
 
                 <div class="card-box" style="border-color: #7c3aed;">
+                    <div>
+                        <label>Cerca Cantiere Aperto</label>
+                        <input type="text" id="inputRicercaCantiereGaranzie" placeholder="Scrivi per filtrare i cantieri..." oninput="popolaSelectCantieriGenerico('selectCantiereGaranzie', 'inputRicercaCantiereGaranzie')">
+                    </div>
+
+                    <div style="background: #f1f5f9; padding: 12px; border-radius: 10px; border: 1px dashed #7c3aed;">
+                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--brand-dark); margin-bottom: 6px;">➕ Cantiere non trovato? Crealo subito:</div>
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <input type="text" id="nuovoClienteGaranzie" placeholder="Nome Cliente..." style="padding: 10px; font-size: 0.9rem;">
+                            <input type="text" id="nuovoIndirizzoGaranzie" placeholder="Indirizzo Cantiere..." style="padding: 10px; font-size: 0.9rem;">
+                            <button type="button" class="action-btn btn-dark" style="padding: 10px; font-size: 0.85rem;" onclick="creaCantiereAlVoloGenerico('nuovoClienteGaranzie', 'nuovoIndirizzoGaranzie', 'selectCantiereGaranzie', 'inputRicercaCantiereGaranzie')">Crea e Seleziona Cantiere</button>
+                        </div>
+                    </div>
+
                     <div><label>Seleziona Cantiere *</label><select id="selectCantiereGaranzie"><option value="">Caricamento cantieri...</option></select></div>
                     <div>
                         <label>🛡️ Carica Foto Etichette (Condizionatori, PDC, ecc.) *</label>
                         <input type="file" id="inputFotoGaranzieExtra" accept="image/*" multiple>
                     </div>
-                    <div><label>Note / Modello Macchina</label><textarea id="noteGaranzie" rows="2" placeholder="Es. Condizionatore Daikin / PDC..."></textarea></div>
 
                     <button class="action-btn btn-purple" onclick="salvaGaranzie()">Salva Etichette Garanzia</button>
                 </div>
@@ -398,13 +440,79 @@
         let utenteCorrente = "";
         let tipoUtenteCorrente = ""; 
         let cartellaCorrente = 'da_fare';
+        
+        // Gestione Canvas Firma
+        let canvasFirma, ctxFirma, isDrawingFirma = false, hasFirma = false;
 
         window.onload = function() {
             let oggiStr = new Date().toISOString().split('T')[0];
             document.getElementById('dataInterventoUtente').value = oggiStr;
             document.getElementById('dataInterventoUfficio').value = oggiStr;
             popolaTendineLogin();
+            inizializzaCanvasFirma();
         };
+
+        function inizializzaCanvasFirma() {
+            canvasFirma = document.getElementById('canvasFirmaCliente');
+            if (!canvasFirma) return;
+            ctxFirma = canvasFirma.getContext('2d');
+            
+            // Imposta risoluzione interna per nitidezza
+            function ridimensionaCanvas() {
+                let rect = canvasFirma.getBoundingClientRect();
+                canvasFirma.width = rect.width * window.devicePixelRatio;
+                canvasFirma.height = rect.height * window.devicePixelRatio;
+                ctxFirma.scale(window.devicePixelRatio, window.devicePixelRatio);
+                ctxFirma.lineWidth = 2.5;
+                ctxFirma.lineCap = 'round';
+                ctxFirma.strokeStyle = '#0f172a';
+            }
+            ridimensionaCanvas();
+            window.addEventListener('resize', ridimensionaCanvas);
+
+            // Eventi Mouse & Touch
+            canvasFirma.addEventListener('mousedown', avviaDisegnoFirma);
+            canvasFirma.addEventListener('mousemove', disegnaFirma);
+            canvasFirma.addEventListener('mouseup', fermaDisegnoFirma);
+            canvasFirma.addEventListener('mouseleave', fermaDisegnoFirma);
+
+            canvasFirma.addEventListener('touchstart', (e) => { e.preventDefault(); avviaDisegnoFirma(e.touches[0]); });
+            canvasFirma.addEventListener('touchmove', (e) => { e.preventDefault(); disegnaFirma(e.touches[0]); });
+            canvasFirma.addEventListener('touchend', (e) => { e.preventDefault(); fermaDisegnoFirma(); });
+        }
+
+        function ottieniPosizioneFirma(e) {
+            let rect = canvasFirma.getBoundingClientRect();
+            return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        }
+
+        function avviaDisegnoFirma(e) {
+            isDrawingFirma = true;
+            let pos = ottieniPosizioneFirma(e);
+            ctxFirma.beginPath();
+            ctxFirma.moveTo(pos.x, pos.y);
+        }
+
+        function disegnaFirma(e) {
+            if (!isDrawingFirma) return;
+            let pos = ottieniPosizioneFirma(e);
+            ctxFirma.lineTo(pos.x, pos.y);
+            ctxFirma.stroke();
+            hasFirma = true;
+            document.getElementById('labelStatoFirma').innerText = "✅ Firma registrata";
+            document.getElementById('labelStatoFirma').style.color = "var(--success)";
+        }
+
+        function fermaDisegnoFirma() {
+            isDrawingFirma = false;
+        }
+
+        function pulisciFirmaCanvas() {
+            ctxFirma.clearRect(0, 0, canvasFirma.width, canvasFirma.height);
+            hasFirma = false;
+            document.getElementById('labelStatoFirma').innerText = "Nessuna firma inserita";
+            document.getElementById('labelStatoFirma').style.color = "var(--danger)";
+        }
 
         function mostraVista(vista) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
@@ -535,24 +643,48 @@
                 document.getElementById('viewFormUtente').classList.add('active');
                 popolaCantieriUtente();
                 popolaColleghiUtente();
+                pulisciFirmaCanvas();
             } else if (tipoSchermata === 'fotografie') {
                 document.getElementById('viewFotoImpianti').classList.add('active');
-                popolaSelectCantieriGenerico('selectCantiereFoto');
+                popolaSelectCantieriGenerico('selectCantiereFoto', 'inputRicercaCantiereFoto');
             } else if (tipoSchermata === 'garanzie') {
                 document.getElementById('viewGaranzie').classList.add('active');
-                popolaSelectCantieriGenerico('selectCantiereGaranzie');
+                popolaSelectCantieriGenerico('selectCantiereGaranzie', 'inputRicercaCantiereGaranzie');
             }
         }
 
-        function popolaSelectCantieriGenerico(elementId) {
-            let select = document.getElementById(elementId);
+        function popolaSelectCantieriGenerico(selectId, inputQueryId) {
+            let select = document.getElementById(selectId);
+            let query = document.getElementById(inputQueryId).value.toLowerCase().trim();
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            select.innerHTML = '<option value="">-- Seleziona Cantiere --</option>';
+            select.innerHTML = '';
+            let count = 0;
             cantieriDB.forEach((c, idx) => {
-                if (!c.completato) {
+                if (!c.completato && (`${c.cliente} - ${c.indirizzo}`.toLowerCase().includes(query))) {
                     select.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo}</option>`;
+                    count++;
                 }
             });
+            if (count === 0) select.innerHTML = '<option value="">Nessun cantiere trovato</option>';
+        }
+
+        function creaCantiereAlVoloGenerico(idCli, idInd, idSelect, idQuery) {
+            let cliente = document.getElementById(idCli).value.trim();
+            let indirizzo = document.getElementById(idInd).value.trim();
+            if (!cliente || !indirizzo) return alert("⚠️ Inserisci cliente e indirizzo!");
+
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            cantieriDB.push({ cliente: cliente, indirizzo: indirizzo, completato: false, storico: [], fotoImpianti: [], garanzie: [] });
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+
+            document.getElementById(idCli).value = '';
+            document.getElementById(idInd).value = '';
+            document.getElementById(idQuery).value = '';
+            
+            popolaSelectCantieriGenerico(idSelect, idQuery);
+            let sel = document.getElementById(idSelect);
+            sel.selectedIndex = sel.options.length - 1;
+            alert("✅ Cantiere creato e selezionato!");
         }
 
         function popolaGestionePasswordUfficio() {
@@ -621,9 +753,11 @@
 
             document.getElementById('nuovoClienteUtente').value = '';
             document.getElementById('nuovoIndirizzoUtente').value = '';
+            document.getElementById('inputRicercaCantiereUtente').value = '';
             popolaCantieriUtente();
             let selectCantiere = document.getElementById('selectCantiereUtente');
             selectCantiere.selectedIndex = selectCantiere.options.length - 1;
+            alert("✅ Cantiere creato e selezionato!");
         }
 
         function popolaCantieriUtente() {
@@ -696,9 +830,13 @@
             let note = document.getElementById('noteInterventoUtente').value.trim();
 
             if (cIdx === "" || stato === "" || !note) return alert("⚠️ Compila tutti i campi obbligatori!");
+            if (!hasFirma) return alert("⚠️ La firma del cliente è obbligatoria per completare il foglio di lavoro!");
 
             let inputBolle = document.getElementById('inputBolleManuale').files;
             let fotoBolleBase64 = await elaboraFileList(inputBolle);
+
+            // Cattura la firma del cliente come immagine base64 compressa
+            let firmaBase64 = canvasFirma.toDataURL('image/jpeg', 0.8);
 
             let partecipanti = [`${utenteCorrente} (${ore}h)`];
             document.querySelectorAll('input[name="collegaCheckbox"]:checked').forEach(cb => {
@@ -716,15 +854,17 @@
                 note, 
                 statoIntervento: stato, 
                 fotoBolle: fotoBolleBase64, 
+                firmaCliente: firmaBase64,
                 fotoLavori: [] 
             });
             cantieriDB[cIdx].completato = (stato === "Terminato");
 
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            alert("✅ Foglio di lavoro salvato con successo!");
+            alert("✅ Foglio di lavoro e firma salvati con successo!");
             
             document.getElementById('noteInterventoUtente').value = '';
             document.getElementById('inputBolleManuale').value = '';
+            pulisciFirmaCanvas();
             tornaAlMenuUtente();
         }
 
@@ -734,6 +874,7 @@
             let note = document.getElementById('noteFotoImpianti').value.trim();
 
             if (cIdx === "" || files.length === 0) return alert("⚠️ Seleziona un cantiere e almeno una foto degli impianti!");
+            if (!note) return alert("⚠️ La descrizione/nota delle foto impianti è obbligatoria!");
 
             let fotoBase64 = await elaboraFileList(files);
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
@@ -756,9 +897,8 @@
         async function salvaGaranzie() {
             let cIdx = document.getElementById('selectCantiereGaranzie').value;
             let files = document.getElementById('inputFotoGaranzieExtra').files;
-            let note = document.getElementById('noteGaranzie').value.trim();
 
-            if (cIdx === "" || files.length === 0) return alert("⚠️ Seleziona un cantiere e almeno una foto dell'etichetta!");
+            if (cIdx === "" || files.length === 0) return alert("⚠️ Seleziona un cantiere e almeno una foto dell'etichetta di garanzia!");
 
             let fotoBase64 = await elaboraFileList(files);
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
@@ -767,14 +907,12 @@
             cantieriDB[cIdx].garanzie.push({
                 data: new Date().toISOString().split('T')[0],
                 utente: utenteCorrente,
-                note: note,
                 foto: fotoBase64
             });
 
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             alert("✅ Foto etichette garanzia salvate con successo!");
             document.getElementById('inputFotoGaranzieExtra').value = '';
-            document.getElementById('noteGaranzie').value = '';
             tornaAlMenuUtente();
         }
 
@@ -893,11 +1031,14 @@
                     if (c.storico) {
                         c.storico.forEach(s => {
                             let fb = s.fotoBolle && s.fotoBolle.length > 0 ? s.fotoBolle.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('') : '';
+                            let firmaHtml = s.firmaCliente ? `<div style="margin-top:6px;"><span style="font-weight:700; color:var(--brand-dark); font-size:0.75rem; text-transform:uppercase;">✍️ Firma Cliente:</span><br><img src="${s.firmaCliente}" class="foto-thumb" style="width:120px; height:50px; object-fit:contain; background:#fff;" onclick="apriZoomFoto('${s.firmaCliente}')"></div>` : '';
+                            
                             stHtml += `
                                 <div style="background:#f1f5f9; padding:10px; border-radius:8px; margin-top:8px; font-size:0.8rem; border: 1px solid var(--border);">
                                     <div><b>📅 ${s.data}</b> (${s.tipo}) - ${s.operai}</div>
                                     <div style="margin-top:4px;"><i>${s.note.replace(/\n/g, '<br>')}</i></div>
                                     ${fb ? `<div style="margin-top:6px; font-weight:700; color:var(--brand-dark); font-size:0.75rem; text-transform:uppercase;">📄 Foto DDT:</div><div class="foto-thumb-container">${fb}</div>` : ''}
+                                    ${firmaHtml}
                                 </div>`;
                         });
                     }
@@ -914,7 +1055,7 @@
                     if (c.garanzie && c.garanzie.length > 0) {
                         c.garanzie.forEach(g => {
                             let gList = g.foto.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('');
-                            garanzieHtml += `<div style="background:#f3e8ff; padding:8px; border-radius:8px; margin-top:6px; font-size:0.8rem;"><div><b>🛡️ Garanzia / Etichetta (${g.data})</b> - ${g.utente}</div>${g.note ? `<div><i>${g.note}</i></div>` : ''}<div class="foto-thumb-container">${gList}</div></div>`;
+                            garanzieHtml += `<div style="background:#f3e8ff; padding:8px; border-radius:8px; margin-top:6px; font-size:0.8rem;"><div><b>🛡️ Garanzia / Etichetta (${g.data})</b> - ${g.utente}</div><div class="foto-thumb-container">${gList}</div></div>`;
                         });
                     }
 
