@@ -647,11 +647,9 @@
                 let verdetto = await analizzaImmagineConGemini(base64);
 
                 if (tipoSelezionato === 'bolle' && verdetto === 'LAVORO') {
-                    // Spostamento automatico se caricata in bolle ma è un lavoro (senza paroline/documenti)
                     aggiungiFileAInput(fileCorrente, lavoriInput);
                     spostaEffettuato = true;
                 } else if (tipoSelezionato === 'lavori' && verdetto === 'BOLLA') {
-                    // Spostamento automatico se caricata in lavori ma è una bolla/documento
                     aggiungiFileAInput(fileCorrente, bolleInput);
                     spostaEffettuato = true;
                 } else if (verdetto === "SCARTO") {
