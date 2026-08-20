@@ -908,17 +908,8 @@
             let ore = document.getElementById('mieOreLavorate').value;
             let note = document.getElementById('noteInterventoUtente').value.trim();
 
-            // CONTROLLI AGGIORNATI
-            if (cIdx === "") {
-                alert("⚠️ Seleziona un cantiere valido!");
-                return;
-            }
-            if (stato === "") {
-                alert("⚠️ Seleziona lo stato del cantiere per questo intervento (In Corso o Terminato)!");
-                return;
-            }
-            if (!note) {
-                alert("⚠️ Inserisci le note dei lavori eseguiti!");
+            if (cIdx === "" || stato === "" || !note) {
+                alert("⚠️ Compila tutti i campi obbligatori (Cantiere, Stato e Note)!");
                 return;
             }
             if (!hasFirma || !firmaTempBase64) {
@@ -938,9 +929,14 @@
                 }
             });
 
+            // Raccolta dinamica dei colleghi selezionati
             let partecipanti = [`${utenteCorrente} (${ore}h)`];
-            document.querySelectorAll('input[name="collegaCheckbox"]:checked').forEach(cb => {
-                let oCollega = document.getElementById(`ore_collega_${cb.value.replace(/\s+/g, '_')}`).value;
+            let checkboxColleghi = document.querySelectorAll('input[name="collegaCheckbox"]:checked');
+            
+            checkboxColleghi.forEach(cb => {
+                let idSelect = `ore_collega_${cb.value.replace(/\s+/g, '_')}`;
+                let selectCollega = document.getElementById(idSelect);
+                let oCollega = selectCollega ? selectCollega.value : "0";
                 participanti.push(`${cb.value} (${oCollega}h)`);
             });
 
@@ -959,11 +955,7 @@
                 fotoLavori: [] 
             });
 
-            if (stato === "Terminato") {
-                cantieriDB[cIdx].statoRichiestaChiusura = "In attesa di verifica";
-            } else {
-                cantieriDB[cIdx].statoRichiestaChiusura = null;
-            }
+            cantieriDB[cIdx].statoRichiestaChiusura = (stato === "Terminato") ? "In attesa di verifica" : null;
             cantieriDB[cIdx].completato = false; 
 
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
