@@ -265,7 +265,7 @@
                         <button type="button" class="action-btn btn-dark" style="background: #334155; font-size: 0.9rem;" onclick="apriSchermataFirmaFullscreen()">🖊️ Apri Schermata Firma</button>
                     </div>
 
-                    <button class="action-btn btn-orange" onclick="salvaFoglioLavoroUtente()" style="margin-top: 10px;">Salva Foglio di Lavoro</button>
+                    <button type="button" class="action-btn btn-orange" onclick="salvaFoglioLavoroUtente()" style="margin-top: 10px;">Salva Foglio di Lavoro</button>
                 </div>
             </div>
 
@@ -856,33 +856,59 @@
         }
 
         function popolaColleghiUtente() {
-            let container = document.getElementById('listaColleghiUtente');
+            const container = document.getElementById('listaColleghiUtente');
+            if (!container) return;
+
             container.innerHTML = '';
-            let tuttiColleghi = [...elencoOperaiTotali, ...elencoArtigianiTotali];
-            
-            tuttiColleghi.forEach((op, index) => {
+            const tuttiColleghi = [...elencoOperaiTotali, ...elencoArtigianiTotali];
+            let indiceCollega = 0;
+
+            tuttiColleghi.forEach((op) => {
+                // Non mostrare l'utente che ha effettuato l'accesso.
                 if (op === utenteCorrente) return;
-                let chkId = `chk_collega_${index}`;
-                let selectId = `ore_collega_${index}`;
-                
-                container.innerHTML += `
-                    <div class="collega-card-item">
-                        <label>
-                            <input type="checkbox" id="${chkId}" name="collegaCheckbox" value="${op}" onchange="document.getElementById('${selectId}').disabled = !this.checked"> 
-                            ${op}
-                        </label>
-                        <select id="${selectId}" disabled>
-                            <option value="8">8 Ore</option>
-                            <option value="7">7 Ore</option>
-                            <option value="6">6 Ore</option>
-                            <option value="5">5 Ore</option>
-                            <option value="4">4 Ore</option>
-                            <option value="3">3 Ore</option>
-                            <option value="2">2 Ore</option>
-                            <option value="1">1 Ora</option>
-                        </select>
-                    </div>
+
+                const safeIndex = indiceCollega++;
+                const chkId = `chk_collega_${safeIndex}`;
+                const selectId = `ore_collega_${safeIndex}`;
+
+                const card = document.createElement('div');
+                card.className = 'collega-card-item';
+
+                const label = document.createElement('label');
+                label.htmlFor = chkId;
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = chkId;
+                checkbox.name = 'collegaCheckbox';
+                checkbox.value = op;
+                checkbox.dataset.selectId = selectId;
+
+                const nome = document.createTextNode(' ' + op);
+
+                const select = document.createElement('select');
+                select.id = selectId;
+                select.disabled = true;
+                select.innerHTML = `
+                    <option value="8">8 Ore</option>
+                    <option value="7">7 Ore</option>
+                    <option value="6">6 Ore</option>
+                    <option value="5">5 Ore</option>
+                    <option value="4">4 Ore</option>
+                    <option value="3">3 Ore</option>
+                    <option value="2">2 Ore</option>
+                    <option value="1">1 Ora</option>
                 `;
+
+                checkbox.addEventListener('change', function () {
+                    select.disabled = !this.checked;
+                });
+
+                label.appendChild(checkbox);
+                label.appendChild(nome);
+                card.appendChild(label);
+                card.appendChild(select);
+                container.appendChild(card);
             });
         }
 
@@ -944,21 +970,22 @@
                 }
             });
 
-            // Raccolta sicura dei colleghi selezionati tramite gli indici numerici
+            // Raccolta robusta dei colleghi selezionati.
+            // Non dipende più dagli indici dell'elenco originale.
             let partecipanti = [`${utenteCorrente} (${ore}h)`];
-            let tuttiColleghi = [...elencoOperaiTotali, ...elencoArtigianiTotali];
-            
-            tuttiColleghi.forEach((op, index) => {
-                if (op === utenteCorrente) return;
-                let chk = document.getElementById(`chk_collega_${index}`);
-                if (chk && chk.checked) {
-                    let selOre = document.getElementById(`ore_collega_${index}`);
-                    let oCollega = selOre ? selOre.value : "8";
-                    participanti.push(`${op} (${oCollega}h)`);
-                }
+
+            document.querySelectorAll('#listaColleghiUtente input[name="collegaCheckbox"]:checked').forEach(chk => {
+                const selectId = chk.dataset.selectId;
+                const selOre = selectId ? document.getElementById(selectId) : null;
+                const oCollega = selOre ? selOre.value : "8";
+                partecipanti.push(`${chk.value} (${oCollega}h)`);
             });
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            if (!Array.isArray(cantieriDB) || !cantieriDB[cIdx]) {
+                alert("⚠️ Il cantiere selezionato non è più disponibile. Aggiorna la pagina e riprova.");
+                return;
+            }
             if (!cantieriDB[cIdx].storico) cantieriDB[cIdx].storico = [];
 
             cantieriDB[cIdx].storico.push({ 
@@ -976,7 +1003,17 @@
             cantieriDB[cIdx].statoRichiestaChiusura = (stato === "Terminato") ? "In attesa di verifica" : null;
             cantieriDB[cIdx].completato = false; 
 
-            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+            try {
+                localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+            } catch (erroreSalvataggio) {
+                console.error('Errore salvataggio foglio di lavoro:', erroreSalvataggio);
+                if (erroreSalvataggio && (erroreSalvataggio.name === 'QuotaExceededError' || erroreSalvataggio.code === 22)) {
+                    alert('⚠️ Memoria locale piena. Le foto/immagini salvate nel browser hanno raggiunto il limite. Elimina qualche vecchio allegato oppure esporta/archivia i dati prima di continuare.');
+                } else {
+                    alert('⚠️ Errore durante il salvataggio del foglio. Controlla la console del browser per i dettagli.');
+                }
+                return;
+            }
             alert("✅ Foglio di lavoro inviato con successo! L'ufficio verificherà la richiesta.");
             
             document.getElementById('noteInterventoUtente').value = '';
