@@ -712,7 +712,7 @@
             });
         }
 
-        // ================= INTEGRAZIONE GEMINI AI PER CONTROLLO FOTO (AGGIORNATA) =================
+        // ================= INTEGRAZIONE GEMINI AI (BASATA SU FOGLIO/DOCUMENTO VS CANTIERE) =================
         async function analizzaImmagineConGemini(base64Data) {
             if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("INSERISCI")) {
                 console.warn("⚠️ Chiave API Gemini non configurata.");
@@ -729,7 +729,7 @@
                     body: JSON.stringify({
                         contents: [{
                             parts: [
-                                { text: "Analizza questa immagine. Se è una bolla di consegna, un documento di trasporto o una fattura cartacea, rispondi tassativamente solo 'BOLLA'. Se è una foto di lavori edili, idraulici, operai o impianti installati, rispondi tassativamente solo 'LAVORO'. Non aggiungere altro." },
+                                { text: "Guarda attentamente questa foto. Se in primo piano c'è un foglio di carta, un documento, una bolla, una fattura o un modulo con scritte/testo stampato o compilato a mano, rispondi tassativamente solo 'BOLLA'. Se invece l'immagine mostra un ambiente di cantiere, tubi, impianti, apparecchiature installate o operai al lavoro senza fogli in primo piano, rispondi tassativamente solo 'LAVORO'. Non aggiungere altro." },
                                 { inline_data: { mime_type: "image/jpeg", data: cleanBase64 } }
                             ]
                         }]
@@ -760,15 +760,14 @@
                 let base64 = await comprimiEConvertiImmagine(files[i]);
                 let verdetto = await analizzaImmagineConGemini(base64);
 
-                // Controllo flessibile basato sulla presenza delle parole chiave
                 let eBolla = verdetto.includes("BOLLA") || verdetto.includes("DOCUMENTO") || verdetto.includes("FATTURA");
                 let eLavoro = verdetto.includes("LAVORO") || verdetto.includes("CANTIERE") || verdetto.includes("IMPIANTO");
 
                 if (tipoSelezionato === 'bolle' && eLavoro && !eBolla) {
-                    alert("⚠️ Attenzione! L'IA ha rilevato che questa foto è un LAVORO ESEGUITO, non una bolla. L'ho spostata automaticamente nella sezione Foto Lavori!");
+                    alert("⚠️ L'IA ha rilevato che questa foto mostra un lavoro/cantiere senza fogli in primo piano. L'ho spostata automaticamente nella sezione Foto Lavori!");
                     spostaFileTraInput(files[i], inputElement, altroInput);
                 } else if (tipoSelezionato === 'lavori' && eBolla && !eLavoro) {
-                    alert("⚠️ Attenzione! L'IA ha rilevato che questa foto è una BOLLA DI CONSEGNA, non un lavoro. L'ho spostata automaticamente nella sezione Foto Bolle!");
+                    alert("⚠️ L'IA ha rilevato la presenza di un documento/foglio in primo piano. L'ho spostata automaticamente nella sezione Foto Bolle!");
                     spostaFileTraInput(files[i], inputElement, altroInput);
                 }
             }
