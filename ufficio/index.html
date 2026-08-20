@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -395,23 +396,24 @@
         function estraiFotoDaIntervento(s) {
             if (!s) return [];
             let listaFoto = [];
-            let possibiliCampi = ['fotoLavori', 'lavori', 'foto', 'immagini', 'allegati', 'images', 'fotoGaranzia'];
-            
-            possibiliCampi.forEach(campo => {
-                if (Array.isArray(s[campo])) {
-                    s[campo].forEach(item => {
-                        if (typeof item === 'string' && (item.startsWith('data:image') || item.startsWith('http') || item.length > 100)) {
-                            listaFoto.push(item);
-                        } else if (item && typeof item === 'object') {
-                            Object.values(item).forEach(valSub => {
-                                if (typeof valSub === 'string' && (valSub.startsWith('data:image') || valSub.length > 100)) {
-                                    listaFoto.push(valSub);
-                                }
-                            });
-                        }
-                    });
+            // Legge le foto inviate dagli operai senza spostarle o modificarle.
+            // Le associa direttamente allo stesso intervento/cantiere in cui sono state salvate.
+            let possibiliCampi = ['fotoLavori', 'fotoBolle', 'foto', 'immagini', 'allegati', 'images', 'fotoGaranzia'];
+
+            const aggiungiValoreFoto = (val) => {
+                if (typeof val === 'string' && (val.startsWith('data:image') || val.startsWith('http') || val.length > 100)) {
+                    listaFoto.push(val);
+                } else if (Array.isArray(val)) {
+                    val.forEach(aggiungiValoreFoto);
+                } else if (val && typeof val === 'object') {
+                    Object.values(val).forEach(aggiungiValoreFoto);
                 }
-            });
+            };
+
+            possibiliCampi.forEach(campo => aggiungiValoreFoto(s[campo]));
+            // La firma del cliente viene mostrata insieme alla documentazione dell'intervento.
+            aggiungiValoreFoto(s.firmaCliente);
+
             return [...new Set(listaFoto)];
         }
 
