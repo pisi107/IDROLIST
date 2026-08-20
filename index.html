@@ -711,7 +711,7 @@
             });
         }
 
-        // ================= INTEGRAZIONE GEMINI AI (CORRETTA) =================
+        // ================= INTEGRAZIONE GEMINI AI (AGGIORNATA CON REGOLA "FIRMA DESTINATARIO") =================
         async function analizzaImmagineConGemini(base64Data) {
             if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("INSERISCI")) {
                 return "SCONOSCIUTO";
@@ -721,7 +721,7 @@
                 let cleanBase64 = base64Data.split(',')[1] || base64Data;
                 let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
                 
-                let promptTesto = "Analizza questa immagine aziendale. Rispondi ESCLUSIVAMENTE con una di queste tre parole, senza aggiungere altro: BOLLA (se l'immagine mostra un documento, bolla, fattura, modulo stampato o facsimile di documento), LAVORO (se l'immagine mostra impianti, tubazioni, cantieri o attività lavorativa), SCARTO (se è un selfie, un paesaggio o un oggetto del tutto estraneo al lavoro).";
+                let promptTesto = "Analizza questa immagine aziendale. Cerca la presenza di sezioni di firma o scritte come 'firma destinatario', 'firma incaricato del trasporto' o 'causale'. Rispondi ESCLUSIVAMENTE con una di queste tre parole, senza aggiungere altro: BOLLA (se l'immagine mostra un documento, DDT, bolla, fattura, modulo stampato o facsimile con campi di firma/destinatario), LAVORO (se l'immagine mostra impianti, tubazioni, cantieri o attività lavorativa), SCARTO (se è un selfie, un paesaggio o un oggetto del tutto estraneo al lavoro).";
 
                 let response = await fetch(url, {
                     method: "POST",
@@ -759,7 +759,6 @@
             let bolleInput = document.getElementById('fotoBolleInput');
             let lavoriInput = document.getElementById('fotoLavoriInput');
 
-            // Creiamo copie dei file correnti per elaborarli in modo sicuro
             let fileListValidi = [];
             
             for (let i = 0; i < files.length; i++) {
@@ -781,12 +780,10 @@
                     aggiungiFileAInput(fileCorrente, lavoriInput);
                 }
                 else {
-                    // Se il verdetto corrisponde esattamente alla sezione giusta (es. Bolla in sezione bolle)
                     fileListValidi.push(fileCorrente);
                 }
             }
 
-            // Aggiorna l'input di origine mantenendo solo i file validi rimasti
             let dtNuovo = new DataTransfer();
             fileListValidi.forEach(f => dtNuovo.items.add(f));
             inputElement.files = dtNuovo.files;
