@@ -711,7 +711,7 @@
             });
         }
 
-        // ================= INTEGRAZIONE GEMINI AI (BIDIREZIONALE & PERMISSIVA) =================
+        // ================= INTEGRAZIONE GEMINI AI (DOPPIO SCAMBIO ATTIVO) =================
         async function analizzaImmagineConGemini(base64Data) {
             if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("INSERISCI")) {
                 return "BOLLA"; // Fallback di sicurezza
@@ -772,11 +772,11 @@
                     alert("🚫 L'IA ha scartato questa foto (ritenuta non valida o non pertinente). Rimossa dal caricamento!");
                 } 
                 else if (tipoSelezionato === 'lavori' && verdetto === "BOLLA") {
-                    alert("🤖 L'IA ha rilevato un documento/bolla: spostata automaticamente in FOTO BOLLE!");
+                    alert("🤖 L'IA ha rilevato un documento/bolla caricato per errore in Lavori: spostata automaticamente in FOTO BOLLE!");
                     aggiungiFileAInput(fileCorrente, bolleInput);
                 } 
                 else if (tipoSelezionato === 'bolle' && verdetto === "LAVORO") {
-                    alert("🤖 L'IA ha rilevato una foto cantiere/lavoro: spostata automaticamente in FOTO LAVORI!");
+                    alert("⚠️ Errore: Hai caricato una foto cantiere/lavoro nella sezione Bolle! L'IA l'ha intercettata e spostata automaticamente in FOTO LAVORI.");
                     aggiungiFileAInput(fileCorrente, lavoriInput);
                 }
                 else {
