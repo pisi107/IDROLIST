@@ -2,124 +2,136 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Idrotech Varese - Pannello Ufficio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Idrotech Varese - Dashboard Ufficio</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --brand-orange: #f28c1e;
-            --brand-dark: #1e293b;
+            --brand-orange-dark: #d97712;
+            --brand-dark: #0f172a;
+            --sidebar-bg: #1e293b;
             --success: #16a34a;
             --danger: #dc2626;
-            --bg: #0b0f19;
+            --bg: #f1f5f9;
             --card-bg: #ffffff;
             --text: #0f172a;
             --text-light: #64748b;
             --border: #cbd5e1;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; justify-content: center; min-height: 100vh; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        .app-container { width: 100%; max-width: 500px; background: var(--card-bg); min-height: 100vh; display: flex; flex-direction: column; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
+        .sidebar { width: 280px; background-color: var(--sidebar-bg); color: white; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 4px 0 15px rgba(0,0,0,0.1); }
+        .sidebar-header { padding: 25px 20px; background: #0f172a; border-bottom: 3px solid var(--brand-orange); text-align: center; }
+        .sidebar-header h1 { font-size: 1.25rem; font-weight: 800; margin: 0; letter-spacing: 0.5px; }
+        .sidebar-header h1 span { color: var(--brand-orange); }
+        .sidebar-header p { font-size: 0.7rem; color: #94a3b8; margin: 5px 0 0 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+
+        .sidebar-menu { padding: 20px 15px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; }
+        .sidebar-btn { width: 100%; padding: 14px 16px; border: none; border-radius: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px; transition: all 0.2s; background: rgba(255,255,255,0.05); color: #cbd5e1; }
+        .sidebar-btn:hover { background: rgba(242, 140, 30, 0.15); color: white; transform: translateX(4px); }
+        .sidebar-btn.active { background: var(--brand-orange); color: white; box-shadow: 0 4px 12px rgba(242,140,30,0.3); }
+
+        .main-container { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        .header-app { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 25px 20px 20px 20px; text-align: center; border-bottom: 4px solid var(--brand-orange); }
-        .header-app h1 { font-size: 1.5rem; font-weight: 800; margin: 0; }
-        .header-app h1 span { color: var(--brand-orange); }
-        .header-app p { font-size: 0.75rem; color: #94a3b8; margin: 5px 0 0 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .topbar { background: white; padding: 15px 30px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .topbar-title { font-size: 1.2rem; font-weight: 800; color: var(--brand-dark); display: flex; align-items: center; gap: 10px; }
+        
+        .content-area { padding: 25px 30px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 24px; }
 
-        .content-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 16px; }
+        .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 16px; }
+        .card-title { font-size: 1.05rem; font-weight: 800; color: var(--brand-dark); display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
 
-        label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-        input, select, textarea { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; background-color: #f8fafc; color: var(--text); font-family: 'Inter', sans-serif; outline: none; }
-        input[type="date"] { appearance: none; -webkit-appearance: none; }
+        label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        input, select, textarea { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; background-color: #f8fafc; color: var(--text); font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; }
+        input:focus, select:focus, textarea:focus { border-color: var(--brand-orange); background: #fff; }
 
-        .action-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
+        .action-btn { padding: 12px 20px; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 700; cursor: pointer; text-align: center; transition: background 0.2s, transform 0.1s; }
+        .action-btn:active { transform: scale(0.98); }
         .btn-green { background-color: var(--success); color: white; }
-        .btn-orange { background: linear-gradient(135deg, #f28c1e, #d97712); color: white; }
-        .btn-danger { background-color: var(--danger); color: white; padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; box-shadow: none; width: auto; }
+        .btn-orange { background-color: var(--brand-orange); color: white; }
+        .btn-danger { background-color: var(--danger); color: white; padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; }
 
-        .card-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-        
-        .accordion-header { background: #1e293b; color: white; padding: 16px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .accordion-content { display: none; flex-direction: column; gap: 12px; margin-top: 10px; padding-top: 5px; }
-        .accordion-content.open { display: flex; }
+        .table-responsive { width: 100%; overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+        .riepilogo-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; background: #fff; text-align: left; }
+        .riepilogo-table th, .riepilogo-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+        .riepilogo-table th { background: #f8fafc; color: var(--brand-dark); font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .riepilogo-table tr:hover { background: #f8fafc; }
 
-        .cantiere-card { background: #fff; border: 2px solid var(--border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
-        .cantiere-card.terminato { border-color: var(--success); background: #f0fdf4; }
-        
-        .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
         .badge-da-fare { background: #fef3c7; color: #b45309; }
         .badge-fatto { background: #dcfce7; color: #15803d; }
         .badge-alert { background: #fee2e2; color: #b91c1c; }
-        .badge-assenza { background: #e0f2fe; color: #0369a1; }
         .badge-garanzia-ok { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
         .badge-garanzia-no { background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
-        .badge-stampato { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
 
-        .garanzia-box { background: #fefce8; border: 1px solid #facc15; border-radius: 8px; padding: 10px; display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
-        .garanzia-box label { margin: 0; font-size: 0.85rem; color: #713f12; text-transform: none; display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; }
-        .garanzia-box input[type="checkbox"] { width: 18px; height: 18px; accent-color: #ca8a04; cursor: pointer; }
+        .container-scroll { max-height: 280px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 8px; background: #fff; }
+        .collega-card-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid #f1f5f9; }
+        .collega-card-item:last-child { border-bottom: none; }
+        .collega-card-item label { margin: 0; font-size: 0.85rem; color: var(--text); display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; text-transform: none; }
+        .collega-card-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--brand-orange); }
+        .collega-card-item select { width: 100px; padding: 6px; font-size: 0.85rem; }
 
-        .tabs-container { display: flex; gap: 8px; margin-bottom: 8px; }
-        .tab-btn { flex: 1; padding: 12px; border: 2px solid var(--border); background: #f1f5f9; font-weight: 700; font-size: 0.85rem; border-radius: 10px; cursor: pointer; color: var(--text-light); text-align: center; }
+        .cantiere-card-desktop { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+        .cantiere-card-desktop.terminato { border-left: 5px solid var(--success); background: #fcfdfd; }
+        .cantiere-card-desktop.aperto { border-left: 5px solid var(--brand-orange); }
+
+        .foto-thumb-container { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+        .foto-thumb { width: 70px; height: 70px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s; }
+        .foto-thumb:hover { transform: scale(1.05); border-color: var(--brand-orange); }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); z-index: 999; justify-content: center; align-items: center; padding: 30px; backdrop-filter: blur(4px); }
+        .modal-overlay.open { display: flex; }
+        .modal-card { background: #fff; width: 100%; max-width: 800px; max-height: 85vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
+        .modal-header { background: var(--sidebar-bg); color: white; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 1.15rem; }
+        .modal-body { padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+        .close-modal-btn { background: none; border: none; color: white; font-size: 1.8rem; cursor: pointer; line-height: 1; }
+
+        .folder-cliente-box { background: #fff; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+        .folder-cliente-header { background: #f8fafc; color: var(--brand-dark); padding: 14px 18px; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .folder-cliente-header:hover { background: #f1f5f9; }
+        .folder-cliente-body { display: none; padding: 16px; background: #fff; flex-direction: column; gap: 12px; }
+        .folder-cliente-body.open { display: flex; }
+        .folder-intervento-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+
+        .tabs-container { display: flex; gap: 10px; margin-bottom: 4px; }
+        .tab-btn { flex: 1; padding: 10px; border: 1px solid var(--border); background: #f8fafc; font-weight: 700; font-size: 0.85rem; border-radius: 8px; cursor: pointer; color: var(--text-light); text-align: center; }
         .tab-btn.active-da-fare { background: #fef3c7; border-color: #f59e0b; color: #b45309; }
         .tab-btn.active-terminati { background: #dcfce7; border-color: var(--success); color: #15803d; }
-
-        .collega-card-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-        .collega-card-item label { margin: 0; font-size: 0.9rem; color: var(--text); text-transform: none; display: flex; align-items: center; gap: 8px; cursor: pointer; }
-        .collega-card-item input[type="checkbox"] { width: 18px; height: 18px; }
-        .collega-card-item select { width: 110px; padding: 8px; font-size: 0.9rem; }
-        .container-colleghi-scroll { max-height: 220px; overflow-y: auto; background: #fff; padding: 8px; border: 1px solid var(--border); border-radius: 10px; }
-
-        .riepilogo-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
-        .riepilogo-table th, .riepilogo-table td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
-        .riepilogo-table th { background: #1e293b; color: white; font-size: 0.75rem; text-transform: uppercase; }
-        .riepilogo-table tr:last-child td { border-bottom: none; }
-        
-        .presenza-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px; }
-
-        .foto-thumb-container { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
-        .foto-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s; }
-        .foto-thumb:hover { transform: scale(1.05); }
-
-        .folder-cliente-box { background: #fff; border: 2px solid var(--border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
-        .folder-cliente-header { background: #1e293b; color: white; padding: 12px 16px; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .folder-cliente-body { display: none; padding: 12px; background: #f8fafc; flex-direction: column; gap: 10px; }
-        .folder-cliente-body.open { display: flex; }
-        
-        .folder-intervento-box { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
-
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 999; justify-content: center; align-items: center; padding: 15px; }
-        .modal-overlay.open { display: flex; }
-        .modal-card { background: #fff; width: 100%; max-width: 520px; max-height: 90vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .modal-header { background: #1e293b; color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 1.1rem; }
-        .modal-body { padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
-        .close-modal-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <div class="header-app">
+
+    <div class="sidebar">
+        <div class="sidebar-header">
             <h1>IDROTECH <span>VARESE</span></h1>
-            <p>Pannello Gestione Ufficio</p>
+            <p>Dashboard Ufficio PC</p>
+        </div>
+        <div class="sidebar-menu">
+            <button class="sidebar-btn active" onclick="cambiaVistaDashboard('home', this)">📊 Panoramica & Dashboard</button>
+            <button class="sidebar-btn" onclick="apriModaleCartellaClienti()">📁 Archivio Cartella Clienti</button>
+            <button class="sidebar-btn" onclick="apriModaleGaranzie()">🛡️ Gestione Garanzie Clienti</button>
+            <button class="sidebar-btn" onclick="apriModaleFiltri()">🔍 Archivio Storico & Filtri</button>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="topbar">
+            <div class="topbar-title">📊 Panoramica & Dashboard Ufficio</div>
+            <div style="font-size: 0.85rem; color: var(--text-light); font-weight: 600;">Sistema Gestionale Operativo</div>
         </div>
 
-        <div class="content-body">
-            
-            <button class="action-btn btn-orange" style="font-size: 1.05rem; padding: 18px;" onclick="apriModaleCartellaClienti()">📁 Apri Archivio Cartella Clienti & Foto Lavori</button>
-            
-            <!-- NUOVO PULSANTE GARANZIE -->
-            <button class="action-btn btn-green" style="font-size: 1.05rem; padding: 18px;" onclick="apriModaleGaranzie()">🛡️ Gestione Garanzie Divise per Clienti</button>
-
-            <div class="card-box" style="border-color: #ef4444; background: #fff5f5;">
-                <div style="font-size: 1.05rem; font-weight: 800; color: #b91c1c;">🚨 Controllo Ufficio: Mancati Fogli Lavoro (Ultimi 2 Giorni)</div>
-                <div style="font-size: 0.8rem; color: #7f1d1d; line-height: 1.4;">Elenco dipendenti che negli ultimi 2 giorni non hanno completato le ore o il report:</div>
-                <div style="overflow-x: auto;">
-                    <table class="riepilogo-table" id="tabellaControlloMancanti">
+        <div class="content-area">
+            <div class="card" style="border-color: #f87171; background: #fff5f5;">
+                <div class="card-title" style="color: #b91c1c; border-color: #fecaca;">🚨 Controllo Ufficio: Mancati Fogli Lavoro (Ultimi 2 Giorni)</div>
+                <div class="table-responsive">
+                    <table class="riepilogo-table" style="background: white;">
                         <thead>
                             <tr>
                                 <th>Dipendente</th>
-                                <th>Giorni Mancanti / Dettaglio</th>
+                                <th>Giorni Mancanti / Dettaglio Ore</th>
                             </tr>
                         </thead>
                         <tbody id="corpoTabellaControlloMancanti"></tbody>
@@ -127,167 +139,147 @@
                 </div>
             </div>
 
-            <div>
-                <div class="accordion-header" onclick="toggleAccordion('contentPresenze', this)">
-                    <span>📋 Gestione Presenze / Assenze Dipendenti</span>
-                    <span id="arrowPresenze">▼</span>
+            <div class="dashboard-grid">
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <div class="card">
+                        <div class="card-title">✏️ Registrazione Intervento per Conto Dipendenti</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div>
+                                <label>Cerca Cantiere Aperto</label>
+                                <input type="text" id="inputRicercaCantiereUfficio" placeholder="Filtra..." oninput="filtraSelectCantieriUfficio()">
+                            </div>
+                            <div>
+                                <label>Data Intervento</label>
+                                <input type="date" id="dataInterventoUfficio">
+                            </div>
+                        </div>
+                        <div>
+                            <label>Seleziona Cantiere</label>
+                            <select id="selectCantiereUfficio"></select>
+                        </div>
+                        <div>
+                            <label>Seleziona Dipendenti e Relative Ore</label>
+                            <div class="container-scroll" id="listaDipendentiUfficioMultiplo" style="max-height: 200px;"></div>
+                        </div>
+                        <div>
+                            <label>Note / Lavori Eseguiti / Materiali</label>
+                            <textarea id="noteUfficio" rows="2" placeholder="Inserisci dettagli..."></textarea>
+                        </div>
+                        <button class="action-btn btn-orange" style="width: 100%;" onclick="registraUfficioMultiplo()">Registra Intervento</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">📊 Ultime Ore Registrate nel Sistema</div>
+                        <div class="table-responsive">
+                            <table class="riepilogo-table">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Dipendente</th>
+                                        <th>Cantiere / Stato</th>
+                                        <th>Ore</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="corpoTabellaRiepilogo"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-                <div id="contentPresenze" class="accordion-content card-box" style="border-color: var(--brand-orange);">
-                    <div style="font-size: 0.85rem; color: var(--text-light);">Imposta qui sotto se un dipendente è assente (Ferie, Malattia, Permesso), specificando la data di fine assenza.</div>
-                    <div class="container-colleghi-scroll" id="listaPresenzeUfficio" style="max-height: 300px;"></div>
-                    <button class="action-btn btn-orange" onclick="salvaPresenzeUfficio()">Salva Stato Assenze</button>
+
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <div class="card">
+                        <div class="card-title">🏢 Inserisci Nuovo Cantiere</div>
+                        <div>
+                            <label>Nome Cliente</label>
+                            <input type="text" id="nuovoCliente" placeholder="Es. Mario Rossi">
+                        </div>
+                        <div>
+                            <label>Indirizzo Cantiere</label>
+                            <input type="text" id="nuovoIndirizzo" placeholder="Es. Via Roma 10, Varese">
+                        </div>
+                        <button class="action-btn btn-green" style="width: 100%;" onclick="creaCantiereUfficio()">Crea Cantiere</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">📋 Stato Presenze / Assenze Dipendenti</div>
+                        <div class="container-scroll" id="listaPresenzeUfficio" style="max-height: 260px;"></div>
+                        <button class="action-btn btn-orange" style="width: 100%;" onclick="salvaPresenzeUfficio()">Salva Stato Assenze</button>
+                    </div>
                 </div>
             </div>
 
-            <div>
-                <div class="accordion-header" onclick="toggleAccordion('contentRegistrazione', this)">
-                    <span>✏️ Registrazione per conto Dipendenti</span>
-                    <span id="arrowRegistrazione">▼</span>
-                </div>
-                <div id="contentRegistrazione" class="accordion-content card-box" style="border-color: var(--brand-orange);">
-                    <div>
-                        <label>Cerca Cantiere Aperto (Digitazione rapida)</label>
-                        <input type="text" id="inputRicercaCantiereUfficio" placeholder="Scrivi per filtrare i cantieri..." oninput="filtraSelectCantieriUfficio()">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="card-title" style="border:none; padding:0;">📁 Archivio Completo Cantieri & Storico Rapportini</div>
+                    <div class="tabs-container" style="width: 300px; margin-bottom: 0;">
+                        <button id="btnTabDaFare" class="tab-btn active-da-fare" onclick="cambiaCartella('da_fare')">Da Terminare</button>
+                        <button id="btnTabTerminati" class="tab-btn" onclick="cambiaCartella('terminati')">Terminati</button>
                     </div>
-
-                    <div>
-                        <label>Seleziona Cantiere (Menu a tendina)</label>
-                        <select id="selectCantiereUfficio"></select>
-                    </div>
-
-                    <div>
-                        <label>Data Intervento</label>
-                        <input type="date" id="dataInterventoUfficio">
-                    </div>
-
-                    <div>
-                        <label>Seleziona Dipendenti e Relative Ore</label>
-                        <div class="container-colleghi-scroll" id="listaDipendentiUfficioMultiplo"></div>
-                    </div>
-
-                    <div>
-                        <label>Note / Lavori Eseguiti / Materiali</label>
-                        <textarea id="noteUfficio" rows="2" placeholder="Inserisci dettagli..."></textarea>
-                    </div>
-                    <button class="action-btn btn-orange" onclick="registraUfficioMultiplo()">Registra per conto dei Dipendenti</button>
                 </div>
-            </div>
-
-            <div class="card-box">
-                <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Inserisci Nuovo Cantiere</div>
-                <div>
-                    <label>Nome Cliente</label>
-                    <input type="text" id="nuovoCliente" placeholder="Es. Mario Rossi">
-                </div>
-                <div>
-                    <label>Indirizzo Cantiere</label>
-                    <input type="text" id="nuovoIndirizzo" placeholder="Es. Via Roma 10, Varese">
-                </div>
-                <button class="action-btn btn-green" onclick="creaCantiereUfficio()">Crea Cantiere</button>
-            </div>
-
-            <div class="card-box">
-                <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">Archivio Cantieri</div>
-                
-                <div class="tabs-container">
-                    <button id="btnTabDaFare" class="tab-btn active-da-fare" onclick="cambiaCartella('da_fare')">📁 Da Terminare</button>
-                    <button id="btnTabTerminati" class="tab-btn" onclick="cambiaCartella('terminati')">📁 Lavori Terminati</button>
-                </div>
-
-                <div id="listaCantieriUfficio"></div>
-            </div>
-
-            <div class="card-box">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                    <div style="font-size: 1.05rem; font-weight: 800; color: var(--brand-dark);">📊 Tabella Riepilogo Ore</div>
-                    <button class="action-btn btn-orange" style="width: auto; padding: 10px 14px; font-size: 0.85rem;" onclick="apriModaleFiltri()">📁 Apri Archivio Completo / Filtri</button>
-                </div>
-                <div style="overflow-x: auto;">
-                    <table class="riepilogo-table" id="tabellaRiepilogoOre">
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Dipendente</th>
-                                <th>Cantiere / Stato</th>
-                                <th>Ore</th>
-                            </tr>
-                        </thead>
-                        <tbody id="corpoTabellaRiepilogo"></tbody>
-                    </table>
-                </div>
+                <div id="listaCantieriUfficio" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;"></div>
             </div>
         </div>
     </div>
 
-    <!-- MODALE ARCHIVIO CARTELLA CLIENTI -->
+    <!-- MODALI -->
     <div class="modal-overlay" id="modalCartellaClienti">
-        <div class="modal-card" style="max-width: 580px;">
+        <div class="modal-card">
             <div class="modal-header">
-                <span>📁 Cartella Clienti e Foto Lavori</span>
+                <span>📁 Archivio Cartella Clienti e Foto Lavori</span>
                 <button class="close-modal-btn" onclick="chiudiModaleCartellaClienti()">&times;</button>
             </div>
             <div class="modal-body">
                 <div>
-                    <label>Cerca Cliente / Cantiere</label>
-                    <input type="text" id="inputCercaCartellaCliente" placeholder="Filtra per nome cliente o indirizzo..." oninput="renderizzaAlberoCartellaClienti()">
+                    <label>Cerca Cliente o Indirizzo</label>
+                    <input type="text" id="inputCercaCartellaCliente" placeholder="Filtra archivio..." oninput="renderizzaAlberoCartellaClienti()">
                 </div>
-                <div style="font-size: 0.8rem; color: var(--text-light);">Clicca su un cliente per aprire la sua cartella ed esplorare i lavori con le relative foto dei lavori eseguite.</div>
-                
-                <div id="contenitoreAlberoClienti" style="display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto;"></div>
+                <div id="contenitoreAlberoClienti" style="display: flex; flex-direction: column; gap: 10px; max-height: 55vh; overflow-y: auto;"></div>
             </div>
         </div>
     </div>
 
-    <!-- NUOVA MODALE GARANZIE DIVISE PER CLIENTE -->
     <div class="modal-overlay" id="modalGaranzieClienti">
-        <div class="modal-card" style="max-width: 580px;">
+        <div class="modal-card">
             <div class="modal-header">
-                <span>🛡️ Garanzie Divise per Clienti</span>
+                <span>🛡️ Gestione Garanzie Divise per Clienti & Foto Operai</span>
                 <button class="close-modal-btn" onclick="chiudiModaleGaranzie()">&times;</button>
             </div>
             <div class="modal-body">
                 <div>
-                    <label>Cerca per Cliente o Indirizzo</label>
-                    <input type="text" id="inputCercaGaranziaCliente" placeholder="Filtra garanzie..." oninput="renderizzaGaranziePerClienti()">
+                    <label>Filtra Garanzie per Cliente</label>
+                    <input type="text" id="inputCercaGaranziaCliente" placeholder="Cerca cliente..." oninput="renderizzaGaranziePerClienti()">
                 </div>
-                <div style="font-size: 0.8rem; color: var(--text-light);">Qui l'ufficio può controllare lo stato delle garanzie di ogni cliente e verificare le relative foto degli interventi.</div>
-                
-                <div id="contenitoreGaranzieClienti" style="display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto;"></div>
+                <div id="contenitoreGaranzieClienti" style="display: flex; flex-direction: column; gap: 10px; max-height: 55vh; overflow-y: auto;"></div>
             </div>
         </div>
     </div>
 
-    <!-- MODALE FILTRI -->
     <div class="modal-overlay" id="modalFiltri">
         <div class="modal-card">
             <div class="modal-header">
-                <span>📁 Archivio e Filtri Avanzati</span>
+                <span>🔍 Archivio Storico Completo & Filtri Avanzati</span>
                 <button class="close-modal-btn" onclick="chiudiModaleFiltri()">&times;</button>
             </div>
             <div class="modal-body">
-                <div>
-                    <label>Filtra per Dipendente</label>
-                    <select id="selectFiltroDipendente" onchange="filtraArchivioModale()">
-                        <option value="">Tutti i dipendenti</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label>Filtra per Data Specifica</label>
-                    <input type="date" id="inputFiltroData" onchange="filtraArchivioModale()">
-                </div>
-
-                <div>
-                    <label>Cerca Cantiere / Cliente</label>
-                    <div style="display: flex; gap: 6px;">
-                        <input type="text" id="inputFiltroCantiere" placeholder="Es. Mario..." oninput="filtraArchivioModale()">
-                        <button class="action-btn btn-danger" style="padding: 0 12px; font-size: 0.8rem;" onclick="azzeraFiltriModale()">Reset</button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+                    <div>
+                        <label>Filtra per Dipendente</label>
+                        <select id="selectFiltroDipendente" onchange="filtraArchivioModale()"><option value="">Tutti i dipendenti</option></select>
+                    </div>
+                    <div>
+                        <label>Filtra per Data</label>
+                        <input type="date" id="inputFiltroData" onchange="filtraArchivioModale()">
+                    </div>
+                    <div>
+                        <label>Cerca Cantiere / Cliente</label>
+                        <div style="display: flex; gap: 6px;">
+                            <input type="text" id="inputFiltroCantiere" placeholder="Nome cliente..." oninput="filtraArchivioModale()">
+                            <button class="action-btn btn-danger" onclick="azzeraFiltriModale()">Reset</button>
+                        </div>
                     </div>
                 </div>
-
-                <div style="font-size: 0.8rem; color: var(--text-light); margin-top: -4px;" id="infoTotaleOreFiltro"></div>
-                
-                <div style="overflow-x: auto;">
+                <div style="font-size: 0.85rem; color: var(--text-light);" id="infoTotaleOreFiltro"></div>
+                <div class="table-responsive">
                     <table class="riepilogo-table">
                         <thead>
                             <tr>
@@ -304,8 +296,7 @@
         </div>
     </div>
 
-    <!-- MODALE ZOOM FOTO -->
-    <div class="modal-overlay" id="modalFotoZoom" onclick="chiudiZoomFoto()">
+    <div class="modal-overlay" id="modalFotoZoom" onclick="chiudiZoomFoto()" style="background: rgba(0,0,0,0.85);">
         <div style="max-width: 90%; max-height: 90%; display: flex; justify-content: center; align-items: center;" onclick="event.stopPropagation()">
             <img id="imgZoomFull" src="" style="max-width: 100%; max-height: 85vh; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
         </div>
@@ -322,41 +313,64 @@
         let cartellaCorrente = 'da_fare';
 
         window.onload = function() {
-            try {
-                let oggiInput = document.getElementById('dataInterventoUfficio');
-                if(oggiInput) oggiInput.value = new Date().toISOString().split('T')[0];
-                popolaDipendentiUfficioMultiplo();
-                popolaTabellaPresenzeUfficio();
-                popolaSelectFiltroDipendenti();
-                aggiornaVistaUfficio();
-                eseguiControlloMancantiUfficio();
-            } catch (e) {
-                console.error("Errore nell'avvio:", e);
-            }
+            let oggiInput = document.getElementById('dataInterventoUfficio');
+            if(oggiInput) oggiInput.value = new Date().toISOString().split('T')[0];
+            popolaDipendentiUfficioMultiplo();
+            popolaTabellaPresenzeUfficio();
+            popolaSelectFiltroDipendenti();
+            aggiornaVistaUfficio();
+            eseguiControlloMancantiUfficio();
         };
 
-        // GESTIONE MODALE CARTELLA CLIENTI
-        function apriModaleCartellaClienti() {
-            let m = document.getElementById('modalCartellaClienti');
-            if(m) m.classList.add('open');
-            renderizzaAlberoCartellaClienti();
+        function cambiaVistaDashboard(vista, btnEl) {
+            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+            if(btnEl) btnEl.classList.add('active');
         }
 
-        function chiudiModaleCartellaClienti() {
-            let m = document.getElementById('modalCartellaClienti');
-            if(m) m.classList.remove('open');
+        function apriModaleCartellaClienti() { document.getElementById('modalCartellaClienti').classList.add('open'); renderizzaAlberoCartellaClienti(); }
+        function chiudiModaleCartellaClienti() { document.getElementById('modalCartellaClienti').classList.remove('open'); }
+
+        function apriModaleGaranzie() { document.getElementById('modalGaranzieClienti').classList.add('open'); renderizzaGaranziePerClienti(); }
+        function chiudiModaleGaranzie() { document.getElementById('modalGaranzieClienti').classList.remove('open'); }
+
+        function apriModaleFiltri() { document.getElementById('modalFiltri').classList.add('open'); filtraArchivioModale(); }
+        function chiudiModaleFiltri() { document.getElementById('modalFiltri').classList.remove('open'); }
+
+        function apriZoomFoto(srcBase64) {
+            let img = document.getElementById('imgZoomFull');
+            let m = document.getElementById('modalFotoZoom');
+            if(img && m) { img.src = srcBase64; m.classList.add('open'); }
+        }
+        function chiudiZoomFoto() { document.getElementById('modalFotoZoom').classList.remove('open'); }
+
+        function toggleFolderCliente(idCorpo, headerEl) {
+            let bodyEl = document.getElementById(idCorpo);
+            if(!bodyEl) return;
+            let isOpen = bodyEl.classList.contains('open');
+            bodyEl.classList.toggle('open', !isOpen);
+            let arrowSpan = headerEl.querySelector('span:last-child');
+            if(arrowSpan) arrowSpan.innerText = isOpen ? '▼' : '▲';
         }
 
-        // GESTIONE NUOVA MODALE GARANZIE
-        function apriModaleGaranzie() {
-            let m = document.getElementById('modalGaranzieClienti');
-            if(m) m.classList.add('open');
-            renderizzaGaranziePerClienti();
+        function ottieniCantieriAggiornati() {
+            try {
+                let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+                return Array.isArray(cantieriDB) ? cantieriDB : [];
+            } catch(e) { return []; }
         }
 
-        function chiudiModaleGaranzie() {
-            let m = document.getElementById('modalGaranzieClienti');
-            if(m) m.classList.remove('open');
+        // Funzione unificata per estrarre le foto da qualsiasi formato salvato dall'operaio
+        function estraiFotoDaIntervento(s) {
+            if (!s) return [];
+            let listaFoto = [];
+            if (Array.isArray(s.fotoLavori)) listaFoto = listaFoto.concat(s.fotoLavori);
+            if (Array.isArray(s.lavori)) {
+                s.lavori.forEach(item => {
+                    if (typeof item === 'string' && (item.startsWith('data:image') || item.length > 100)) listaFoto.push(item);
+                });
+            }
+            if (Array.isArray(s.foto)) listaFoto = listaFoto.concat(s.foto);
+            return listaFoto;
         }
 
         function renderizzaGaranziePerClienti() {
@@ -374,30 +388,18 @@
                     trovati++;
                     let idCorpoGaranzia = `folder_garanzia_body_${cIdx}`;
                     let garanziaChecked = c.garanziaGestita === true ? 'checked' : '';
-                    let badgeGaranzia = c.garanziaGestita ? '<span class="badge badge-garanzia-ok">🛡️ Garanzia Gestita / Chiusa</span>' : '<span class="badge badge-garanzia-no">🛡️ Garanzia Aperta</span>';
+                    let badgeGaranzia = c.garanziaGestita ? '<span class="badge badge-garanzia-ok">🛡️ Garanzia Chiusa</span>' : '<span class="badge badge-garanzia-no">🛡️ Garanzia Aperta</span>';
 
                     let interventiHtml = '';
                     if (c.storico && Array.isArray(c.storico) && c.storico.length > 0) {
                         c.storico.forEach((s) => {
-                            let lavoriArr = s.fotoLavori || s.lavori || [];
-                            if(!Array.isArray(lavoriArr)) lavoriArr = [];
-
-                            let fotoHtml = '';
-                            if (lavoriArr.length > 0) {
-                                fotoHtml = `<div class="foto-thumb-container">`;
-                                lavoriArr.forEach(imgB64 => {
-                                    fotoHtml += `<img src="${imgB64}" class="foto-thumb" onclick="apriZoomFoto('${imgB64}')">`;
-                                });
-                                fotoHtml += `</div>`;
-                            } else {
-                                fotoHtml = `<div style="font-size: 0.75rem; color: var(--text-light); font-style: italic;">Nessuna foto lavori allegata.</div>`;
-                            }
+                            let fotoArr = estraiFotoDaIntervento(s);
+                            let fotoHtml = fotoArr.length > 0 ? `<div class="foto-thumb-container">` + fotoArr.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('') + `</div>` : `<div style="font-size: 0.75rem; color: var(--text-light); font-style: italic;">Nessuna foto allegata.</div>`;
 
                             interventiHtml += `
                                 <div class="folder-intervento-box">
-                                    <div style="font-size: 0.85rem; font-weight: 700; color: var(--brand-dark);">📅 Data: ${s.data || 'N/D'}</div>
-                                    <div style="font-size: 0.8rem; color: var(--text-light);"><b>Operai:</b> ${s.operai || s.dipendente || 'N/D'}</div>
-                                    <div style="font-size: 0.8rem;"><b>Note:</b> ${s.note || 'Nessuna nota'}</div>
+                                    <div style="font-size: 0.85rem; font-weight: 700; color: var(--brand-dark);">📅 Data: ${s.data || 'N/D'} | <b>Operai:</b> ${s.operai || s.dipendente || 'N/D'}</div>
+                                    <div style="font-size: 0.8rem;"><b>Note:</b> ${s.note || s.descrizione || 'Nessuna nota'}</div>
                                     <div style="margin-top: 4px;">
                                         <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-light); margin-bottom: 2px;">Foto Operai / Lavori:</div>
                                         ${fotoHtml}
@@ -406,38 +408,28 @@
                             `;
                         });
                     } else {
-                        interventiHtml = `<div style="font-size: 0.8rem; color: var(--text-light); font-style: italic; padding: 5px;">Nessun intervento registrato.</div>`;
+                        interventiHtml = `<div style="font-size: 0.8rem; color: var(--text-light); font-style: italic;">Nessun intervento registrato.</div>`;
                     }
 
                     container.innerHTML += `
                         <div class="folder-cliente-box">
                             <div class="folder-cliente-header" onclick="toggleFolderCliente('${idCorpoGaranzia}', this)">
-                                <div style="display: flex; flex-direction: column; gap: 2px;">
-                                    <span>📁 ${c.cliente} <span style="font-size:0.75rem; font-weight:400; color:#94a3b8;">(${c.indirizzo})</span></span>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    ${badgeGaranzia}
-                                    <span id="arrow_garanzia_${cIdx}">▼</span>
-                                </div>
+                                <div><b>${c.cliente}</b> <span style="font-size:0.8rem; color:var(--text-light);">(${c.indirizzo})</span></div>
+                                <div style="display: flex; align-items: center; gap: 10px;">${badgeGaranzia}<span>▼</span></div>
                             </div>
                             <div id="${idCorpoGaranzia}" class="folder-cliente-body">
-                                <div class="garanzia-box">
-                                    <label>
-                                        <input type="checkbox" ${garanziaChecked} onchange="toggleGaranziaCantiere(${cIdx}, this); renderizzaGaranziePerClienti();">
-                                        Segna Garanzia come Gestita / Chiusa
-                                    </label>
+                                <div style="background: #fefce8; border: 1px solid #facc15; border-radius: 8px; padding: 10px; display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" ${garanziaChecked} style="width:18px;height:18px;cursor:pointer;" onchange="toggleGaranziaCantiere(${cIdx}, this); renderizzaGaranziePerClienti();">
+                                    <label style="margin:0; font-weight:700; color:#713f12; cursor:pointer; text-transform:none;">Segna Garanzia come Gestita / Chiusa</label>
                                 </div>
-                                <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-top: 4px;">Storico Interventi e Foto:</div>
+                                <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-light); text-transform: uppercase;">Storico Interventi e Foto:</div>
                                 ${interventiHtml}
                             </div>
                         </div>
                     `;
                 }
             });
-
-            if (trovati === 0) {
-                container.innerHTML = `<div style="text-align: center; color: var(--text-light); padding: 20px; font-size: 0.9rem;">Nessun cliente trovato.</div>`;
-            }
+            if (trovati === 0) container.innerHTML = `<div style="text-align: center; color: var(--text-light); padding: 20px;">Nessuna garanzia trovata.</div>`;
         }
 
         function renderizzaAlberoCartellaClienti() {
@@ -454,166 +446,64 @@
                 if (query === '' || nomeClienteTesto.includes(query)) {
                     trovati++;
                     let idCorpo = `folder_body_${cIdx}`;
-
                     let interventiHtml = '';
-                    if (c.storico && Array.isArray(c.storico) && c.storico.length > 0) {
-                        c.storico.forEach((s) => {
-                            let lavoriArr = s.fotoLavori || s.lavori || [];
-                            if(!Array.isArray(lavoriArr)) lavoriArr = [];
 
-                            let fotoHtml = '';
-                            if (lavoriArr.length > 0) {
-                                fotoHtml = `<div class="foto-thumb-container">`;
-                                lavoriArr.forEach(imgB64 => {
-                                    fotoHtml += `<img src="${imgB64}" class="foto-thumb" onclick="apriZoomFoto('${imgB64}')">`;
-                                });
-                                fotoHtml += `</div>`;
-                            } else {
-                                fotoHtml = `<div style="font-size: 0.75rem; color: var(--text-light); font-style: italic;">Nessuna foto lavori allegata in questo intervento.</div>`;
-                            }
+                    if (c.storico && c.storico.length > 0) {
+                        c.storico.forEach(s => {
+                            let fotoArr = estraiFotoDaIntervento(s);
+                            let fotoHtml = fotoArr.length > 0 ? `<div class="foto-thumb-container">` + fotoArr.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('') + `</div>` : `<div style="font-size: 0.75rem; color: var(--text-light); font-style: italic;">Nessuna foto lavori.</div>`;
 
                             interventiHtml += `
                                 <div class="folder-intervento-box">
-                                    <div style="font-size: 0.85rem; font-weight: 700; color: var(--brand-dark);">📅 Data: ${s.data || 'N/D'}</div>
-                                    <div style="font-size: 0.8rem; color: var(--text-light);"><b>Lavoro / Operai:</b> ${s.operai || s.dipendente || 'N/D'}</div>
-                                    <div style="font-size: 0.8rem;"><b>Note:</b> ${s.note || 'Nessuna nota'}</div>
-                                    <div style="margin-top: 4px;">
-                                        <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-light); margin-bottom: 2px;">Foto Lavori:</div>
-                                        ${fotoHtml}
-                                    </div>
+                                    <div style="font-size: 0.85rem; font-weight: 700;">📅 Data: ${s.data} | <b>Operai:</b> ${s.operai || s.dipendente}</div>
+                                    <div style="font-size: 0.8rem;"><b>Note:</b> ${s.note || s.descrizione || 'N/D'}</div>
+                                    ${fotoHtml}
                                 </div>
                             `;
                         });
                     } else {
-                        interventiHtml = `<div style="font-size: 0.8rem; color: var(--text-light); font-style: italic; padding: 5px;">Nessuna cartella di lavoro registrata per questo cliente.</div>`;
+                        interventiHtml = `<div style="font-size: 0.8rem; color: var(--text-light); font-style: italic;">Nessun intervento registrato.</div>`;
                     }
 
                     container.innerHTML += `
                         <div class="folder-cliente-box">
                             <div class="folder-cliente-header" onclick="toggleFolderCliente('${idCorpo}', this)">
-                                <span>📁 ${c.cliente} <span style="font-size:0.75rem; font-weight:400; color:#94a3b8;">(${c.indirizzo})</span></span>
-                                <span id="arrow_folder_${cIdx}">▼</span>
+                                <div><b>${c.cliente}</b> <span style="font-size:0.8rem; color:var(--text-light);">(${c.indirizzo})</span></div>
+                                <span>▼</span>
                             </div>
-                            <div id="${idCorpo}" class="folder-cliente-body">
-                                ${interventiHtml}
-                            </div>
+                            <div id="${idCorpo}" class="folder-cliente-body">${interventiHtml}</div>
                         </div>
                     `;
                 }
             });
-
-            if (trovati === 0) {
-                container.innerHTML = `<div style="text-align: center; color: var(--text-light); padding: 20px; font-size: 0.9rem;">Nessun cliente trovato.</div>`;
-            }
-        }
-
-        function toggleFolderCliente(idCorpo, headerEl) {
-            let bodyEl = document.getElementById(idCorpo);
-            if(!bodyEl) return;
-            let isOpen = bodyEl.classList.contains('open');
-            bodyEl.classList.toggle('open', !isOpen);
-            let arrowSpan = headerEl.querySelector('span:last-child');
-            if(arrowSpan) {
-                arrowSpan.innerText = isOpen ? '▼' : '▲';
-            }
-        }
-
-        function popolaSelectFiltroDipendenti() {
-            let sel = document.getElementById('selectFiltroDipendente');
-            if(!sel) return;
-            sel.innerHTML = '<option value="">Tutti i dipendenti</option>';
-            elencoOperaiTotali.forEach(op => {
-                sel.innerHTML += `<option value="${op}">${op}</option>`;
-            });
-        }
-
-        function apriModaleFiltri() {
-            let m = document.getElementById('modalFiltri');
-            if(m) m.classList.add('open');
-            filtraArchivioModale();
-        }
-
-        function chiudiModaleFiltri() {
-            let m = document.getElementById('modalFiltri');
-            if(m) m.classList.remove('open');
-        }
-
-        function azzeraFiltriModale() {
-            document.getElementById('selectFiltroDipendente').value = "";
-            document.getElementById('inputFiltroData').value = "";
-            document.getElementById('inputFiltroCantiere').value = "";
-            filtraArchivioModale();
-        }
-
-        function apriZoomFoto(srcBase64) {
-            let img = document.getElementById('imgZoomFull');
-            let m = document.getElementById('modalFotoZoom');
-            if(img && m) {
-                img.src = srcBase64;
-                m.classList.add('open');
-            }
-        }
-
-        function chiudiZoomFoto() {
-            let m = document.getElementById('modalFotoZoom');
-            if(m) m.classList.remove('open');
-        }
-
-        function toggleAccordion(contentId, headerEl) {
-            let content = document.getElementById(contentId);
-            if(!content) return;
-            let isOpen = content.classList.contains('open');
-            content.classList.toggle('open', !isOpen);
-            let arrowSpan = headerEl.querySelector('span:last-child');
-            if (arrowSpan) {
-                arrowSpan.innerText = isOpen ? '▼' : '▲';
-            }
+            if (trovati === 0) container.innerHTML = `<div style="text-align: center; color: var(--text-light); padding: 20px;">Nessun cliente trovato.</div>`;
         }
 
         function popolaDipendentiUfficioMultiplo() {
             let container = document.getElementById('listaDipendentiUfficioMultiplo');
             if(!container) return;
             container.innerHTML = '';
-
             elencoOperaiTotali.forEach(op => {
                 let idSelect = `ore_uff_op_${op.replace(/\s+/g, '_')}`;
                 let optionsHtml = '';
                 for (let i = 0.5; i <= 10; i += 0.5) {
-                    let sel = (i === 8) ? 'selected' : '';
-                    optionsHtml += `<option value="${i}" ${sel}>${i} ${i === 1 ? 'Ora' : 'Ore'}</option>`;
+                    optionsHtml += `<option value="${i}" ${i === 8 ? 'selected' : ''}>${i} ${i === 1 ? 'Ora' : 'Ore'}</option>`;
                 }
-
                 container.innerHTML += `
                     <div class="collega-card-item">
-                        <label>
-                            <input type="checkbox" name="dipendenteUfficioCheckbox" value="${op}" onchange="toggleSelectDipUfficio('${idSelect}', this)">
-                            ${op}
-                        </label>
-                        <select id="${idSelect}" disabled>
-                            ${optionsHtml}
-                        </select>
+                        <label><input type="checkbox" name="dipendenteUfficioCheckbox" value="${op}" onchange="toggleSelectDipUfficio('${idSelect}', this)">${op}</label>
+                        <select id="${idSelect}" disabled>${optionsHtml}</select>
                     </div>
                 `;
             });
         }
-
-        function toggleSelectDipUfficio(idSelect, checkbox) {
-            let selectEl = document.getElementById(idSelect);
-            if (selectEl) {
-                selectEl.disabled = !checkbox.checked;
-            }
-        }
+        function toggleSelectDipUfficio(idSelect, cb) { document.getElementById(idSelect).disabled = !cb.checked; }
 
         function popolaTabellaPresenzeUfficio() {
             let container = document.getElementById('listaPresenzeUfficio');
             if(!container) return;
             container.innerHTML = '';
-
-            let assenzeDB = {};
-            try {
-                assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
-            } catch(e) { assenzeDB = {}; }
-
+            let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
             let oggiStr = new Date().toISOString().split('T')[0];
 
             elencoOperaiTotali.forEach(op => {
@@ -622,51 +512,38 @@
                 let isAssente = datiOp.stato === 'Assente';
 
                 container.innerHTML += `
-                    <div class="presenza-item">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <b>${op}</b>
-                            <select id="stato_op_${safeId}" onchange="cambiaStatoPresenzaUI('${safeId}')" style="width: 130px; padding: 6px; font-size: 0.85rem;">
+                    <div class="collega-card-item" style="flex-direction: column; align-items: flex-start; gap: 6px;">
+                        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                            <span style="font-weight:600; font-size:0.85rem;">${op}</span>
+                            <select id="stato_op_${safeId}" onchange="cambiaStatoPresenzaUI('${safeId}')" style="width: 120px; padding: 4px; font-size: 0.8rem;">
                                 <option value="Presente" ${!isAssente ? 'selected' : ''}>🟢 Presente</option>
                                 <option value="Assente" ${isAssente ? 'selected' : ''}>🔴 Assente</option>
                             </select>
                         </div>
-                        <div id="dettagli_assenza_${safeId}" style="display: ${isAssente ? 'flex' : 'none'}; gap: 8px; margin-top: 4px;">
-                            <select id="tipo_op_${safeId}" style="flex: 1; padding: 6px; font-size: 0.8rem;">
-                                <option value="Ferie" ${datiOp.tipo === 'Ferie' ? 'selected' : ''}>Ferie</option>
-                                <option value="Malattia" ${datiOp.tipo === 'Malattia' ? 'selected' : ''}>Malattia</option>
-                                <option value="Permesso" ${datiOp.tipo === 'Permesso' ? 'selected' : ''}>Permesso</option>
-                            </select>
-                            <input type="date" id="fino_a_op_${safeId}" value="${datiOp.finoA || oggiStr}" style="flex: 1; padding: 6px; font-size: 0.8rem;">
+                        <div id="dettagli_assenza_${safeId}" style="display: ${isAssente ? 'flex' : 'none'}; gap: 6px; width: 100%;">
+                            <select id="tipo_op_${safeId}" style="flex:1; padding:4px; font-size:0.75rem;"><option value="Ferie">Ferie</option><option value="Malattia">Malattia</option><option value="Permesso">Permesso</option></select>
+                            <input type="date" id="fino_a_op_${safeId}" value="${datiOp.finoA || oggiStr}" style="flex:1; padding:4px; font-size:0.75rem;">
                         </div>
                     </div>
                 `;
             });
         }
-
         function cambiaStatoPresenzaUI(safeId) {
             let val = document.getElementById(`stato_op_${safeId}`).value;
-            let dettDiv = document.getElementById(`dettagli_assenza_${safeId}`);
-            if(dettDiv) {
-                dettDiv.style.display = (val === 'Assente') ? 'flex' : 'none';
-            }
+            document.getElementById(`dettagli_assenza_${safeId}`).style.display = (val === 'Assente') ? 'flex' : 'none';
         }
 
         function salvaPresenzeUfficio() {
             let assenzeDB = {};
             elencoOperaiTotali.forEach(op => {
                 let safeId = op.replace(/\s+/g, '_');
-                let stEl = document.getElementById(`stato_op_${safeId}`);
-                let tpEl = document.getElementById(`tipo_op_${safeId}`);
-                let fnEl = document.getElementById(`fino_a_op_${safeId}`);
-
-                if(stEl && tpEl && fnEl) {
-                    assenzeDB[op] = { stato: stEl.value, tipo: tpEl.value, finoA: fnEl.value };
-                }
+                let st = document.getElementById(`stato_op_${safeId}`).value;
+                let tp = document.getElementById(`tipo_op_${safeId}`).value;
+                let fn = document.getElementById(`fino_a_op_${safeId}`).value;
+                assenzeDB[op] = { stato: st, tipo: tp, finoA: fn };
             });
-
             localStorage.setItem('idra_assenze_dettaglio_db', JSON.stringify(assenzeDB));
-            alert("✅ Stato presenze e assenze salvato con successo!");
-            aggiornaVistaUfficio();
+            alert("✅ Presenze salvate!");
             eseguiControlloMancantiUfficio();
         }
 
@@ -675,546 +552,238 @@
                 let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
                 let datiOp = assenzeDB[nomeOp];
                 if (!datiOp || datiOp.stato !== 'Assente') return false;
-
-                let dataVerifica = new Date(dataStr);
-                let dataFineAssenza = new Date(datiOp.finoA);
-                return dataVerifica <= dataFineAssenza;
-            } catch(e) {
-                return false;
-            }
-        }
-
-        function cambiaCartella(tipo) {
-            cartellaCorrente = tipo;
-            let btnDaFare = document.getElementById('btnTabDaFare');
-            let btnTerminati = document.getElementById('btnTabTerminati');
-
-            if (tipo === 'da_fare') {
-                if(btnDaFare) btnDaFare.className = "tab-btn active-da-fare";
-                if(btnTerminati) btnTerminati.className = "tab-btn";
-            } else {
-                if(btnDaFare) btnDaFare.className = "tab-btn";
-                if(btnTerminati) btnTerminati.className = "tab-btn active-terminati";
-            }
-            aggiornaVistaUfficio();
-        }
-
-        function creaCantiereUfficio() {
-            let clienteEl = document.getElementById('nuovoCliente');
-            let indirizzoEl = document.getElementById('nuovoIndirizzo');
-
-            if(!clienteEl || !indirizzoEl) return;
-            let cliente = clienteEl.value.trim();
-            let indirizzo = indirizzoEl.value.trim();
-
-            if(!cliente || !indirizzo) {
-                alert("Inserisci nome cliente e indirizzo!");
-                return;
-            }
-
-            let cantieriDB = [];
-            try {
-                cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            } catch(e) {
-                cantieriDB = [];
-            }
-
-            cantieriDB.push({
-                cliente: cliente,
-                indirizzo: indirizzo,
-                completato: false,
-                garanziaGestita: false,
-                storico: []
-            });
-
-            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            clienteEl.value = '';
-            indirizzoEl.value = '';
-            aggiornaVistaUfficio();
-            alert("✅ Cantiere creato con successo!");
+                return new Date(dataStr) <= new Date(datiOp.finoA);
+            } catch(e) { return false; }
         }
 
         function eseguiControlloMancantiUfficio() {
             let corpoTabella = document.getElementById('corpoTabellaControlloMancanti');
             if(!corpoTabella) return;
             corpoTabella.innerHTML = '';
-
             const operaiEsclusi = ["Bruno Nicola", "Coriglione Alessandro", "Marinoni Alessandro"];
             let cantieriDB = ottieniCantieriAggiornati();
             let oggi = new Date();
-            let mappaMancanti = {}; 
+            let mappaMancanti = {};
 
             for (let i = 1; i <= 2; i++) {
-                let d = new Date();
-                d.setDate(oggi.getDate() - i);
+                let d = new Date(); d.setDate(oggi.getDate() - i);
                 let dataStr = d.toISOString().split('T')[0];
-
                 elencoOperaiTotali.forEach(nomeOp => {
-                    if (operaiEsclusi.includes(nomeOp)) return;
-                    let eAssente = isOperaioAssenteInData(nomeOp, dataStr);
-
-                    if (!eAssente) {
-                        let oreTotData = 0;
-                        cantieriDB.forEach(c => {
-                            if (c.storico && Array.isArray(c.storico)) {
-                                c.storico.forEach(s => {
-                                    if (s.data === dataStr && s.operai && s.operai.includes(nomeOp)) {
-                                        let matchOre = s.operai.match(new RegExp(`${nomeOp} \\(([^)]+h)\\)`));
-                                        if (matchOre && matchOre[1]) {
-                                            let val = parseFloat(matchOre[1]);
-                                            if (!isNaN(val)) oreTotData += val;
-                                        } else {
-                                            oreTotData += 8;
-                                        }
-                                    }
-                                });
-                            }
-                        });
-
-                        if (oreTotData < 8) {
-                            if (!mappaMancanti[nomeOp]) mappaMancanti[nomeOp] = [];
-                            mappaMancanti[nomeOp].push(`${dataStr} (${oreTotData}h)`);
+                    if (operaiEsclusi.includes(nomeOp) || isOperaioAssenteInData(nomeOp, dataStr)) return;
+                    let oreTotData = 0;
+                    cantieriDB.forEach(c => {
+                        if (c.storico) {
+                            c.storico.forEach(s => {
+                                if (s.data === dataStr && s.operai && s.operai.includes(nomeOp)) {
+                                    let matchOre = s.operai.match(new RegExp(`${nomeOp} \\(([^)]+h)\\)`));
+                                    oreTotData += matchOre ? (parseFloat(matchOre[1]) || 0) : 8;
+                                }
+                            });
                         }
+                    });
+                    if (oreTotData < 8) {
+                        if (!mappaMancanti[nomeOp]) mappaMancanti[nomeOp] = [];
+                        mappaMancanti[nomeOp].push(`${dataStr} (${oreTotData}h)`);
                     }
                 });
             }
 
-            let operaiKeys = Object.keys(mappaMancanti);
-            if (operaiKeys.length === 0) {
-                corpoTabella.innerHTML = `<tr><td colspan="2" style="text-align: center; color: var(--success); font-weight: 700;">Nessun allarme attivo per i dipendenti controllati! 🎉</td></tr>`;
+            let keys = Object.keys(mappaMancanti);
+            if (keys.length === 0) {
+                corpoTabella.innerHTML = `<tr><td colspan="2" style="text-align: center; color: var(--success); font-weight: 700;">Nessun allarme attivo per i dipendenti! 🎉</td></tr>`;
             } else {
-                operaiKeys.forEach(nomeOp => {
-                    let dettagliGiorni = mappaMancanti[nomeOp].join(', ');
-                    corpoTabella.innerHTML += `
-                        <tr>
-                            <td><b>${nomeOp}</b></td>
-                            <td><span class="badge badge-alert">${dettagliGiorni}</span></td>
-                        </tr>
-                    `;
+                keys.forEach(k => {
+                    corpoTabella.innerHTML += `<tr><td><b>${k}</b></td><td><span class="badge badge-alert">${mappaMancanti[k].join(', ')}</span></td></tr>`;
                 });
             }
         }
 
-        function ottieniCantieriAggiornati() {
-            let cantieriDB = [];
-            try {
-                cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-                if(!Array.isArray(cantieriDB)) cantieriDB = [];
-            } catch(e) {
-                cantieriDB = [];
-            }
-            return cantieriDB;
+        function cambiaCartella(tipo) {
+            cartellaCorrente = tipo;
+            document.getElementById('btnTabDaFare').className = tipo === 'da_fare' ? 'tab-btn active-da-fare' : 'tab-btn';
+            document.getElementById('btnTabTerminati').className = tipo === 'terminati' ? 'tab-btn active-terminati' : 'tab-btn';
+            aggiornaVistaUfficio();
+        }
+
+        function creaCantiereUfficio() {
+            let cl = document.getElementById('nuovoCliente').value.trim();
+            let ind = document.getElementById('nuovoIndirizzo').value.trim();
+            if(!cl || !ind) { alert("Inserisci cliente e indirizzo!"); return; }
+            let cantieriDB = ottieniCantieriAggiornati();
+            cantieriDB.push({ cliente: cl, indirizzo: ind, completato: false, garanziaGestita: false, storico: [] });
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+            document.getElementById('nuovoCliente').value = '';
+            document.getElementById('nuovoIndirizzo').value = '';
+            aggiornaVistaUfficio();
+            alert("✅ Cantiere creato!");
         }
 
         function aggiornaVistaUfficio() {
             let cantieriDB = ottieniCantieriAggiornati();
             let containerLista = document.getElementById('listaCantieriUfficio');
             if(!containerLista) return;
-
             containerLista.innerHTML = '';
             popolaSelectCantieriUfficio();
 
-            if (cantieriDB.length === 0) {
-                containerLista.innerHTML = '<div style="font-size: 0.85rem; color: var(--text-light); text-align: center; padding: 10px;">Nessun cantiere inserito nel database.</div>';
-                aggiornaTabellaRiepilogo(cantieriDB);
-                return;
-            }
-
-            let cantieriFiltratiCount = 0;
-
-            cantieriDB.forEach((c, cIdx) => {
+            let count = 0;
+            cantieriDB.forEach((c, idx) => {
                 let isCompletato = c.completato === true;
                 if ((cartellaCorrente === 'da_fare' && !isCompletato) || (cartellaCorrente === 'terminati' && isCompletato)) {
-                    cantieriFiltratiCount++;
-
+                    count++;
                     let storicoHtml = '';
-                    if (c.storico && Array.isArray(c.storico) && c.storico.length > 0) {
-                        c.storico.forEach((s, sIdx) => {
-                            let fotoBolleHtml = '';
-                            let fotoBolleArr = s.fotoBolle || s.bolle || [];
-                            if (Array.isArray(fotoBolleArr) && fotoBolleArr.length > 0) {
-                                fotoBolleHtml += `<div style="margin-top: 4px; font-size: 0.75rem; font-weight: 700; color: var(--text-light);">Bolle:</div><div class="foto-thumb-container">`;
-                                fotoBolleArr.forEach(imgBase64 => {
-                                    fotoBolleHtml += `<img src="${imgBase64}" class="foto-thumb" onclick="apriZoomFoto('${imgBase64}')">`;
-                                });
-                                fotoBolleHtml += `</div>`;
-                            }
-
-                            let fotoLavoriHtml = '';
-                            let fotoLavoriArr = s.fotoLavori || s.lavori || [];
-                            if (Array.isArray(fotoLavoriArr) && fotoLavoriArr.length > 0) {
-                                fotoLavoriHtml += `<div style="margin-top: 6px; font-size: 0.75rem; font-weight: 700; color: var(--text-light);">Lavori / Installazioni:</div><div class="foto-thumb-container">`;
-                                fotoLavoriArr.forEach(imgBase64 => {
-                                    fotoLavoriHtml += `<img src="${imgBase64}" class="foto-thumb" onclick="apriZoomFoto('${imgBase64}')">`;
-                                });
-                                fotoLavoriHtml += `</div>`;
-                            }
-
-                            let badgeStampato = s.stampato ? `<span class="badge-stampato">STAMPATO (${s.dataStampa})</span>` : ``;
-
+                    if (c.storico && c.storico.length > 0) {
+                        c.storico.forEach((s) => {
+                            let fotoArr = estraiFotoDaIntervento(s);
+                            let fHtml = fotoArr.length > 0 ? `<div class="foto-thumb-container">` + fotoArr.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('') + `</div>` : '';
                             storicoHtml += `
-                                <div style="font-size: 0.8rem; background: #f1f5f9; padding: 10px; border-radius: 8px; margin-top: 6px;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                                        <div><b>${s.data || 'Data N/D'}</b> - ${s.operai || s.dipendente || ''} ${badgeStampato}</div>
-                                        <button class="action-btn btn-orange" style="width: auto; padding: 4px 10px; font-size: 0.75rem;" onclick="stampaSingoloFoglio(${cIdx}, ${sIdx})">🖨️ Stampa</button>
-                                    </div>
-                                    <div><i>Note: ${s.note || ''}</i></div>
-                                    ${fotoBolleHtml}
-                                    ${fotoLavoriHtml}
+                                <div style="font-size: 0.8rem; background: #f8fafc; padding: 8px; border-radius: 6px; margin-top: 4px;">
+                                    <div><b>${s.data}</b> - ${s.operai || s.dipendente}</div>
+                                    <div><i>${s.note || s.descrizione || ''}</i></div>
+                                    ${fHtml}
                                 </div>
                             `;
                         });
-                    } else {
-                        storicoHtml = '<div style="font-size: 0.75rem; color: var(--text-light);">Nessun intervento registrato.</div>';
-                    }
-
-                    let badgeStato = isCompletato ? '<span class="badge badge-fatto">Terminato</span>' : '<span class="badge badge-da-fare">Da terminare</span>';
-                    let btnStatoTesto = isCompletato ? 'Segna come Da Terminare' : 'Segna come Lavoro Concluso';
-                    let classeCard = isCompletato ? 'cantiere-card terminato' : 'cantiere-card';
-                    let btnStatoClasse = isCompletato ? 'action-btn btn-green' : 'action-btn btn-orange';
-
-                    let garanziaChecked = c.garanziaGestita === true ? 'checked' : '';
-                    let badgeGaranzia = c.garanziaGestita ? '<span class="badge badge-garanzia-ok">🛡️ Garanzia Gestita</span>' : '<span class="badge badge-garanzia-no">🛡️ Garanzia Aperta</span>';
+                    } else { storicoHtml = '<div style="font-size: 0.75rem; color: var(--text-light);">Nessun intervento.</div>'; }
 
                     containerLista.innerHTML += `
-                        <div class="${classeCard}">
+                        <div class="cantiere-card-desktop ${isCompletato ? 'terminato' : 'aperto'}">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                 <div>
-                                    <div style="font-weight: 800; font-size: 1rem; color: var(--brand-dark);">${c.cliente}</div>
+                                    <div style="font-weight: 800; font-size: 0.95rem; color: var(--brand-dark);">${c.cliente}</div>
                                     <div style="font-size: 0.8rem; color: var(--text-light);">${c.indirizzo}</div>
                                 </div>
-                                <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-end;">
-                                    ${badgeStato}
-                                    ${badgeGaranzia}
-                                </div>
+                                <span class="badge ${isCompletato ? 'badge-fatto' : 'badge-da-fare'}">${isCompletato ? 'Terminato' : 'Aperto'}</span>
                             </div>
-
-                            <div class="garanzia-box">
-                                <label>
-                                    <input type="checkbox" ${garanziaChecked} onchange="toggleGaranziaCantiere(${cIdx}, this)">
-                                    Garanzia Gestita / Chiusa
-                                </label>
-                                <span style="font-size: 0.75rem; color: #854d0e;">${c.garanziaGestita ? 'Chiusa con successo' : 'Da verificare'}</span>
-                            </div>
-
-                            <div style="font-size: 0.8rem; font-weight: 700; color: var(--brand-orange); margin-top: 4px;">Totale Interventi Registrati: ${c.storico ? c.storico.length : 0}</div>
-                            <div style="margin-top: 2px;">
-                                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-bottom: 4px;">Storico Rapportini:</div>
+                            <div>
+                                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-light); text-transform: uppercase;">Storico:</div>
                                 ${storicoHtml}
                             </div>
-                            <div style="display: flex; gap: 8px; margin-top: 10px;">
-                                <button class="${btnStatoClasse}" style="padding: 8px; font-size: 0.8rem;" onclick="cambiaStatoCantiere(${cIdx})">${btnStatoTesto}</button>
-                                <button class="action-btn btn-danger" onclick="eliminaCantiere(${cIdx})">Elimina</button>
+                            <div style="display: flex; gap: 8px; margin-top: auto;">
+                                <button class="action-btn btn-orange" style="padding: 6px 10px; font-size: 0.75rem;" onclick="cambiaStatoCantiere(${idx})">${isCompletato ? 'Riapri' : 'Concludi'}</button>
+                                <button class="action-btn btn-danger" onclick="eliminaCantiere(${idx})">Elimina</button>
                             </div>
                         </div>
                     `;
                 }
             });
-
-            if (cantieriFiltratiCount === 0) {
-                containerLista.innerHTML = `<div style="font-size: 0.85rem; color: var(--text-light); text-align: center; padding: 15px;">Nessun cantiere in questa cartella.</div>`;
-            }
-
+            if (count === 0) containerLista.innerHTML = `<div style="grid-column: span 2; text-align: center; color: var(--text-light); padding: 20px;">Nessun cantiere in questa cartella.</div>`;
             aggiornaTabellaRiepilogo(cantieriDB);
-        }
-
-        function toggleGaranziaCantiere(cIdx, checkboxEl) {
-            let cantieriDB = ottieniCantieriAggiornati();
-            if(cantieriDB[cIdx]) {
-                cantieriDB[cIdx].garanziaGestita = checkboxEl.checked;
-                localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-                aggiornaVistaUfficio();
-            }
-        }
-
-        function stampaSingoloFoglio(cIdx, sIdx) {
-            let cantieriDB = ottieniCantieriAggiornati();
-            let c = cantieriDB[cIdx];
-            let s = c.storico[sIdx];
-
-            let oraCorrente = new Date().toLocaleDateString('it-IT') + ' ' + new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
-            s.stampato = true;
-            s.dataStampa = oraCorrente;
-            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            aggiornaVistaUfficio();
-
-            let finestraStampa = window.open('', '_blank');
-            let bolleHtml = "";
-            let fotoBolleArr = s.fotoBolle || s.bolle || [];
-            if (fotoBolleArr.length > 0) {
-                bolleHtml = `<div style="margin-top:15px;"><b>Foto Bolle Allega:</b><div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;">` + 
-                    fotoBolleArr.map(img => `<img src="${img}" style="width:180px; height:180px; object-fit:cover; border:1px solid #999; border-radius:4px;">`).join('') + 
-                    `</div></div>`;
-            } else {
-                bolleHtml = `<div style="margin-top:10px; font-size:13px; color:#666;"><i>Nessuna foto bolla allegata.</i></div>`;
-            }
-
-            let htmlContent = `
-                <!DOCTYPE html>
-                <html lang="it">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>Foglio di Lavoro - Idrotech Varese</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; color: #000; margin: 30px; font-size: 15px; }
-                        h1 { font-size: 22px; border-bottom: 2px solid #000; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-                        .box { border: 2px solid #333; padding: 20px; border-radius: 8px; margin-top: 20px; position: relative; }
-                        .stampato-badge { background: #1e40af; color: white; padding: 6px 14px; font-weight: bold; border-radius: 4px; font-size: 14px; text-transform: uppercase; }
-                        @media print { .no-print { display: none; } }
-                    </style>
-                </head>
-                <body>
-                    <div class="no-print" style="margin-bottom: 20px;">
-                        <button onclick="window.print()" style="padding:10px 20px; font-size:16px; cursor:pointer; background:#f28c1e; color:#fff; border:none; border-radius:5px;">🖨️ Stampa Ora</button>
-                    </div>
-                    <h1>
-                        <span>IDROTECH VARESE - Foglio di Lavoro</span>
-                        <span class="stampato-badge">STAMPATO (${oraCorrente})</span>
-                    </h1>
-                    <div class="box">
-                        <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">🏢 Cliente: ${c.cliente}</div>
-                        <div style="font-size: 15px; margin-bottom: 12px; color: #444;">📍 Indirizzo Cantiere: ${c.indirizzo}</div>
-                        <hr style="border:0; border-top:1px solid #ddd; margin:12px 0;">
-                        <div style="margin-bottom: 8px;"><b>Data Intervento:</b> ${s.data || 'N/D'}</div>
-                        <div style="margin-bottom: 8px;"><b>Personale e Ore:</b> ${s.operai || s.dipendente || ''}</div>
-                        <div style="margin-bottom: 12px;"><b>Note / Lavori Eseguiti:</b><br><div style="background:#f9f9f9; padding:10px; border:1px solid #ccc; margin-top:4px; border-radius:4px;">${s.note || ''}</div></div>
-                        ${bolleHtml}
-                    </div>
-                </body>
-                </html>
-            `;
-            finestraStampa.document.write(htmlContent);
-            finestraStampa.document.close();
         }
 
         function popolaSelectCantieriUfficio() {
             let selectCantiere = document.getElementById('selectCantiereUfficio');
-            let inputRicerca = document.getElementById('inputRicercaCantiereUfficio');
+            let query = document.getElementById('inputRicercaCantiereUfficio').value.toLowerCase().trim();
             if(!selectCantiere) return;
-
-            let query = inputRicerca ? inputRicerca.value.toLowerCase().trim() : '';
-            let cantieriDB = ottieniCantieriAggiornati();
             selectCantiere.innerHTML = '';
-
-            let countAperti = 0;
+            let cantieriDB = ottieniCantieriAggiornati();
+            let count = 0;
             cantieriDB.forEach((c, idx) => {
-                if (!c.completato) {
-                    let testoCompleto = `${c.cliente} - ${c.indirizzo}`.toLowerCase();
-                    if (query === '' || testoCompleto.includes(query)) {
-                        selectCantiere.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo}</option>`;
-                        countAperti++;
-                    }
+                if (!c.completato && (`${c.cliente} - ${c.indirizzo}`.toLowerCase().includes(query))) {
+                    selectCantiere.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo}</option>`;
+                    count++;
                 }
             });
-
-            if (countAperti === 0) {
-                selectCantiere.innerHTML = '<option value="">Nessun cantiere aperto trovato</option>';
-            }
+            if (count === 0) selectCantiere.innerHTML = '<option value="">Nessun cantiere trovato</option>';
         }
-
-        function filtraSelectCantieriUfficio() {
-            popolaSelectCantieriUfficio();
-        }
+        function filtraSelectCantieriUfficio() { popolaSelectCantieriUfficio(); }
 
         function raccogliTutteLeRigheRiepilogo(cantieriDB) {
-            let listaRigheRiepilogo = [];
-
+            let righe = [];
             cantieriDB.forEach(c => {
-                if (c.storico && Array.isArray(c.storico)) {
+                if (c.storico) {
                     c.storico.forEach(s => {
-                        let operaiString = s.operai || s.dipendente || "";
-                        if (operaiString) {
-                            if (operaiString.includes('(')) {
-                                let parti = operaiString.split(',');
-                                parti.forEach(p => {
-                                    let match = p.trim().match(/^(.*?)\s*\(([\d.]+)h\)$/);
-                                    if (match) {
-                                        let nomeOp = match[1].trim();
-                                        let oreOp = parseFloat(match[2]) || 0;
-                                        listaRigheRiepilogo.push({
-                                            data: s.data || 'N/D',
-                                            dipendente: nomeOp,
-                                            cantiere: c.cliente,
-                                            oreNum: oreOp,
-                                            ore: `${oreOp} Ore`
-                                        });
-                                    }
-                                });
-                            } else {
-                                listaRigheRiepilogo.push({
-                                    data: s.data || 'N/D',
-                                    dipendente: operaiString,
-                                    cantiere: c.cliente,
-                                    oreNum: 8,
-                                    ore: `8 Ore`
-                                });
-                            }
+                        let opStr = s.operai || s.dipendente || "";
+                        if (opStr.includes('(')) {
+                            opStr.split(',').forEach(p => {
+                                let m = p.trim().match(/^(.*?)\s*\(([\d.]+)h\)$/);
+                                if (m) righe.push({ data: s.data || 'N/D', dipendente: m[1].trim(), cantiere: c.cliente, oreNum: parseFloat(m[2]) || 0, ore: `${m[2]} Ore` });
+                            });
+                        } else if(opStr) {
+                            righe.push({ data: s.data || 'N/D', dipendente: opStr, cantiere: c.cliente, oreNum: 8, ore: `8 Ore` });
                         }
                     });
                 }
             });
-
-            let assenzeDB = {};
-            try {
-                assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
-            } catch(e) { assenzeDB = {}; }
-
-            let oggiStr = new Date().toISOString().split('T')[0];
-
-            elencoOperaiTotali.forEach(op => {
-                let datiOp = assenzeDB[op];
-                if (datiOp && datiOp.stato === 'Assente') {
-                    let dataFineAssenza = new Date(datiOp.finoA);
-                    let oggiDate = new Date(oggiStr);
-                    
-                    if (oggiDate <= dataFineAssenza) {
-                        listaRigheRiepilogo.push({
-                            data: `Oggi / Fino al ${datiOp.finoA}`,
-                            dipendente: op,
-                            cantiere: `<span class="badge badge-assenza">🔴 ${datiOp.tipo}</span>`,
-                            oreNum: 0,
-                            ore: `0 Ore`
-                        });
-                    }
-                }
-            });
-
-            listaRigheRiepilogo.sort((a, b) => new Date(b.data) - new Date(a.data));
-            return listaRigheRiepilogo;
+            righe.sort((a, b) => new Date(b.data) - new Date(a.data));
+            return righe;
         }
 
         function aggiornaTabellaRiepilogo(cantieriDB) {
-            let corpoTabella = document.getElementById('corpoTabellaRiepilogo');
-            if(!corpoTabella) return;
-            corpoTabella.innerHTML = '';
-
-            let listaRigheRiepilogo = raccogliTutteLeRigheRiepilogo(cantieriDB);
-
-            if (listaRigheRiepilogo.length === 0) {
-                corpoTabella.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-light);">Nessuna ora registrata finora.</td></tr>`;
-                return;
-            }
-
-            let ultimeRighe = listaRigheRiepilogo.slice(0, 5);
-            ultimeRighe.forEach(item => {
-                corpoTabella.innerHTML += `
-                    <tr>
-                        <td><b>${item.data}</b></td>
-                        <td><b>${item.dipendente}</b></td>
-                        <td>${item.cantiere}</td>
-                        <td><b>${item.ore}</b></td>
-                    </tr>
-                `;
+            let corpo = document.getElementById('corpoTabellaRiepilogo');
+            if(!corpo) return;
+            corpo.innerHTML = '';
+            let righe = raccogliTutteLeRigheRiepilogo(cantieriDB).slice(0, 5);
+            if (righe.length === 0) { corpo.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-light);">Nessuna ora registrata.</td></tr>`; return; }
+            righe.forEach(r => {
+                corpo.innerHTML += `<tr><td><b>${r.data}</b></td><td><b>${r.dipendente}</b></td><td>${r.cantiere}</td><td><b>${r.ore}</b></td></tr>`;
             });
+        }
+
+        function popolaSelectFiltroDipendenti() {
+            let sel = document.getElementById('selectFiltroDipendente');
+            if(!sel) return;
+            sel.innerHTML = '<option value="">Tutti i dipendenti</option>';
+            elencoOperaiTotali.forEach(op => sel.innerHTML += `<option value="${op}">${op}</option>`);
         }
 
         function filtraArchivioModale() {
-            let dipendenteFiltro = document.getElementById('selectFiltroDipendente').value;
-            let dataFiltro = document.getElementById('inputFiltroData').value;
-            let cantiereFiltro = document.getElementById('inputFiltroCantiere').value.toLowerCase().trim();
+            let dip = document.getElementById('selectFiltroDipendente').value;
+            let data = document.getElementById('inputFiltroData').value;
+            let cant = document.getElementById('inputFiltroCantiere').value.toLowerCase().trim();
+            let corpo = document.getElementById('corpoTabellaModaleFiltri');
+            let info = document.getElementById('infoTotaleOreFiltro');
+            if(!corpo) return;
+            corpo.innerHTML = '';
 
-            let corpoModale = document.getElementById('corpoTabellaModaleFiltri');
-            let infoOre = document.getElementById('infoTotaleOreFiltro');
-            if(!corpoModale) return;
-            corpoModale.innerHTML = '';
-
-            let cantieriDB = ottieniCantieriAggiornati();
-            let tutteLeRighe = raccogliTutteLeRigheRiepilogo(cantieriDB);
-
-            let righeFiltrate = tutteLeRighe.filter(r => {
-                let matchDip = (dipendenteFiltro === "" || r.dipendente === dipendenteFiltro);
-                let matchData = (dataFiltro === "" || r.data.includes(dataFiltro));
-                let matchCantiere = (cantiereFiltro === "" || r.cantiere.toLowerCase().includes(cantiereFiltro));
-                return matchDip && matchData && matchCantiere;
+            let righe = raccogliTutteLeRigheRiepilogo(ottieniCantieriAggiornati()).filter(r => {
+                return (dip === "" || r.dipendente === dip) && (data === "" || r.data.includes(data)) && (cant === "" || r.cantiere.toLowerCase().includes(cant));
             });
 
-            let sommaOreTotale = 0;
-            righeFiltrate.forEach(r => { sommaOreTotale += (r.oreNum || 0); });
+            let totOre = righe.reduce((acc, r) => acc + r.oreNum, 0);
+            if(info) info.innerHTML = `<b>Trovati:</b> ${righe.length} record | <b>Totale Ore:</b> ${totOre}h`;
 
-            if(infoOre) infoOre.innerHTML = `<b>Risultati Trovati:</b> ${righeFiltrate.length} | <b>Totale Ore:</b> ${sommaOreTotale} Ore`;
-
-            if (righeFiltrate.length === 0) {
-                corpoModale.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-light);">Nessun record trovato per i filtri selezionati.</td></tr>`;
-                return;
-            }
-
-            righeFiltrate.forEach(item => {
-                corpoModale.innerHTML += `
-                    <tr>
-                        <td><b>${item.data}</b></td>
-                        <td><b>${item.dipendente}</b></td>
-                        <td>${item.cantiere}</td>
-                        <td><b>${item.ore}</b></td>
-                    </tr>
-                `;
+            if (righe.length === 0) { corpo.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-light);">Nessun record trovato.</td></tr>`; return; }
+            righe.forEach(r => {
+                corpo.innerHTML += `<tr><td><b>${r.data}</b></td><td><b>${r.dipendente}</b></td><td>${r.cantiere}</td><td><b>${r.ore}</b></td></tr>`;
             });
+        }
+        function azzeraFiltriModale() {
+            document.getElementById('selectFiltroDipendente').value = "";
+            document.getElementById('inputFiltroData').value = "";
+            document.getElementById('inputFiltroCanti_ere').value = "";
+            filtraArchivioModale();
         }
 
         function registraUfficioMultiplo() {
-            let selectCantiere = document.getElementById('selectCantiereUfficio');
-            let dataIntervento = document.getElementById('dataInterventoUfficio');
-            let noteUfficio = document.getElementById('noteUfficio');
+            let selCantiere = document.getElementById('selectCantiereUfficio');
+            let dataInp = document.getElementById('dataInterventoUfficio');
+            let noteInp = document.getElementById('noteUfficio');
+            if(!selCantiere || selCantiere.value === '') { alert("Seleziona un cantiere!"); return; }
+            if(!dataInp || !dataInp.value) { alert("Inserisci la data!"); return; }
 
-            if(!selectCantiere || selectCantiere.value === '') {
-                alert("Seleziona un cantiere valido!");
-                return;
-            }
-            if(!dataIntervento || !dataIntervento.value) {
-                alert("Inserisci una data!");
-                return;
-            }
+            let cIdx = selCantiere.value;
+            let chks = document.querySelectorAll('input[name="dipendenteUfficioCheckbox"]:checked');
+            if (chks.length === 0) { alert("Seleziona almeno un dipendente!"); return; }
 
-            let cantiereIdx = selectCantiere.value;
-            let data = dataIntervento.value;
-            let note = noteUfficio ? noteUfficio.value.trim() : "";
-
-            let checkboxSelezionati = document.querySelectorAll('input[name="dipendenteUfficioCheckbox"]:checked');
-            if (checkboxSelezionati.length === 0) {
-                alert("Seleziona almeno un dipendente!");
-                return;
-            }
-
-            let stringaOperaiArray = [];
-            checkboxSelezionati.forEach(cb => {
-                let nomeOp = cb.value;
-                let idSelect = `ore_uff_op_${nomeOp.replace(/\s+/g, '_')}`;
-                let selectOre = document.getElementById(idSelect);
-                let oreOp = selectOre ? parseFloat(selectOre.value) || 8 : 8;
-                stringaOperaiArray.push(`${nomeOp} (${oreOp}h)`);
+            let arrOps = [];
+            chks.forEach(cb => {
+                let ore = parseFloat(document.getElementById(`ore_uff_op_${cb.value.replace(/\s+/g, '_')}`).value) || 8;
+                arrOps.push(`${cb.value} (${ore}h)`);
             });
 
             let cantieriDB = ottieniCantieriAggiornati();
-            if(!cantieriDB[cantiereIdx]) return;
+            if(!cantieriDB[cIdx].storico) cantieriDB[cIdx].storico = [];
 
-            if (!cantieriDB[cantiereIdx].storico || !Array.isArray(cantieriDB[cantiereIdx].storico)) {
-                cantieriDB[cantiereIdx].storico = [];
-            }
-
-            cantieriDB[cantiereIdx].storico.push({
-                data: data,
-                tipo: "Inserito da Ufficio",
-                operai: stringaOperaiArray.join(', '),
-                note: note ? note : "Inserito dall'ufficio",
-                statoIntervento: cantieriDB[cantiereIdx].completato ? "Terminato" : "Da terminare",
-                fotoBolle: [],
-                fotoLavori: [],
-                stampato: false,
-                dataStampa: ""
+            cantieriDB[cIdx].storico.push({
+                data: dataInp.value,
+                operai: arrOps.join(', '),
+                note: noteInp ? noteInp.value.trim() : "Inserito da ufficio",
+                fotoLavori: []
             });
 
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            if(noteUfficio) noteUfficio.value = '';
-            
-            let inputRicerca = document.getElementById('inputRicercaCantiereUfficio');
-            if(inputRicerca) inputRicerca.value = '';
-            
-            document.querySelectorAll('input[name="dipendenteUfficioCheckbox"]').forEach(cb => {
-                cb.checked = false;
-                let idSelect = `ore_uff_op_${cb.value.replace(/\s+/g, '_')}`;
-                let sel = document.getElementById(idSelect);
-                if(sel) sel.disabled = true;
-            });
-
+            if(noteInp) noteInp.value = '';
+            document.querySelectorAll('input[name="dipendenteUfficioCheckbox"]').forEach(cb => cb.checked = false);
             aggiornaVistaUfficio();
             eseguiControlloMancantiUfficio();
             alert("✅ Intervento registrato con successo!");
@@ -1228,16 +797,20 @@
                 aggiornaVistaUfficio();
             }
         }
-
+        function toggleGaranziaCantiere(idx, cb) {
+            let cantieriDB = ottieniCantieriAggiornati();
+            if(cantieriDB[idx]) {
+                cantieriDB[idx].garanziaGestita = cb.checked;
+                localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+            }
+        }
         function eliminaCantiere(idx) {
-            if(confirm("Sei sicuro di voler eliminare questo cantiere?")) {
+            if(confirm("Eliminare definitivamente questo cantiere?")) {
                 let cantieriDB = ottieniCantieriAggiornati();
-                if(cantieriDB[idx]) {
-                    cantieriDB.splice(idx, 1);
-                    localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-                    aggiornaVistaUfficio();
-                    eseguiControlloMancantiUfficio();
-                }
+                cantieriDB.splice(idx, 1);
+                localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+                aggiornaVistaUfficio();
+                eseguiControlloMancantiUfficio();
             }
         }
     </script>
