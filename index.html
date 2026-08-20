@@ -95,7 +95,7 @@
 
         <div class="content-body">
             
-            <!-- SELETTORE MODALITA' (UFFICIO / OPERAIO / ARTIGIANO) -->
+            <!-- SELETTORE MODALITA' -->
             <div id="viewSelezioneRuolo" class="view-section active">
                 <div class="card-box" style="border-color: var(--brand-orange); text-align: center; padding: 30px 20px;">
                     <div style="font-size: 1.2rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 10px;">👋 Benvenuto</div>
@@ -107,11 +107,11 @@
                 </div>
             </div>
 
-            <!-- ================= VISTA LOGIN UFFICIO ================= -->
+            <!-- LOGIN UFFICIO -->
             <div id="viewLoginUfficio" class="view-section">
                 <div class="card-box" style="border-color: var(--brand-orange); text-align: center; padding: 25px 15px;">
                     <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 8px;">📊 Accesso Ufficio / Admin</div>
-                    <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 15px;">Inserisci la password di amministrazione (Predefinita: <b>ufficio2026</b>)</div>
+                    <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 15px;">Inserisci la password (Predefinita: <b>ufficio2026</b>)</div>
 
                     <div style="text-align: left; margin-bottom: 15px;">
                         <label>Password Admin *</label>
@@ -123,16 +123,14 @@
                 </div>
             </div>
 
-            <!-- ================= VISTA LOGIN OPERAIO ================= -->
+            <!-- LOGIN OPERAIO -->
             <div id="viewLoginOperaio" class="view-section">
                 <div class="card-box" style="border-color: var(--brand-orange); text-align: center; padding: 25px 15px;">
                     <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 8px;">🔐 Accesso Operai</div>
                     
                     <div style="text-align: left; margin-bottom: 10px;">
                         <label>Seleziona il tuo Nome *</label>
-                        <select id="selectLoginOperaio">
-                            <option value="">-- Il mio nome --</option>
-                        </select>
+                        <select id="selectLoginOperaio"><option value="">-- Il mio nome --</option></select>
                     </div>
 
                     <div style="text-align: left; margin-bottom: 8px;">
@@ -141,7 +139,7 @@
                     </div>
                     
                     <div style="text-align: right; margin-bottom: 15px;">
-                        <a href="#" onclick="alert('ℹ️ Per recuperare la password contatta l\'Ufficio: provvederanno a resettarla in un click dal pannello amministrativo.'); return false;" style="font-size: 0.75rem; color: var(--brand-orange); text-decoration: none; font-weight: 600;">Password dimenticata?</a>
+                        <a href="#" onclick="alert('ℹ️ Per recuperare la password contatta l\'Ufficio.'); return false;" style="font-size: 0.75rem; color: var(--brand-orange); text-decoration: none; font-weight: 600;">Password dimenticata?</a>
                     </div>
 
                     <button class="action-btn btn-orange" style="margin-bottom: 8px;" onclick="effettuaLoginOperaio()">Accedi</button>
@@ -149,16 +147,14 @@
                 </div>
             </div>
 
-            <!-- ================= VISTA LOGIN ARTIGIANO ================= -->
+            <!-- LOGIN ARTIGIANO -->
             <div id="viewLoginArtigiano" class="view-section">
                 <div class="card-box" style="border-color: var(--brand-orange); text-align: center; padding: 25px 15px;">
                     <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 8px;">🔧 Accesso Artigiani</div>
                     
                     <div style="text-align: left; margin-bottom: 10px;">
                         <label>Seleziona il tuo Nome *</label>
-                        <select id="selectLoginArtigiano">
-                            <option value="">-- Il mio nome --</option>
-                        </select>
+                        <select id="selectLoginArtigiano"><option value="">-- Il mio nome --</option></select>
                     </div>
 
                     <div style="text-align: left; margin-bottom: 8px;">
@@ -167,7 +163,7 @@
                     </div>
 
                     <div style="text-align: right; margin-bottom: 15px;">
-                        <a href="#" onclick="alert('ℹ️ Per recuperare la password contatta l\'Ufficio: provvederanno a resettarla in un click dal pannello amministrativo.'); return false;" style="font-size: 0.75rem; color: var(--brand-orange); text-decoration: none; font-weight: 600;">Password dimenticata?</a>
+                        <a href="#" onclick="alert('ℹ️ Per recuperare la password contatta l\'Ufficio.'); return false;" style="font-size: 0.75rem; color: var(--brand-orange); text-decoration: none; font-weight: 600;">Password dimenticata?</a>
                     </div>
 
                     <button class="action-btn btn-artigiani" style="margin-bottom: 8px;" onclick="effettuaLoginArtigiano()">Accedi</button>
@@ -175,27 +171,20 @@
                 </div>
             </div>
 
-            <!-- ================= VISTA CAMBIO PASSWORD OPERAIO / ARTIGIANO ================= -->
+            <!-- CAMBIO PASSWORD -->
             <div id="viewCambioPassword" class="view-section">
                 <div class="card-box" style="border-color: var(--brand-orange); padding: 25px 15px;">
                     <div style="font-size: 1rem; font-weight: 800; color: var(--brand-dark); text-align: center; margin-bottom: 5px;">🔑 Cambio Password Obbligatorio</div>
                     <div style="font-size: 0.75rem; color: var(--text-light); text-align: center; margin-bottom: 15px;">Scegli una nuova password personale (min 4 caratteri).</div>
 
-                    <div style="margin-bottom: 10px;">
-                        <label>Nuova Password *</label>
-                        <input type="password" id="nuovaPasswordInput" placeholder="Nuova password...">
-                    </div>
-
-                    <div style="margin-bottom: 15px;">
-                        <label>Conferma Password *</label>
-                        <input type="password" id="confermaPasswordInput" placeholder="Ripeti password...">
-                    </div>
+                    <div style="margin-bottom: 10px;"><label>Nuova Password *</label><input type="password" id="nuovaPasswordInput" placeholder="Nuova password..."></div>
+                    <div style="margin-bottom: 15px;"><label>Conferma Password *</label><input type="password" id="confermaPasswordInput" placeholder="Ripeti password..."></div>
 
                     <button class="action-btn btn-orange" onclick="salvaNuovaPassword()">Salva e Accedi</button>
                 </div>
             </div>
 
-            <!-- ================= VISTA COMPILAZIONE FOGLIO LAVORO (OPERAIO / ARTIGIANO) ================= -->
+            <!-- FOGLIO LAVORO UTENTE -->
             <div id="viewFormUtente" class="view-section">
                 <div class="user-logged-box">
                     <span id="labelUtenteConnesso">Utente: -</span>
@@ -210,7 +199,6 @@
                         <input type="text" id="inputRicercaCantiereUtente" placeholder="Scrivi per filtrare i cantieri..." oninput="popolaCantieriUtente()">
                     </div>
 
-                    <!-- BOX AGGIUNTA RAPIDA CANTIERE -->
                     <div style="background: #f1f5f9; padding: 12px; border-radius: 10px; border: 1px dashed var(--brand-orange);">
                         <div style="font-size: 0.8rem; font-weight: 700; color: var(--brand-dark); margin-bottom: 6px;">➕ Cantiere non trovato? Crealo subito:</div>
                         <div style="display: flex; flex-direction: column; gap: 6px;">
@@ -220,154 +208,64 @@
                         </div>
                     </div>
 
-                    <div>
-                        <label>Seleziona Cantiere *</label>
-                        <select id="selectCantiereUtente">
-                            <option value="">Caricamento cantieri...</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label>Stato Cantiere per questo intervento *</label>
-                        <select id="selectStatoCantiereIntervento">
-                            <option value="">Seleziona stato...</option>
-                            <option value="In Corso">Cantiere in Corso</option>
-                            <option value="Terminato">Cantiere Terminato</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label>Data Intervento</label>
-                        <input type="date" id="dataInterventoUtente">
-                    </div>
-
-                    <div>
-                        <label>Tipo di Lavoro</label>
-                        <select id="tipoLavoroUtente">
-                            <option value="Nuovo Lavoro / Installazione">Nuovo Lavoro / Installazione</option>
-                            <option value="Manutenzione / Riparazione">Manutenzione / Riparazione</option>
-                            <option value="Sopralluogo / Preventivo">Sopralluogo / Preventivo</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label>Le tue Ore Lavorate *</label>
-                        <select id="mieOreLavorate">
-                            <option value="8" selected>8 Ore</option>
-                            <option value="7">7 Ore</option>
-                            <option value="6">6 Ore</option>
-                            <option value="5">5 Ore</option>
-                            <option value="4">4 Ore</option>
-                            <option value="3">3 Ore</option>
-                            <option value="2">2 Ore</option>
-                            <option value="1">1 Ora</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label>Colleghi presenti e ore dedicate</label>
-                        <div class="container-colleghi-scroll" id="listaColleghiUtente"></div>
-                    </div>
-
-                    <div>
-                        <label>Note / Lavori Eseguiti *</label>
-                        <textarea id="noteInterventoUtente" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea>
-                    </div>
-
-                    <div>
-                        <label>📷 Foto Bolle <span id="statoAiBolle" style="font-size:0.7rem; color:var(--brand-orange);"></span></label>
-                        <input type="file" id="fotoBolleInput" accept="image/*" multiple onchange="gestisciCaricamentoFotoAI(this, 'bolle')">
-                    </div>
-
-                    <div>
-                        <label>📷 Foto Lavori <span id="statoAiLavori" style="font-size:0.7rem; color:var(--brand-orange);"></span></label>
-                        <input type="file" id="fotoLavoriInput" accept="image/*" multiple onchange="gestisciCaricamentoFotoAI(this, 'lavori')">
-                    </div>
+                    <div><label>Seleziona Cantiere *</label><select id="selectCantiereUtente"><option value="">Caricamento cantieri...</option></select></div>
+                    <div><label>Stato Cantiere per questo intervento *</label><select id="selectStatoCantiereIntervento"><option value="">Seleziona stato...</option><option value="In Corso">Cantiere in Corso</option><option value="Terminato">Cantiere Terminato</option></select></div>
+                    <div><label>Data Intervento</label><input type="date" id="dataInterventoUtente"></div>
+                    <div><label>Tipo di Lavoro</label><select id="tipoLavoroUtente"><option value="Nuovo Lavoro / Installazione">Nuovo Lavoro / Installazione</option><option value="Manutenzione / Riparazione">Manutenzione / Riparazione</option><option value="Sopralluogo / Preventivo">Sopralluogo / Preventivo</option></select></div>
+                    <div><label>Le tue Ore Lavorate *</label><select id="mieOreLavorate"><option value="8" selected>8 Ore</option><option value="7">7 Ore</option><option value="6">6 Ore</option><option value="5">5 Ore</option><option value="4">4 Ore</option><option value="3">3 Ore</option><option value="2">2 Ore</option><option value="1">1 Ora</option></select></div>
+                    <div><label>Colleghi presenti e ore dedicate</label><div class="container-colleghi-scroll" id="listaColleghiUtente"></div></div>
+                    <div><label>Note / Lavori Eseguiti *</label><textarea id="noteInterventoUtente" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea></div>
+                    <div><label>📷 Foto Bolle <span id="statoAiBolle" style="font-size:0.7rem; color:var(--brand-orange);"></span></label><input type="file" id="fotoBolleInput" accept="image/*" multiple onchange="gestisciCaricamentoFotoAI(this, 'bolle')"></div>
+                    <div><label>📷 Foto Lavori <span id="statoAiLavori" style="font-size:0.7rem; color:var(--brand-orange);"></span></label><input type="file" id="fotoLavoriInput" accept="image/*" multiple onchange="gestisciCaricamentoFotoAI(this, 'lavori')"></div>
 
                     <button class="action-btn btn-orange" onclick="salvaFoglioLavoroUtente()">Salva Foglio di Lavoro</button>
                 </div>
             </div>
 
-            <!-- ================= VISTA PANNELLO UFFICIO ================= -->
+            <!-- PANNELLO UFFICIO -->
             <div id="viewUfficio" class="view-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; background: #e2e8f0; padding: 10px 14px; border-radius: 10px; font-weight: 700; font-size: 0.9rem;">
                     <span>📊 Pannello Amministrazione</span>
                     <button class="action-btn btn-dark" style="width: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="mostraVista('selezione')">Esci Ufficio</button>
                 </div>
 
-                <!-- CONTROLLO MANCATI FOGLI -->
                 <div class="card-box" style="border-color: #ef4444; background: #fff5f5;">
                     <div style="font-size: 1rem; font-weight: 800; color: #b91c1c;">🚨 Controllo Ufficio: Mancati Fogli (Ultimi 2 Giorni)</div>
                     <div style="overflow-x: auto;">
                         <table class="riepilogo-table" id="tabellaControlloMancanti">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Dipendente</th>
-                                    <th>Ore</th>
-                                </tr>
-                            </thead>
+                            <thead><tr><th>Data</th><th>Dipendente</th><th>Ore</th></tr></thead>
                             <tbody id="corpoTabellaControlloMancanti"></tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- GESTIONE PASSWORD UTENTI -->
                 <div>
-                    <div class="accordion-header" onclick="toggleAccordion('contentGestionePassword', this)">
-                        <span>🔑 Gestione Password Utenti</span>
-                        <span id="arrowGestionePassword">▼</span>
-                    </div>
+                    <div class="accordion-header" onclick="toggleAccordion('contentGestionePassword', this)"><span>🔑 Gestione Password Utenti</span><span>▼</span></div>
                     <div id="contentGestionePassword" class="accordion-content card-box" style="border-color: var(--brand-orange);">
-                        <div style="font-size: 0.8rem; color: var(--text-light);">Da qui puoi resettare la password di un operaio/artigiano (tornerà quella predefinita con il nome minuscolo) oppure impostarne una nuova.</div>
                         <div class="container-colleghi-scroll" id="listaGestionePasswordUfficio" style="max-height: 250px;"></div>
                     </div>
                 </div>
 
-                <!-- GESTIONE PRESENZE / ASSENZE -->
                 <div>
-                    <div class="accordion-header" onclick="toggleAccordion('contentPresenze', this)">
-                        <span>📋 Gestione Presenze / Assenze</span>
-                        <span id="arrowPresenze">▼</span>
-                    </div>
+                    <div class="accordion-header" onclick="toggleAccordion('contentPresenze', this)"><span>📋 Gestione Presenze / Assenze</span><span>▼</span></div>
                     <div id="contentPresenze" class="accordion-content card-box" style="border-color: var(--brand-orange);">
                         <div class="container-colleghi-scroll" id="listaPresenzeUfficio" style="max-height: 250px;"></div>
                         <button class="action-btn btn-orange" onclick="salvaPresenzeUfficio()">Salva Stato Assenze</button>
                     </div>
                 </div>
 
-                <!-- REGISTRAZIONE PER CONTO DIPENDENTI -->
                 <div>
-                    <div class="accordion-header" onclick="toggleAccordion('contentRegistrazione', this)">
-                        <span>✏️ Registra per conto Dipendenti</span>
-                        <span id="arrowRegistrazione">▼</span>
-                    </div>
+                    <div class="accordion-header" onclick="toggleAccordion('contentRegistrazione', this)"><span>✏️ Registra per conto Dipendenti</span><span>▼</span></div>
                     <div id="contentRegistrazione" class="accordion-content card-box" style="border-color: var(--brand-orange);">
-                        <div>
-                            <label>Cerca Cantiere</label>
-                            <input type="text" id="inputRicercaCantiereUfficio" placeholder="Filtra cantieri..." oninput="popolaSelectCantieriUfficio()">
-                        </div>
-                        <div>
-                            <label>Seleziona Cantiere</label>
-                            <select id="selectCantiereUfficio"></select>
-                        </div>
-                        <div>
-                            <label>Data Intervento</label>
-                            <input type="date" id="dataInterventoUfficio">
-                        </div>
-                        <div>
-                            <label>Dipendenti e Ore</label>
-                            <div class="container-colleghi-scroll" id="listaDipendentiUfficioMultiplo"></div>
-                        </div>
-                        <div>
-                            <label>Note</label>
-                            <textarea id="noteUfficio" rows="2" placeholder="Dettagli..."></textarea>
-                        </div>
+                        <div><label>Cerca Cantiere</label><input type="text" id="inputRicercaCantiereUfficio" placeholder="Filtra cantieri..." oninput="popolaSelectCantieriUfficio()"></div>
+                        <div><label>Seleziona Cantiere</label><select id="selectCantiereUfficio"></select></div>
+                        <div><label>Data Intervento</label><input type="date" id="dataInterventoUfficio"></div>
+                        <div><label>Dipendenti e Ore</label><div class="container-colleghi-scroll" id="listaDipendentiUfficioMultiplo"></div></div>
+                        <div><label>Note</label><textarea id="noteUfficio" rows="2" placeholder="Dettagli..."></textarea></div>
                         <button class="action-btn btn-orange" onclick="registraUfficioMultiplo()">Registra per conto Dipendenti</button>
                     </div>
                 </div>
 
-                <!-- CREA NUOVO CANTIERE UFFICIO -->
                 <div class="card-box">
                     <div style="font-size: 1rem; font-weight: 800; color: var(--brand-dark);">Inserisci Nuovo Cantiere</div>
                     <div><label>Cliente</label><input type="text" id="nuovoCliente" placeholder="Nome cliente..."></div>
@@ -375,7 +273,6 @@
                     <button class="action-btn btn-green" onclick="creaCantiereUfficio()">Crea Cantiere</button>
                 </div>
 
-                <!-- ARCHIVIO CANTIERI -->
                 <div class="card-box">
                     <div style="font-size: 1rem; font-weight: 800; color: var(--brand-dark);">Archivio Cantieri</div>
                     <div class="tabs-container">
@@ -385,7 +282,6 @@
                     <div id="listaCantieriUfficio"></div>
                 </div>
 
-                <!-- RIEPILOGO ORE -->
                 <div class="card-box">
                     <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
                         <div style="font-size: 1rem; font-weight: 800; color: var(--brand-dark);">📊 Riepilogo Ore</div>
@@ -393,14 +289,7 @@
                     </div>
                     <div style="overflow-x: auto;">
                         <table class="riepilogo-table">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Dipendente</th>
-                                    <th>Cantiere</th>
-                                    <th>Ore</th>
-                                </tr>
-                            </thead>
+                            <thead><tr><th>Data</th><th>Dipendente</th><th>Cantiere</th><th>Ore</th></tr></thead>
                             <tbody id="corpoTabellaRiepilogo"></tbody>
                         </table>
                     </div>
@@ -449,9 +338,7 @@
             "Rosini Jean Paul", "Saleh Mohamed"
         ];
 
-        const elencoArtigianiTotali = [
-            "SGL", "ARBO", "Clima Group Srl"
-        ];
+        const elencoArtigianiTotali = ["SGL", "ARBO", "Clima Group Srl"];
 
         let utenteCorrente = "";
         let tipoUtenteCorrente = ""; 
@@ -507,15 +394,11 @@
         function popolaTendineLogin() {
             let selectOp = document.getElementById('selectLoginOperaio');
             selectOp.innerHTML = '<option value="">-- Il mio nome --</option>';
-            elencoOperaiTotali.forEach(op => {
-                selectOp.innerHTML += `<option value="${op}">${op}</option>`;
-            });
+            elencoOperaiTotali.forEach(op => selectOp.innerHTML += `<option value="${op}">${op}</option>`);
 
             let selectArt = document.getElementById('selectLoginArtigiano');
             selectArt.innerHTML = '<option value="">-- Il mio nome --</option>';
-            elencoArtigianiTotali.forEach(art => {
-                selectArt.innerHTML += `<option value="${art}">${art}</option>`;
-            });
+            elencoArtigianiTotali.forEach(art => selectArt.innerHTML += `<option value="${art}">${art}</option>`);
         }
 
         function effettuaLoginOperaio() {
@@ -608,7 +491,7 @@
 
                 container.innerHTML += `
                     <div class="collega-card-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
-                        <div style="display: flex; justify-content: space-width; width: 100%; align-items: center;">
+                        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
                             <div><b>${item.nome}</b> <span style="font-size: 0.75rem; color: var(--text-light);">(${item.tipo})</span></div>
                             <button class="action-btn btn-danger" style="padding: 4px 8px; font-size: 0.7rem;" onclick="resettaPasswordUtente('${item.nome}', '${item.tipo}')">Resetta</button>
                         </div>
@@ -711,31 +594,23 @@
             });
         }
 
-        // ================= INTEGRAZIONE GEMINI AI (DOPPIO SCAMBIO ATTIVO) =================
         async function analizzaImmagineConGemini(base64Data) {
-            if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("INSERISCI")) {
-                return "BOLLA"; // Fallback di sicurezza
-            }
-
+            if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("INSERISCI")) return "BOLLA";
             try {
                 let cleanBase64 = base64Data.split(',')[1] || base64Data;
                 let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-                
-                let promptTesto = "Analizza questa immagine. Se contiene un documento di trasporto, bolla, DDT, fattura, ricevuta o scritte come 'firma destinatario', 'destinazione', 'codice', 'quantità', rispondi esattamente BOLLA. Se contiene foto di cantieri, tubi, caldaie, impianti idraulici, stanze in ristrutturazione o operai a lavoro, rispondi esattamente LAVORO. Se l'immagine è chiaramente un soggetto estraneo (es. selfie, cibo, animali), rispondi SCARTO. In caso di dubbio o incertezza su documenti o cantiere, rispondi BOLLA.";
-
                 let response = await fetch(url, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         contents: [{
                             parts: [
-                                { text: promptTesto },
+                                { text: "Analizza questa immagine. Rispondi esattamente BOLLA se è un documento/DDT/fattura, LAVORO se è un cantiere/impianto/lavoro, o SCARTO se non è pertinente." },
                                 { inline_data: { mime_type: "image/jpeg", data: cleanBase64 } }
                             ]
                         }]
                     })
                 });
-
                 let data = await response.json();
                 if (data.candidates && data.candidates[0].content) {
                     let risposta = data.candidates[0].content.parts[0].text.trim().toUpperCase();
@@ -744,9 +619,9 @@
                     if (risposta.includes("SCARTO")) return "SCARTO";
                 }
             } catch (err) {
-                console.error("Errore chiamata Gemini:", err);
+                console.error("Errore Gemini:", err);
             }
-            return "BOLLA"; // In caso di errore di rete, diamo via libera
+            return "BOLLA";
         }
 
         async function gestisciCaricamentoFotoAI(inputElement, tipoSelezionato) {
@@ -758,7 +633,6 @@
 
             let bolleInput = document.getElementById('fotoBolleInput');
             let lavoriInput = document.getElementById('fotoLavoriInput');
-
             let fileListValidi = [];
             
             for (let i = 0; i < files.length; i++) {
@@ -766,20 +640,15 @@
                 let base64 = await comprimiEConvertiImmagine(fileCorrente);
                 let verdetto = await analizzaImmagineConGemini(base64);
 
-                console.log("File:", fileCorrente.name, "| Sezione scelta:", tipoSelezionato, "| Verdetto IA:", verdetto);
-
                 if (verdetto === "SCARTO") {
-                    alert("🚫 L'IA ha scartato questa foto (ritenuta non valida o non pertinente). Rimossa dal caricamento!");
-                } 
-                else if (tipoSelezionato === 'lavori' && verdetto === "BOLLA") {
-                    alert("🤖 L'IA ha rilevato un documento/bolla caricato per errore in Lavori: spostata automaticamente in FOTO BOLLE!");
+                    alert("🚫 Foto scartata dall'IA perché non pertinente.");
+                } else if (tipoSelezionato === 'lavori' && verdetto === "BOLLA") {
+                    alert("🤖 Rilevata bolla: spostata in FOTO BOLLE.");
                     aggiungiFileAInput(fileCorrente, bolleInput);
-                } 
-                else if (tipoSelezionato === 'bolle' && verdetto === "LAVORO") {
-                    alert("⚠️ Errore: Hai caricato una foto cantiere/lavoro nella sezione Bolle! L'IA l'ha intercettata e spostata automaticamente in FOTO LAVORI.");
+                } else if (tipoSelezionato === 'bolle' && verdetto === "LAVORO") {
+                    alert("🤖 Rilevato lavoro: spostata in FOTO LAVORI.");
                     aggiungiFileAInput(fileCorrente, lavoriInput);
-                }
-                else {
+                } else {
                     fileListValidi.push(fileCorrente);
                 }
             }
@@ -794,9 +663,7 @@
 
         function aggiungiFileAInput(fileDaAggiungere, inputDestinazione) {
             let dt = new DataTransfer();
-            for (let f of inputDestinazione.files) {
-                dt.items.add(f);
-            }
+            for (let f of inputDestinazione.files) dt.items.add(f);
             dt.items.add(fileDaAggiungere);
             inputDestinazione.files = dt.files;
         }
@@ -854,7 +721,11 @@
         function chiudiModaleFiltri() { document.getElementById('modalFiltri').classList.remove('open'); }
         function apriZoomFoto(src) { document.getElementById('imgZoomFull').src = src; document.getElementById('modalFotoZoom').classList.add('open'); }
         function chiudiZoomFoto() { document.getElementById('modalFotoZoom').classList.remove('open'); }
-        function toggleAccordion(id, el) { document.getElementById(id).classList.toggle('open'); el.querySelector('span:last-child').innerText = document.getElementById(id).classList.contains('open') ? '▲' : '▼'; }
+        function toggleAccordion(id, el) { 
+            let content = document.getElementById(id);
+            content.classList.toggle('open'); 
+            el.querySelector('span:last-child').innerText = content.classList.contains('open') ? '▲' : '▼'; 
+        }
 
         function popolaDipendentiUfficioMultiplo() {
             let c = document.getElementById('listaDipendentiUfficioMultiplo');
@@ -897,7 +768,8 @@
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             cantieriDB.push({ cliente, indirizzo, completato: false, storico: [] });
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            document.getElementById('nuovoCliente').value = ''; document.getElementById('nuovoIndirizzo').value = '';
+            document.getElementById('nuovoCliente').value = ''; 
+            document.getElementById('nuovoIndirizzo').value = '';
             aggiornaVistaUfficio();
             alert("✅ Cantiere creato!");
         }
@@ -923,7 +795,7 @@
             let ops = [];
             document.querySelectorAll('input[name="dipUffChk"]:checked').forEach(cb => {
                 let o = document.getElementById(`ore_uff_${cb.value.replace(/\s+/g, '_')}`).value;
-                ops.push(`${cb.value} (${o})`);
+                ops.push(`${cb.value} (${o}h)`);
             });
             if (ops.length === 0) return alert("Seleziona dipendenti!");
 
