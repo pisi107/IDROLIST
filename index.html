@@ -68,7 +68,6 @@
         .collega-card-item select { width: 110px; padding: 8px; font-size: 0.9rem; }
         .container-colleghi-scroll { max-height: 220px; overflow-y: auto; background: #fff; padding: 8px; border: 1px solid var(--border); border-radius: 10px; }
 
-        /* Stili Righe Materiale Extra */
         .materiale-extra-row { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
         .materiale-extra-row input[type="text"] { flex: 2; padding: 10px; font-size: 0.9rem; }
         .materiale-extra-row input[type="number"] { flex: 1; padding: 10px; font-size: 0.9rem; }
@@ -91,7 +90,6 @@
         .modal-body { padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
         .close-modal-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
 
-        /* Schermata Intera per la Firma Digitale */
         .fullscreen-signature-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0f172a; z-index: 9999; flex-direction: column; padding: 20px; }
         .fullscreen-signature-overlay.open { display: flex; }
         .signature-top-bar { display: flex; justify-content: space-between; align-items: center; color: white; margin-bottom: 15px; }
@@ -250,7 +248,6 @@
                         <input type="file" id="inputBolleManuale" accept="image/*" multiple>
                     </div>
 
-                    <!-- SEZIONE RIGHE MATERIALE EXTRA / FUORI DDT -->
                     <div style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                             <label style="margin: 0;">📦 Materiale Extra / Fuori DDT</label>
@@ -260,7 +257,6 @@
                         <div id="containerMaterialiExtra" style="display: flex; flex-direction: column; gap: 6px;"></div>
                     </div>
 
-                    <!-- SEZIONE FIRMA DEL CLIENTE A SCHERMO INTERO -->
                     <div style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px;">
                         <label>✍️ Firma del Cliente *</label>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -474,7 +470,6 @@
         let tipoUtenteCorrente = ""; 
         let cartellaCorrente = 'da_fare';
         
-        // Gestione Canvas Firma
         let canvasFirma, ctxFirma, isDrawingFirma = false, hasFirma = false;
         let firmaTempBase64 = null;
 
@@ -582,7 +577,6 @@
             document.getElementById('labelStatoFirma').style.color = "var(--danger)";
         }
 
-        // Funzioni per la gestione delle righe materiale extra
         function aggiungiRigaMaterialeExtra() {
             let container = document.getElementById('containerMaterialiExtra');
             let rigaId = 'mat_row_' + Date.now() + Math.floor(Math.random() * 1000);
@@ -759,7 +753,7 @@
             if (!cliente || !indirizzo) return alert("⚠️ Inserisci cliente e indirizzo!");
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            cantieriDB.push({ cliente: cliente, indirizzo: indirizzo, completato: false, storico: [], fotoImpianti: [], garanzie: [] });
+            cantieriDB.push({ cliente: cliente, indirizzo: indirizzo, completato: false, statoRichiestaChiusura: null, storico: [], fotoImpianti: [], garanzie: [] });
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
 
             document.getElementById(idCli).value = '';
@@ -787,7 +781,7 @@
             tutti.forEach(item => {
                 let db = item.tipo === 'operaio' ? opPassDB : artPassDB;
                 let haPersonalizzato = !!db[item.nome];
-                let statoTxt = haPersonalizzata ? "Personalizzata" : "Predefinita";
+                let statoTxt = haPersonalizzato ? "Personalizzata" : "Predefinita";
                 let safeId = item.nome.replace(/\s+/g, '_');
 
                 container.innerHTML += `
@@ -833,7 +827,7 @@
             if (!cliente || !indirizzo) return alert("⚠️ Inserisci cliente e indirizzo!");
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            cantieriDB.push({ cliente: cliente, indirizzo: indirizzo, completato: false, storico: [], fotoImpianti: [], garanzie: [] });
+            cantieriDB.push({ cliente: cliente, indirizzo: indirizzo, completato: false, statoRichiestaChiusura: null, storico: [], fotoImpianti: [], garanzie: [] });
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
 
             document.getElementById('nuovoClienteUtente').value = '';
@@ -920,7 +914,6 @@
             let inputBolle = document.getElementById('inputBolleManuale').files;
             let fotoBolleBase64 = await elaboraFileList(inputBolle);
 
-            // Raccogli materiale extra
             let materialiExtraList = [];
             document.querySelectorAll('.materiale-extra-row').forEach(row => {
                 let desc = row.querySelector('.input-desc-mat').value.trim();
@@ -950,10 +943,18 @@
                 firmaCliente: firmaTempBase64,
                 fotoLavori: [] 
             });
-            cantieriDB[cIdx].completato = (stato === "Terminato");
+
+            // MODIFICA CRUCIALE: L'operaio non chiude più direttamente il cantiere.
+            // Se seleziona "Terminato", impostiamo la richiesta di verifica per l'ufficio.
+            if (stato === "Terminato") {
+                cantieriDB[cIdx].statoRichiestaChiusura = "In attesa di verifica";
+            } else {
+                cantieriDB[cIdx].statoRichiestaChiusura = null;
+            }
+            cantieriDB[cIdx].completato = false; 
 
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            alert("✅ Foglio di lavoro, materiale extra e firma salvati con successo!");
+            alert("✅ Foglio di lavoro inviato con successo! L'ufficio verificherà la richiesta.");
             
             document.getElementById('noteInterventoUtente').value = '';
             document.getElementById('inputBolleManuale').value = '';
@@ -1066,7 +1067,7 @@
             let indirizzo = document.getElementById('nuovoIndirizzo').value.trim();
             if (!cliente || !indirizzo) return alert("Inserisci cliente e indirizzo!");
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            cantieriDB.push({ cliente, indirizzo, completato: false, storico: [], fotoImpianti: [], garanzie: [] });
+            cantieriDB.push({ cliente, indirizzo, completato: false, statoRichiestaChiusura: null, storico: [], fotoImpianti: [], garanzie: [] });
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             document.getElementById('nuovoCliente').value = ''; 
             document.getElementById('nuovoIndirizzo').value = '';
@@ -1155,16 +1156,27 @@
                         });
                     }
 
+                    // Pulsante di approvazione chiusura visibile solo se l'operaio ha chiesto di chiudere
+                    let btnApprova = '';
+                    if (c.statoRichiestaChiusura === "In attesa di verifica" && !c.completato) {
+                        btnApprova = `<button class="action-btn btn-green" style="padding:6px; font-size:0.8rem; margin-bottom:6px;" onclick="approvaChiusuraCantiere(${idx})">✅ Approva Chiusura</button>`;
+                    }
+
+                    let badgeRichiesta = c.statoRichiestaChiusura ? `<span class="badge badge-alert" style="margin-left: 6px;">Richiesta Chiusura</span>` : '';
+
                     cont.innerHTML += `
                         <div class="cantiere-card ${c.completato?'terminato':''}">
-                            <div style="font-weight:800;">${c.cliente}</div>
+                            <div style="font-weight:800;">${c.cliente} ${badgeRichiesta}</div>
                             <div style="font-size:0.8rem; color:var(--text-light);">${c.indirizzo}</div>
                             ${stHtml}
                             ${fotoImpiantiHtml}
                             ${garanzieHtml}
-                            <div style="display:flex; gap:6px; margin-top:8px;">
-                                <button class="action-btn ${c.completato?'btn-green':'btn-orange'}" style="padding:6px; font-size:0.8rem;" onclick="toggleStato(${idx})">${c.completato?'Riapri':'Termina'}</button>
-                                <button class="action-btn btn-danger" onclick="eliminaCantiere(${idx})">Elimina</button>
+                            <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
+                                ${btnApprova}
+                                <div style="display:flex; gap:6px;">
+                                    <button class="action-btn ${c.completato?'btn-green':'btn-orange'}" style="padding:6px; font-size:0.8rem;" onclick="toggleStato(${idx})">${c.completato?'Riapri':'Termina'}</button>
+                                    <button class="action-btn btn-danger" onclick="eliminaCantiere(${idx})">Elimina</button>
+                                </div>
                             </div>
                         </div>`;
                 }
@@ -1172,9 +1184,24 @@
             aggiornaTabellaRiepilogo(db);
         }
 
+        // Funzione per l'ufficio per approvare la chiusura richiesta dall'operaio
+        function approvaChiusuraCantiere(idx) {
+            if (confirm("Confermi di voler chiudere definitivamente questo cantiere?")) {
+                let db = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+                db[idx].completato = true;
+                db[idx].statoRichiestaChiusura = null;
+                localStorage.setItem('idra_cantieri_db', JSON.stringify(db));
+                aggiornaVistaUfficio();
+                alert("✅ Cantiere chiuso con successo!");
+            }
+        }
+
         function toggleStato(idx) {
             let db = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             db[idx].completato = !db[idx].completato;
+            if (db[idx].completato) {
+                db[idx].statoRichiestaChiusura = null;
+            }
             localStorage.setItem('idra_cantieri_db', JSON.stringify(db));
             aggiornaVistaUfficio();
         }
