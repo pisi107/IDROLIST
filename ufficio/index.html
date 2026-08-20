@@ -231,7 +231,7 @@
                         <div class="card-title">📋 Gestione Presenze / Assenze Dipendenti</div>
                         <p style="font-size:0.85rem; color:var(--text-light); margin:0 0 12px 0;">
                             Apri il calendario per segnare ogni giorno come <b>Presente</b> o <b>Assente</b>.
-                            Dal lunedì al venerdì i dipendenti sono <b>Presenti di default</b>.
+                            Dal lunedì al venerdì i dipendenti sono <b>Presenti di default</b>; è inoltre possibile selezionare lo <b>Straordinario</b> e le relative ore. Il controllo fogli considera sia le ore ordinarie sia gli straordinari.
                         </p>
                         <button class="action-btn btn-orange" style="width:100%;" onclick="apriCalendarioPresenze()">📅 Apri Calendario Presenze</button>
                     </div>
@@ -385,7 +385,7 @@
                 </div>
                 <div style="display:flex;gap:14px;align-items:center;margin-bottom:12px;font-size:.82rem;flex-wrap:wrap;">
                     <span>🟢 Presente</span><span>🏖️ Ferie</span><span>🤒 Malattia</span>
-                    <span style="color:var(--text-light);">Per Ferie/Malattia indicare le ore di assenza della giornata.</span>
+                    <span style="color:var(--text-light);">Per Ferie/Malattia indicare le ore di assenza. Nei feriali è possibile aggiungere Straordinario; sabato e domenica sono dedicati allo Straordinario.</span>
                 </div>
                 <div id="calendarioPresenzeUfficio" style="overflow:auto;"></div>
             </div>
@@ -796,29 +796,28 @@
         }
 
         function normalizzaGiornoPresenza(valore, dataISO) {
-            const def = statoDefaultGiorno(dataISO);
             const d = new Date(dataISO + 'T12:00:00');
             const weekend = d.getDay() === 0 || d.getDay() === 6;
 
             if (valore && typeof valore === 'object') {
+                let oreStraordinario = Number(valore.oreStraordinario ?? 0);
+                if (!Number.isFinite(oreStraordinario)) oreStraordinario = 0;
+                oreStraordinario = Math.max(0, Math.min(24, oreStraordinario));
+
                 if (weekend) {
-                    const stato = valore.stato === 'Straordinario' ? 'Straordinario' : 'Straordinario';
-                    let ore = Number(valore.oreStraordinario ?? valore.oreAssenza ?? 0);
-                    if (!Number.isFinite(ore)) ore = 0;
-                    ore = Math.max(0, Math.min(24, ore));
-                    return { stato, oreAssenza:0, oreStraordinario:ore };
+                    return { stato:'Straordinario', oreAssenza:0, oreStraordinario };
                 }
+
                 let stato = ['Presente','Ferie','Malattia'].includes(valore.stato) ? valore.stato : 'Presente';
                 let ore = Number(valore.oreAssenza);
                 if (!Number.isFinite(ore)) ore = stato === 'Presente' ? 0 : 8;
                 ore = Math.max(0, Math.min(8, ore));
                 if (stato === 'Presente') ore = 0;
-                return { stato, oreAssenza: ore, oreStraordinario:0 };
+                return { stato, oreAssenza:ore, oreStraordinario };
             }
 
             if (weekend) return { stato:'Straordinario', oreAssenza:0, oreStraordinario:0 };
             if (valore === 'Assente') return { stato:'Ferie', oreAssenza:8, oreStraordinario:0 };
-            if (valore === 'Presente') return { stato:'Presente', oreAssenza:0, oreStraordinario:0 };
             return { stato:'Presente', oreAssenza:0, oreStraordinario:0 };
         }
 
@@ -855,7 +854,7 @@
             const db = getDBPresenzeCalendario();
             if (!db[nome]) db[nome] = {};
 
-            let html = `<div style="display:grid;grid-template-columns:repeat(7,minmax(145px,1fr));gap:6px;min-width:1030px;">`;
+            let html = `<div style="display:grid;grid-template-columns:repeat(7,minmax(165px,1fr));gap:6px;min-width:1160px;">`;
             ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'].forEach(g =>
                 html += `<div style="text-align:center;font-weight:800;padding:8px;background:#e2e8f0;border-radius:6px;">${g}</div>`
             );
@@ -867,7 +866,6 @@
 
             for (let giorno=1; giorno<=giorniNelMese; giorno++) {
                 const data = dataISOCalendario(anno, mese, giorno);
-                const dati = normalizzaGiornoPresenza(db[nome][data], data);
                 const d = new Date(data + 'T12:00:00');
                 const weekend = d.getDay() === 0 || d.getDay() === 6;
 
@@ -876,11 +874,13 @@
                         ? { stato:'Straordinario', oreAssenza:0, oreStraordinario:0 }
                         : { stato:'Presente', oreAssenza:0, oreStraordinario:0 };
                 }
+                const dati = normalizzaGiornoPresenza(db[nome][data], data);
+                const oreAssenza = dati.oreAssenza || 0;
+                const oreStra = dati.oreStraordinario || 0;
 
                 if (weekend) {
-                    const ore = Number(dati.oreStraordinario || 0);
                     html += `
-                    <div style="border:1px solid #f59e0b;border-radius:8px;padding:10px;min-height:150px;background:#fffbeb;">
+                    <div style="border:1px solid #f59e0b;border-radius:8px;padding:10px;min-height:170px;background:#fffbeb;">
                         <div style="display:flex;justify-content:space-between;align-items:center;">
                             <div style="font-size:1.05rem;font-weight:800;">${giorno}</div>
                             <span style="font-size:.72rem;font-weight:700;color:#b45309;">Weekend</span>
@@ -891,23 +891,22 @@
                         </select>
                         <div style="margin-top:7px;">
                             <label style="font-size:.70rem;font-weight:700;margin:0 0 2px;">Ore straordinario</label>
-                            <input id="ore_straordinario_${data}" type="number" min="0" max="24" step="0.5" value="${ore}"
+                            <input id="ore_straordinario_${data}" type="number" min="0" max="24" step="0.5" value="${oreStra}"
                                 onchange="salvaGiornoPresenzaUI('${data}')"
                                 style="width:100%;padding:6px;border:1px solid #fbbf24;border-radius:6px;">
                         </div>
                         <div id="riepilogo_ore_${data}" style="font-size:.70rem;margin-top:6px;font-weight:700;color:#92400e;">
-                            Straordinario: ${ore}h
+                            Straordinario: ${oreStra}h — foglio richiesto per ${oreStra}h
                         </div>
                     </div>`;
                     continue;
                 }
 
                 const stato = dati.stato;
-                const ore = dati.oreAssenza;
                 const bg = stato === 'Presente' ? '#dcfce7' : stato === 'Ferie' ? '#fef3c7' : '#dbeafe';
-
+                const straAttivo = oreStra > 0;
                 html += `
-                    <div style="border:1px solid var(--border);border-radius:8px;padding:10px;min-height:126px;background:${bg};">
+                    <div style="border:1px solid var(--border);border-radius:8px;padding:10px;min-height:205px;background:${bg};">
                         <div style="display:flex;justify-content:space-between;align-items:center;">
                             <div style="font-size:1.05rem;font-weight:800;">${giorno}</div>
                             <span style="font-size:.72rem;font-weight:700;">8h lavorative</span>
@@ -920,12 +919,26 @@
                         </select>
                         <div id="assenza_ore_wrap_${data}" style="margin-top:7px;${stato==='Presente'?'display:none;':''}">
                             <label style="font-size:.70rem;font-weight:700;margin:0 0 2px;">Ore di assenza</label>
-                            <input id="ore_assenza_${data}" type="number" min="0" max="8" step="0.5" value="${ore}"
+                            <input id="ore_assenza_${data}" type="number" min="0" max="8" step="0.5" value="${oreAssenza}"
+                                onchange="salvaGiornoPresenzaUI('${data}')"
+                                style="width:100%;padding:6px;border:1px solid #cbd5e1;border-radius:6px;">
+                        </div>
+                        <div style="margin-top:8px;">
+                            <label style="font-size:.70rem;font-weight:700;margin:0 0 2px;">Straordinario</label>
+                            <select id="stra_cal_${data}" onchange="aggiornaGiornoPresenzaUI('${data}')"
+                                style="width:100%;padding:6px;border:1px solid #cbd5e1;border-radius:6px;font-weight:700;">
+                                <option value="No" ${!straAttivo?'selected':''}>Nessuno</option>
+                                <option value="Straordinario" ${straAttivo?'selected':''}>⏱️ Straordinario</option>
+                            </select>
+                        </div>
+                        <div id="stra_ore_wrap_${data}" style="margin-top:7px;${straAttivo?'':'display:none;'}">
+                            <label style="font-size:.70rem;font-weight:700;margin:0 0 2px;">Ore straordinario</label>
+                            <input id="ore_straordinario_${data}" type="number" min="0" max="24" step="0.5" value="${oreStra}"
                                 onchange="salvaGiornoPresenzaUI('${data}')"
                                 style="width:100%;padding:6px;border:1px solid #cbd5e1;border-radius:6px;">
                         </div>
                         <div id="riepilogo_ore_${data}" style="font-size:.70rem;margin-top:6px;font-weight:700;color:#475569;">
-                            ${stato==='Presente' ? 'Presenza attesa: 8h' : `Presenza attesa: ${Math.max(0,8-ore)}h`}
+                            Ore foglio richieste: ${Math.max(0,8-oreAssenza) + oreStra}h
                         </div>
                     </div>`;
             }
@@ -938,16 +951,19 @@
             const statoEl = document.getElementById(`stato_cal_${data}`);
             const wrap = document.getElementById(`assenza_ore_wrap_${data}`);
             const oreEl = document.getElementById(`ore_assenza_${data}`);
+            const straSel = document.getElementById(`stra_cal_${data}`);
+            const straWrap = document.getElementById(`stra_ore_wrap_${data}`);
             const straEl = document.getElementById(`ore_straordinario_${data}`);
             const riepilogo = document.getElementById(`riepilogo_ore_${data}`);
             if (!statoEl) return;
 
-            const stato = statoEl.value;
             const d = new Date(data + 'T12:00:00');
             const weekend = d.getDay() === 0 || d.getDay() === 6;
+            const stato = statoEl.value;
 
             if (weekend) {
-                if (riepilogo) riepilogo.textContent = `Straordinario: ${Math.max(0, Number(straEl ? straEl.value : 0) || 0)}h`;
+                const ore = Math.max(0, Math.min(24, Number(straEl ? straEl.value : 0) || 0));
+                if (riepilogo) riepilogo.textContent = `Straordinario: ${ore}h — foglio richiesto per ${ore}h`;
                 salvaGiornoPresenzaUI(data);
                 return;
             }
@@ -955,13 +971,17 @@
             if (stato === 'Presente') {
                 if (wrap) wrap.style.display = 'none';
                 if (oreEl) oreEl.value = 0;
-                if (riepilogo) riepilogo.textContent = 'Presenza attesa: 8h';
             } else {
                 if (wrap) wrap.style.display = 'block';
                 if (oreEl && (!oreEl.value || Number(oreEl.value) === 0)) oreEl.value = 8;
-                const ore = Math.max(0, Math.min(8, Number(oreEl ? oreEl.value : 8) || 0));
-                if (riepilogo) riepilogo.textContent = `Presenza attesa: ${8-ore}h`;
             }
+
+            const straAttivo = straSel && straSel.value === 'Straordinario';
+            if (straWrap) straWrap.style.display = straAttivo ? 'block' : 'none';
+            if (!straAttivo && straEl) straEl.value = 0;
+            const oreAssenza = stato === 'Presente' ? 0 : Math.max(0, Math.min(8, Number(oreEl ? oreEl.value : 8) || 0));
+            const oreStra = straAttivo ? Math.max(0, Math.min(24, Number(straEl ? straEl.value : 0) || 0)) : 0;
+            if (riepilogo) riepilogo.textContent = `Ore foglio richieste: ${Math.max(0,8-oreAssenza) + oreStra}h`;
             salvaGiornoPresenzaUI(data);
         }
 
@@ -969,6 +989,7 @@
             const sel = document.getElementById('calendarioDipendentePresenze');
             const statoEl = document.getElementById(`stato_cal_${data}`);
             const oreEl = document.getElementById(`ore_assenza_${data}`);
+            const straSel = document.getElementById(`stra_cal_${data}`);
             const straEl = document.getElementById(`ore_straordinario_${data}`);
             if (!sel || !statoEl) return;
 
@@ -983,18 +1004,15 @@
                 if (!Number.isFinite(oreStraordinario)) oreStraordinario = 0;
                 oreStraordinario = Math.max(0, Math.min(24, oreStraordinario));
                 db[sel.value][data] = { stato:'Straordinario', oreAssenza:0, oreStraordinario };
-                const riepilogo = document.getElementById(`riepilogo_ore_${data}`);
-                if (riepilogo) riepilogo.textContent = `Straordinario: ${oreStraordinario}h`;
             } else {
-                let ore = stato === 'Presente' ? 0 : Number(oreEl ? oreEl.value : 8);
-                if (!Number.isFinite(ore)) ore = 8;
-                ore = Math.max(0, Math.min(8, ore));
-                db[sel.value][data] = { stato, oreAssenza: ore, oreStraordinario:0 };
-
-                const riepilogo = document.getElementById(`riepilogo_ore_${data}`);
-                if (riepilogo) riepilogo.textContent = stato === 'Presente'
-                    ? 'Presenza attesa: 8h'
-                    : `Presenza attesa: ${8-ore}h`;
+                let oreAssenza = stato === 'Presente' ? 0 : Number(oreEl ? oreEl.value : 8);
+                if (!Number.isFinite(oreAssenza)) oreAssenza = 8;
+                oreAssenza = Math.max(0, Math.min(8, oreAssenza));
+                const straAttivo = straSel && straSel.value === 'Straordinario';
+                let oreStraordinario = straAttivo ? Number(straEl ? straEl.value : 0) : 0;
+                if (!Number.isFinite(oreStraordinario)) oreStraordinario = 0;
+                oreStraordinario = Math.max(0, Math.min(24, oreStraordinario));
+                db[sel.value][data] = { stato, oreAssenza, oreStraordinario };
             }
             setDBPresenzeCalendario(db);
         }
@@ -1081,59 +1099,6 @@
             ).join('');
         }
 
-        function eseguiControlloMancantiUfficio() {
-            let corpoTabella = document.getElementById('corpoTabellaControlloMancanti');
-            if(!corpoTabella) return;
-            corpoTabella.innerHTML = '';
-
-            const operaiEsclusi = ["Bruno Nicola", "Coriglione Alessandro", "Marinoni Alessandro"];
-            const oggi = new Date();
-            const mappaMancanti = {};
-
-            // Controllo degli ultimi 31 giorni conclusi. Il giorno corrente non viene
-            // controllato finché non è terminato.
-            for (let i = 1; i <= 31; i++) {
-                let d = new Date(oggi);
-                d.setHours(12,0,0,0);
-                d.setDate(oggi.getDate() - i);
-                const dataStr = d.toISOString().split('T')[0];
-
-                elencoOperaiTotali.forEach(nomeOp => {
-                    if (operaiEsclusi.includes(nomeOp)) return;
-
-                    const presenza = getDatiPresenza(nomeOp, dataStr);
-                    if (presenza.stato === 'Straordinario') return;
-
-                    const oreLavorate = getOreLavorateDipendenteData(nomeOp, dataStr);
-                    const oreAssenza = Number(presenza.oreAssenza || 0);
-                    const oreAttese = Math.max(0, 8 - oreAssenza);
-
-                    // Ferie/malattia a 8h = giornata completamente coperta: nessun foglio richiesto.
-                    // Ferie/malattia parziale = sono richieste le sole ore residue.
-                    // Presente = sono richieste tutte le 8 ore.
-                    if (oreLavorate < oreAttese) {
-                        if (i <= 2) {
-                            if (!mappaMancanti[nomeOp]) mappaMancanti[nomeOp] = [];
-                            mappaMancanti[nomeOp].push(`${dataStr} (${oreLavorate}h/${oreAttese}h)`);
-                        }
-                        creaNotificaMancanzaFoglio(nomeOp, dataStr, oreLavorate, oreAttese, presenza.stato);
-                    } else {
-                        rimuoviNotificaMancanzaFoglio(nomeOp, dataStr);
-                    }
-                });
-            }
-
-            const keys = Object.keys(mappaMancanti);
-            if (keys.length === 0) {
-                corpoTabella.innerHTML = `<tr><td colspan="2" style="text-align:center;color:var(--success);font-weight:700;">Nessun allarme attivo negli ultimi 2 giorni! 🎉</td></tr>`;
-            } else {
-                keys.forEach(k => {
-                    corpoTabella.innerHTML += `<tr><td><b>${k}</b></td><td><span class="badge badge-alert">${mappaMancanti[k].join(', ')}</span></td></tr>`;
-                });
-            }
-            aggiornaRiepilogoNotificheUfficio();
-        }
-
         function popolaTabellaPresenzeUfficio() {
             let container = document.getElementById('listaPresenzeUfficio');
             if(!container) return;
@@ -1199,46 +1164,69 @@
         }
 
         function eseguiControlloMancantiUfficio() {
-            let corpoTabella = document.getElementById('corpoTabellaControlloMancanti');
-            if(!corpoTabella) return;
+            const corpoTabella = document.getElementById('corpoTabellaControlloMancanti');
+            if (!corpoTabella) return;
             corpoTabella.innerHTML = '';
-            const operaiEsclusi = ["Bruno Nicola", "Coriglione Alessandro", "Marinoni Alessandro"];
-            let cantieriDB = ottieniCantieriAggiornati();
-            let oggi = new Date();
-            let mappaMancanti = {};
 
-            for (let i = 1; i <= 2; i++) {
-                let d = new Date(); d.setDate(oggi.getDate() - i);
-                let dataStr = d.toISOString().split('T')[0];
+            const operaiEsclusi = ["Bruno Nicola", "Coriglione Alessandro", "Marinoni Alessandro"];
+            const oggi = new Date();
+            const mappaMancanti = {};
+
+            // Controlla gli ultimi 31 giorni conclusi. Per ogni giorno:
+            // - lun/ven: 8h ordinarie meno eventuali ore di assenza + eventuale straordinario;
+            // - sab/dom: solo le ore di straordinario indicate a calendario.
+            // Se le ore registrate sui fogli sono inferiori alle ore richieste,
+            // viene creata/aggiornata una notifica sia per il dipendente sia per l'ufficio.
+            for (let i = 1; i <= 31; i++) {
+                const d = new Date(oggi);
+                d.setHours(12,0,0,0);
+                d.setDate(oggi.getDate() - i);
+                const dataStr = d.toISOString().split('T')[0];
+
                 elencoOperaiTotali.forEach(nomeOp => {
-                    if (operaiEsclusi.includes(nomeOp) || isOperaioAssenteInData(nomeOp, dataStr)) return;
-                    let oreTotData = 0;
-                    cantieriDB.forEach(c => {
-                        if (c.storico) {
-                            c.storico.forEach(s => {
-                                let testoOp = ottieniTestoOperaiEOre(s);
-                                if (testoOp.includes(nomeOp)) {
-                                    let matchOre = testoOp.match(new RegExp(`${nomeOp} \\(([^)]+h)\\)`));
-                                    oreTotData += matchOre ? (parseFloat(matchOre[1]) || 0) : (s.ore || 8);
-                                }
-                            });
+                    if (operaiEsclusi.includes(nomeOp)) return;
+
+                    const presenza = getDatiPresenza(nomeOp, dataStr);
+                    const dGiorno = new Date(dataStr + 'T12:00:00');
+                    const weekend = dGiorno.getDay() === 0 || dGiorno.getDay() === 6;
+                    const oreAssenza = Number(presenza.oreAssenza || 0);
+                    const oreStraordinario = Number(presenza.oreStraordinario || 0);
+
+                    const oreOrdinarieAttese = weekend ? 0 : Math.max(0, 8 - oreAssenza);
+                    const oreAttese = Math.round((oreOrdinarieAttese + oreStraordinario) * 100) / 100;
+
+                    // Nessun foglio richiesto se il giorno è coperto e non c'è straordinario.
+                    if (oreAttese <= 0) {
+                        rimuoviNotificaMancanzaFoglio(nomeOp, dataStr);
+                        return;
+                    }
+
+                    const oreLavorate = getOreLavorateDipendenteData(nomeOp, dataStr);
+
+                    if (oreLavorate + 0.001 < oreAttese) {
+                        if (i <= 2) {
+                            if (!mappaMancanti[nomeOp]) mappaMancanti[nomeOp] = [];
+                            const dettaglio = weekend
+                                ? `${dataStr} — straordinario ${oreLavorate}h/${oreAttese}h`
+                                : `${dataStr} — ${oreLavorate}h/${oreAttese}h`;
+                            mappaMancanti[nomeOp].push(dettaglio);
                         }
-                    });
-                    if (oreTotData < 8) {
-                        if (!mappaMancanti[nomeOp]) mappaMancanti[nomeOp] = [];
-                        mappaMancanti[nomeOp].push(`${dataStr} (${oreTotData}h)`);
+                        creaNotificaMancanzaFoglio(nomeOp, dataStr, oreLavorate, oreAttese, presenza.stato);
+                    } else {
+                        rimuoviNotificaMancanzaFoglio(nomeOp, dataStr);
                     }
                 });
             }
 
-            let keys = Object.keys(mappaMancanti);
+            const keys = Object.keys(mappaMancanti);
             if (keys.length === 0) {
-                corpoTabella.innerHTML = `<tr><td colspan="2" style="text-align: center; color: var(--success); font-weight: 700;">Nessun allarme attivo per i dipendenti! 🎉</td></tr>`;
+                corpoTabella.innerHTML = `<tr><td colspan="2" style="text-align:center;color:var(--success);font-weight:700;">Nessun allarme attivo negli ultimi 2 giorni! 🎉</td></tr>`;
             } else {
-                keys.forEach(k => {
-                    corpoTabella.innerHTML += `<tr><td><b>${k}</b></td><td><span class="badge badge-alert">${mappaMancanti[k].join(', ')}</span></td></tr>`;
+                keys.forEach(nomeOp => {
+                    corpoTabella.innerHTML += `<tr><td><b>${nomeOp}</b></td><td><span class="badge badge-alert">${mappaMancanti[nomeOp].join(', ')}</span></td></tr>`;
                 });
             }
+            aggiornaRiepilogoNotificheUfficio();
         }
 
         function cambiaCartella(tipo) {
