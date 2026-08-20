@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -200,11 +199,19 @@
                         <div class="card-title">🏢 Inserisci Nuovo Cantiere</div>
                         <div>
                             <label>Nome Cliente</label>
-                            <input type="text" id="nuovoCliente" placeholder="Es. Mario Rossi">
+                            <input type="text" id="nuovoCliente" placeholder="Es. Mario Rossi" required>
+                        </div>
+                        <div>
+                            <label>Nome Cantiere</label>
+                            <input type="text" id="nuovoNomeCantiere" placeholder="Es. Ristrutturazione Villa Rossi" required>
                         </div>
                         <div>
                             <label>Indirizzo Cantiere</label>
-                            <input type="text" id="nuovoIndirizzo" placeholder="Es. Via Roma 10, Varese">
+                            <input type="text" id="nuovoIndirizzo" placeholder="Es. Via Roma 10" required>
+                        </div>
+                        <div>
+                            <label>Città</label>
+                            <input type="text" id="nuovaCitta" placeholder="Es. Varese" required>
                         </div>
                         <button class="action-btn btn-green" style="width: 100%;" onclick="creaCantiereUfficio()">Crea Cantiere</button>
                     </div>
@@ -739,13 +746,31 @@
 
         function creaCantiereUfficio() {
             let cl = document.getElementById('nuovoCliente').value.trim();
+            let nomeCantiere = document.getElementById('nuovoNomeCantiere').value.trim();
             let ind = document.getElementById('nuovoIndirizzo').value.trim();
-            if(!cl || !ind) { alert("Inserisci cliente e indirizzo!"); return; }
+            let citta = document.getElementById('nuovaCitta').value.trim();
+            if(!cl || !nomeCantiere || !ind || !citta) {
+                alert("Inserisci Nome Cliente, Nome Cantiere, Indirizzo Cantiere e Città!");
+                return;
+            }
             let cantieriDB = ottieniCantieriAggiornati();
-            cantieriDB.push({ cliente: cl, indirizzo: ind, completato: false, garanziaGestita: false, storico: [] });
+            cantieriDB.push({
+                cliente: cl,
+                cantiere: nomeCantiere,
+                nomeCantiere: nomeCantiere,
+                indirizzo: ind,
+                citta: citta,
+                completato: false,
+                garanziaGestita: false,
+                storico: [],
+                fotoImpianti: [],
+                garanzie: []
+            });
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             document.getElementById('nuovoCliente').value = '';
+            document.getElementById('nuovoNomeCantiere').value = '';
             document.getElementById('nuovoIndirizzo').value = '';
+            document.getElementById('nuovaCitta').value = '';
             aggiornaVistaUfficio();
             alert("✅ Cantiere creato!");
         }
