@@ -712,7 +712,7 @@
             });
         }
 
-        // ================= INTEGRAZIONE GEMINI AI (CORRETTA E FORZATA) =================
+        // ================= INTEGRAZIONE GEMINI AI (PROMPT BLINDATO CON SCARTO) =================
         async function analizzaImmagineConGemini(base64Data) {
             if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("INSERISCI")) {
                 console.warn("⚠️ Chiave API Gemini non configurata.");
@@ -723,13 +723,15 @@
                 let cleanBase64 = base64Data.split(',')[1] || base64Data;
                 let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
                 
+                let promptTesto = "Agisci come un analista di immagini ultra-rigoroso per un sistema di archiviazione aziendale. Analizza l'immagine e rispondi ESCLUSIVAMENTE con una di queste tre parole, senza alcuna spiegazione: BOLLA (se l'immagine mostra chiaramente un documento di trasporto, bolla o fattura compilata), LAVORO (se l'immagine mostra un cantiere, un intervento tecnico o attività lavorativa reale), SCARTO (se l'immagine è un modulo vuoto o facsimile, un paesaggio, una foto personale, un oggetto casuale o qualsiasi cosa non rientri nelle prime due).";
+
                 let response = await fetch(url, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         contents: [{
                             parts: [
-                                { text: "Analizza questa immagine. Se in primo piano c'è un foglio di carta, un documento, una bolla, una fattura o un modulo con scritte, rispondi un'unica parola: BOLLA. Se invece l'immagine mostra un cantiere, tubi, impianti o lavori senza documenti in primo piano, rispondi un'unica parola: LAVORO. Non scrivere altro." },
+                                { text: promptTesto },
                                 { inline_data: { mime_type: "image/jpeg", data: cleanBase64 } }
                             ]
                         }]
@@ -741,11 +743,12 @@
                     let risposta = data.candidates[0].content.parts[0].text.trim().toUpperCase();
                     if (risposta.includes("BOLLA")) return "BOLLA";
                     if (risposta.includes("LAVORO")) return "LAVORO";
+                    if (risposta.includes("SCARTO")) return "SCARTO";
                 }
             } catch (err) {
                 console.error("Errore chiamata Gemini:", err);
             }
-            return "SCONOSCIUTO";
+            return "SCARTO";
         }
 
         async function gestisciCaricamentoFotoAI(inputElement, tipoSelezionato) {
@@ -758,21 +761,35 @@
             let bolleInput = document.getElementById('fotoBolleInput');
             let lavoriInput = document.getElementById('fotoLavoriInput');
 
+            // Creiamo un DataTransfer per ripulire l'input corrente da eventuali file scartati
+            let dtCorrente = new DataTransfer();
+            for (let f of inputElement.files) {
+                dtCorrente.items.add(f);
+            }
+
             for (let i = 0; i < files.length; i++) {
                 let fileCorrente = files[i];
                 let base64 = await comprimiEConvertiImmagine(fileCorrente);
                 let verdetto = await analizzaImmagineConGemini(base64);
 
-                console.log("Verdetto IA:", verdetto, "Scelto dall'utente:", tipoSelezionato);
+                console.log("Verdetto IA:", verdetto, "Caricato in:", tipoSelezionato);
 
-                // Se l'utente l'ha caricata in Lavori ma l'IA dice che è una Bolla
-                if (tipoSelezionato === 'lavori' && verdetto === "BOLLA") {
-                    alert("🤖 L'IA ha rilevato un documento/foglio: sposto automaticamente in FOTO BOLLE!");
+                if (verdetto === "SCARTO") {
+                    alert("🚫 L'IA ha scartato questa foto (ritenuta non valida, paesaggio o modulo vuoto). Rimossa dal caricamento!");
+                    // Rimuoviamo il file dai file selezionati
+                    // Creiamo un nuovo DataTransfer escludendo questo file
+                    let dtTemp = new DataTransfer();
+                    for (let f of inputElement.files) {
+                        if (f !== fileCorrente) dtTemp.items.add(f);
+                    }
+                    inputElement.files = dtTemp.files;
+                } 
+                else if (tipoSelezionato === 'lavori' && verdetto === "BOLLA") {
+                    alert("🤖 L'IA ha rilevato un documento/bolla: sposto automaticamente in FOTO BOLLE!");
                     spostaFileTraInput(fileCorrente, lavoriInput, bolleInput);
                 } 
-                // Se l'utente l'ha caricata in Bolle ma l'IA dice che è un Lavoro
                 else if (tipoSelezionato === 'bolle' && verdetto === "LAVORO") {
-                    alert("🤖 L'IA ha rilevato un cantiere/lavoro: sposto automaticamente in FOTO LAVORI!");
+                    alert("🤖 L'IA ha rilevato un cantiere/lavoro: sposta automaticamente in FOTO LAVORI!");
                     spostaFileTraInput(fileCorrente, bolleInput, lavoriInput);
                 }
             }
