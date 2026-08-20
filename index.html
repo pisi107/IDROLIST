@@ -711,17 +711,17 @@
             });
         }
 
-        // ================= INTEGRAZIONE GEMINI AI (PIÙ PERMISSIVA) =================
+        // ================= INTEGRAZIONE GEMINI AI (BIDIREZIONALE & PERMISSIVA) =================
         async function analizzaImmagineConGemini(base64Data) {
             if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("INSERISCI")) {
-                return "BOLLA"; // Se manca la chiave per sicurezza la consideriamo valida
+                return "BOLLA"; // Fallback di sicurezza
             }
 
             try {
                 let cleanBase64 = base64Data.split(',')[1] || base64Data;
                 let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
                 
-                let promptTesto = "Analizza questa immagine. Cerca se contiene un documento di trasporto, una bolla, un DDT, una fattura, una ricevuta, oppure la scritta 'firma destinatario', 'destinazione', 'codice', 'quantità' o un cantiere/impianto/lavoro idraulico. Se c'è un documento o un lavoro rispondi esattamente BOLLA o LAVORO. Rispondi SCARTO solo se l'immagine è chiaramente un selfie, una foto mossa o un soggetto totalmente estraneo (es. cibo, animali, paesaggi). Sii molto permissivo con documenti e bolle.";
+                let promptTesto = "Analizza questa immagine. Se contiene un documento di trasporto, bolla, DDT, fattura, ricevuta o scritte come 'firma destinatario', 'destinazione', 'codice', 'quantità', rispondi esattamente BOLLA. Se contiene foto di cantieri, tubi, caldaie, impianti idraulici, stanze in ristrutturazione o operai a lavoro, rispondi esattamente LAVORO. Se l'immagine è chiaramente un soggetto estraneo (es. selfie, cibo, animali), rispondi SCARTO. In caso di dubbio o incertezza su documenti o cantiere, rispondi BOLLA.";
 
                 let response = await fetch(url, {
                     method: "POST",
@@ -746,7 +746,7 @@
             } catch (err) {
                 console.error("Errore chiamata Gemini:", err);
             }
-            return "BOLLA"; // In caso di errore di rete o timeout, diamo via libera per non bloccare l'utente
+            return "BOLLA"; // In caso di errore di rete, diamo via libera
         }
 
         async function gestisciCaricamentoFotoAI(inputElement, tipoSelezionato) {
@@ -766,7 +766,7 @@
                 let base64 = await comprimiEConvertiImmagine(fileCorrente);
                 let verdetto = await analizzaImmagineConGemini(base64);
 
-                console.log("File:", fileCorrente.name, "| Sezione:", tipoSelezionato, "| Verdetto IA:", verdetto);
+                console.log("File:", fileCorrente.name, "| Sezione scelta:", tipoSelezionato, "| Verdetto IA:", verdetto);
 
                 if (verdetto === "SCARTO") {
                     alert("🚫 L'IA ha scartato questa foto (ritenuta non valida o non pertinente). Rimossa dal caricamento!");
@@ -776,7 +776,7 @@
                     aggiungiFileAInput(fileCorrente, bolleInput);
                 } 
                 else if (tipoSelezionato === 'bolle' && verdetto === "LAVORO") {
-                    alert("🤖 L'IA ha rilevato un cantiere/lavoro: spostata automaticamente in FOTO LAVORI!");
+                    alert("🤖 L'IA ha rilevato una foto cantiere/lavoro: spostata automaticamente in FOTO LAVORI!");
                     aggiungiFileAInput(fileCorrente, lavoriInput);
                 }
                 else {
