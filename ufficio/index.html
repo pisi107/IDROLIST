@@ -48,11 +48,12 @@
         input, select, textarea { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; background-color: #f8fafc; color: var(--text); font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; }
         input:focus, select:focus, textarea:focus { border-color: var(--brand-orange); background: #fff; }
 
-        .action-btn { padding: 12px 20px; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 700; cursor: pointer; text-align: center; transition: background 0.2s, transform 0.1s; }
+        .action-btn { padding: 12px 20px; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 700; cursor: pointer; text-align: center; transition: background 0.2s, transform 0.1s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
         .action-btn:active { transform: scale(0.98); }
         .btn-green { background-color: var(--success); color: white; }
         .btn-orange { background-color: var(--brand-orange); color: white; }
         .btn-danger { background-color: var(--danger); color: white; padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; }
+        .btn-blue { background-color: #0284c7; color: white; }
 
         .table-responsive { width: 100%; overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
         .riepilogo-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; background: #fff; text-align: left; }
@@ -84,7 +85,7 @@
 
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); z-index: 999; justify-content: center; align-items: center; padding: 30px; backdrop-filter: blur(4px); }
         .modal-overlay.open { display: flex; }
-        .modal-card { background: #fff; width: 100%; max-width: 800px; max-height: 85vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
+        .modal-card { background: #fff; width: 100%; max-width: 850px; max-height: 85vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
         .modal-header { background: var(--sidebar-bg); color: white; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 1.15rem; }
         .modal-body { padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
         .close-modal-btn { background: none; border: none; color: white; font-size: 1.8rem; cursor: pointer; line-height: 1; }
@@ -94,17 +95,24 @@
         .folder-cliente-header:hover { background: #f1f5f9; }
         .folder-cliente-body { display: none; padding: 16px; background: #fff; flex-direction: column; gap: 12px; }
         .folder-cliente-body.open { display: flex; }
-        .folder-intervento-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+        .folder-intervento-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
 
         .tabs-container { display: flex; gap: 10px; margin-bottom: 4px; }
         .tab-btn { flex: 1; padding: 10px; border: 1px solid var(--border); background: #f8fafc; font-weight: 700; font-size: 0.85rem; border-radius: 8px; cursor: pointer; color: var(--text-light); text-align: center; }
         .tab-btn.active-da-fare { background: #fef3c7; border-color: #f59e0b; color: #b45309; }
         .tab-btn.active-terminati { background: #dcfce7; border-color: var(--success); color: #15803d; }
+
+        @media print {
+            body * { visibility: hidden; }
+            #printableRapportinoArea, #printableRapportinoArea * { visibility: visible; }
+            #printableRapportinoArea { position: absolute; left: 0; top: 0; width: 100%; background: white; padding: 20px; }
+            .no-print { display: none !important; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
+    <div class="sidebar no-print">
         <div class="sidebar-header">
             <h1>IDROTECH <span>VARESE</span></h1>
             <p>Dashboard Ufficio PC</p>
@@ -118,13 +126,13 @@
     </div>
 
     <div class="main-container">
-        <div class="topbar">
+        <div class="topbar no-print">
             <div class="topbar-title">📊 Panoramica & Dashboard Ufficio</div>
             <div style="font-size: 0.85rem; color: var(--text-light); font-weight: 600;">Sistema Gestionale Operativo</div>
         </div>
 
         <div class="content-area">
-            <div class="card" style="border-color: #f87171; background: #fff5f5;">
+            <div class="card no-print" style="border-color: #f87171; background: #fff5f5;">
                 <div class="card-title" style="color: #b91c1c; border-color: #fecaca;">🚨 Controllo Ufficio: Mancati Fogli Lavoro (Ultimi 2 Giorni)</div>
                 <div class="table-responsive">
                     <table class="riepilogo-table" style="background: white;">
@@ -139,7 +147,7 @@
                 </div>
             </div>
 
-            <div class="dashboard-grid">
+            <div class="dashboard-grid no-print">
                 <div style="display: flex; flex-direction: column; gap: 24px;">
                     <div class="card">
                         <div class="card-title">✏️ Registrazione Intervento per Conto Dipendenti</div>
@@ -208,7 +216,7 @@
                 </div>
             </div>
 
-            <div class="card">
+            <div class="card no-print">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div class="card-title" style="border:none; padding:0;">📁 Archivio Completo Cantieri & Storico Rapportini</div>
                     <div class="tabs-container" style="width: 300px; margin-bottom: 0;">
@@ -296,9 +304,33 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="modalFotoZoom" onclick="chiudiZoomFoto()" style="background: rgba(0,0,0,0.85);">
-        <div style="max-width: 90%; max-height: 90%; display: flex; justify-content: center; align-items: center;" onclick="event.stopPropagation()">
-            <img id="imgZoomFull" src="" style="max-width: 100%; max-height: 85vh; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    <!-- MODALE VISUALIZZAZIONE & STAMPA RAPPORTINO / DDT -->
+    <div class="modal-overlay" id="modalStampaRapportino">
+        <div class="modal-card" style="max-width: 900px;">
+            <div class="modal-header no-print">
+                <span>📄 Foglio Lavoro & Stampa Rapportino / DDT</span>
+                <button class="close-modal-btn" onclick="chiudiModaleStampa()">&times;</button>
+            </div>
+            <div class="modal-body" id="printableRapportinoArea">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--brand-orange); padding-bottom: 12px; margin-bottom: 10px;">
+                    <div>
+                        <h2 style="margin:0; color:var(--brand-dark); font-size: 1.4rem;">IDROTECH VARESE</h2>
+                        <p style="margin:2px 0 0 0; font-size:0.8rem; color:var(--text-light);">Rapportino Intervento & DDT Lavori</p>
+                    </div>
+                    <div style="text-align: right; font-size: 0.85rem;" id="printHeaderInfo"></div>
+                </div>
+                <div id="contenitoreDettaglioFoglioLavoro" style="display: flex; flex-direction: column; gap: 14px;"></div>
+            </div>
+            <div style="padding: 16px 24px; background: #f8fafc; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px;" class="no-print">
+                <button class="action-btn btn-blue" onclick="window.print()">🖨️ Stampa Rapportino / DDT</button>
+                <button class="action-btn btn-danger" onclick="chiudiModaleStampa()">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalFotoZoom" onclick="chiudiZoomFoto()" style="background: rgba(0,0,0,0.85); z-index: 1000;">
+        <div style="max-width: 90%; max-height: 95%; display: flex; justify-content: center; align-items: center;" onclick="event.stopPropagation()">
+            <img id="imgZoomFull" src="" style="max-width: 100%; max-height: 90vh; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
         </div>
     </div>
 
@@ -359,21 +391,19 @@
             } catch(e) { return []; }
         }
 
-        // Funzione potenziata per estrarre le foto indipendentemente dalla chiave usata dall'operaio
+        // Funzione universale per estrarre le foto da qualsiasi struttura salvata dagli operai
         function estraiFotoDaIntervento(s) {
             if (!s) return [];
             let listaFoto = [];
+            let possibiliCampi = ['fotoLavori', 'lavori', 'foto', 'immagini', 'allegati', 'images', 'fotoGaranzia'];
             
-            // Controlla tutte le possibili chiavi in cui l'app operaia potrebbe aver salvato le immagini
-            let possibiliCampi = ['fotoLavori', 'lavori', 'foto', 'immagini', 'allegati', 'images'];
             possibiliCampi.forEach(campo => {
                 if (Array.isArray(s[campo])) {
                     s[campo].forEach(item => {
                         if (typeof item === 'string' && (item.startsWith('data:image') || item.startsWith('http') || item.length > 100)) {
                             listaFoto.push(item);
                         } else if (item && typeof item === 'object') {
-                            // Se l'elemento è un oggetto, cerca eventuali proprietà stringa che contengono dati immagine
-                            Object.values(item.val || item).forEach(valSub => {
+                            Object.values(item).forEach(valSub => {
                                 if (typeof valSub === 'string' && (valSub.startsWith('data:image') || valSub.length > 100)) {
                                     listaFoto.push(valSub);
                                 }
@@ -382,9 +412,16 @@
                     });
                 }
             });
-
-            // Rimuove eventuali duplicati
             return [...new Set(listaFoto)];
+        }
+
+        // Funzione unificata per estrarre il testo degli operai e delle ore
+        function ottieniTestoOperaiEOre(s) {
+            if (!s) return "N/D";
+            if (s.operai) return s.operai;
+            if (s.dipendente) return `${s.dipendente} (${s.ore || 8}h)`;
+            if (Array.isArray(s.elencoOperai)) return s.elencoOperai.join(', ');
+            return "N/D";
         }
 
         function renderizzaGaranziePerClienti() {
@@ -412,10 +449,10 @@
 
                             interventiHtml += `
                                 <div class="folder-intervento-box">
-                                    <div style="font-size: 0.85rem; font-weight: 700; color: var(--brand-dark);">📅 Data: ${s.data || 'N/D'} | <b>Operai:</b> ${s.operai || s.dipendente || 'N/D'}</div>
-                                    <div style="font-size: 0.8rem;"><b>Note:</b> ${s.note || s.descrizione || 'Nessuna nota'}</div>
+                                    <div style="font-size: 0.85rem; font-weight: 700; color: var(--brand-dark);">📅 Data: ${s.data || 'N/D'} | <b>Operai/Ore:</b> ${ottieniTestoOperaiEOre(s)}</div>
+                                    <div style="font-size: 0.8rem;"><b>Lavori / Note:</b> ${s.note || s.descrizione || s.lavoriEseguiti || 'Nessuna nota'}</div>
                                     <div style="margin-top: 4px;">
-                                        <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-light); margin-bottom: 2px;">Foto Operai / Lavori:</div>
+                                        <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-light); margin-bottom: 2px;">Foto Lavori / Garanzia:</div>
                                         ${fotoHtml}
                                     </div>
                                 </div>
@@ -463,15 +500,21 @@
                     let interventiHtml = '';
 
                     if (c.storico && c.storico.length > 0) {
-                        c.storico.forEach(s => {
+                        c.storico.forEach((s, sIdx) => {
                             let fotoArr = estraiFotoDaIntervento(s);
-                            let fotoHtml = fotoArr.length > 0 ? `<div class="foto-thumb-container">` + fotoArr.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('') + `</div>` : `<div style="font-size: 0.75rem; color: var(--text-light); font-style: italic;">Nessuna foto lavori.</div>`;
+                            let fotoHtml = fotoArr.length > 0 ? `<div class="foto-thumb-container">` + fotoArr.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('') + `</div>` : `<div style="font-size: 0.75rem; color: var(--text-light); font-style: italic;">Nessuna foto allegata.</div>`;
 
                             interventiHtml += `
                                 <div class="folder-intervento-box">
-                                    <div style="font-size: 0.85rem; font-weight: 700;">📅 Data: ${s.data} | <b>Operai:</b> ${s.operai || s.dipendente}</div>
-                                    <div style="font-size: 0.8rem;"><b>Note:</b> ${s.note || s.descrizione || 'N/D'}</div>
-                                    ${fotoHtml}
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div style="font-size: 0.85rem; font-weight: 700;">📅 Data: ${s.data || 'N/D'} | <b>Operai/Ore:</b> ${ottieniTestoOperaiEOre(s)}</div>
+                                        <button class="action-btn btn-blue" style="padding: 4px 10px; font-size: 0.75rem;" onclick="apriModaleStampaRapportino(${cIdx}, ${sIdx})">📄 Visualizza & Stampa DDT</button>
+                                    </div>
+                                    <div style="font-size: 0.8rem;"><b>Lavorazioni Eseguite / Note:</b> ${s.note || s.descrizione || s.lavoriEseguiti || 'N/D'}</div>
+                                    <div style="margin-top: 4px;">
+                                        <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-light); margin-bottom: 2px;">Foto Lavori:</div>
+                                        ${fotoHtml}
+                                    </div>
                                 </div>
                             `;
                         });
@@ -492,6 +535,31 @@
             });
             if (trovati === 0) container.innerHTML = `<div style="text-align: center; color: var(--text-light); padding: 20px;">Nessun cliente trovato.</div>`;
         }
+
+        function apriModaleStampaRapportino(cIdx, sIdx) {
+            let cantieriDB = ottieniCantieriAggiornati();
+            let c = cantieriDB[cIdx];
+            if(!c || !c.storico || !c.storico[sIdx]) return;
+            let s = c.storico[sIdx];
+
+            document.getElementById('printHeaderInfo').innerHTML = `<b>Data:</b> ${s.data || 'N/D'}<br><b>Cliente:</b> ${c.cliente}<br><b>Indirizzo:</b> ${c.indirizzo}`;
+            
+            let fotoArr = estraiFotoDaIntervento(s);
+            let fotoHtml = fotoArr.length > 0 ? `<div class="foto-thumb-container" style="margin-top:10px;">` + fotoArr.map(img => `<img src="${img}" style="width: 120px; height: 120px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc;">`).join('') + `</div>` : `<p style="font-size:0.85rem; color:#666; font-style:italic;">Nessuna foto allegata.</p>`;
+
+            let containerDettaglio = document.getElementById('contenitoreDettaglioFoglioLavoro');
+            containerDettaglio.innerHTML = `
+                <div style="background:#f8fafc; padding:14px; border-radius:8px; border:1px solid #cbd5e1; display:flex; flex-direction:column; gap:8px;">
+                    <div><b>Operai e Ore Registrate:</b> ${ottieniTestoOperaiEOre(s)}</div>
+                    <div><b>Lavori Eseguiti / Descrizione:</b><br><p style="margin:4px 0; background:#fff; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">${s.note || s.descrizione || s.lavoriEseguiti || 'Nessuna nota inserita.'}</p></div>
+                    <div><b>Materiali / DDT:</b><br><p style="margin:4px 0; background:#fff; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">${s.materiali || s.ddt || 'Nessun materiale specificato.'}</p></div>
+                    <div><b>Documentazione Fotografica:</b>${fotoHtml}</div>
+                </div>
+            `;
+
+            document.getElementById('modalStampaRapportino').classList.add('open');
+        }
+        function chiudiModaleStampa() { document.getElementById('modalStampaRapportino').classList.remove('open'); }
 
         function popolaDipendentiUfficioMultiplo() {
             let container = document.getElementById('listaDipendentiUfficioMultiplo');
@@ -588,9 +656,10 @@
                     cantieriDB.forEach(c => {
                         if (c.storico) {
                             c.storico.forEach(s => {
-                                if (s.data === dataStr && s.operai && s.operai.includes(nomeOp)) {
-                                    let matchOre = s.operai.match(new RegExp(`${nomeOp} \\(([^)]+h)\\)`));
-                                    oreTotData += matchOre ? (parseFloat(matchOre[1]) || 0) : 8;
+                                let testoOp = ottieniTestoOperaiEOre(s);
+                                if (testoOp.includes(nomeOp)) {
+                                    let matchOre = testoOp.match(new RegExp(`${nomeOp} \\(([^)]+h)\\)`));
+                                    oreTotData += matchOre ? (parseFloat(matchOre[1]) || 0) : (s.ore || 8);
                                 }
                             });
                         }
@@ -651,8 +720,8 @@
                             let fHtml = fotoArr.length > 0 ? `<div class="foto-thumb-container">` + fotoArr.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('') + `</div>` : '';
                             storicoHtml += `
                                 <div style="font-size: 0.8rem; background: #f8fafc; padding: 8px; border-radius: 6px; margin-top: 4px;">
-                                    <div><b>${s.data}</b> - ${s.operai || s.dipendente}</div>
-                                    <div><i>${s.note || s.descrizione || ''}</i></div>
+                                    <div><b>${s.data || 'N/D'}</b> - ${ottieniTestoOperaiEOre(s)}</div>
+                                    <div><i>${s.note || s.descrizione || s.lavoriEseguiti || ''}</i></div>
                                     ${fHtml}
                                 </div>
                             `;
@@ -701,19 +770,26 @@
         }
         function filtraSelectCantieriUfficio() { popolaSelectCantieriUfficio(); }
 
+        // Funzione corretta per estrarre tutte le righe e calcolare correttamente le ore nell'archivio storico
         function raccogliTutteLeRigheRiepilogo(cantieriDB) {
             let righe = [];
             cantieriDB.forEach(c => {
-                if (c.storico) {
+                if (c.storico && Array.isArray(c.storico)) {
                     c.storico.forEach(s => {
-                        let opStr = s.operai || s.dipendente || "";
-                        if (opStr.includes('(')) {
-                            opStr.split(',').forEach(p => {
+                        let testoOp = ottieniTestoOperaiEOre(s);
+                        if (testoOp.includes('(')) {
+                            testoOp.split(',').forEach(p => {
                                 let m = p.trim().match(/^(.*?)\s*\(([\d.]+)h\)$/);
-                                if (m) righe.push({ data: s.data || 'N/D', dipendente: m[1].trim(), cantiere: c.cliente, oreNum: parseFloat(m[2]) || 0, ore: `${m[2]} Ore` });
+                                if (m) {
+                                    righe.push({ data: s.data || 'N/D', dipendente: m[1].trim(), cantiere: c.cliente, oreNum: parseFloat(m[2]) || 0, ore: `${m[2]} Ore` });
+                                } else {
+                                    righe.push({ data: s.data || 'N/D', dipendente: p.trim(), cantiere: c.cliente, oreNum: 8, ore: `8 Ore` });
+                                }
                             });
-                        } else if(opStr) {
-                            righe.push({ data: s.data || 'N/D', dipendente: opStr, cantiere: c.cliente, oreNum: 8, ore: `8 Ore` });
+                        } else if (testoOp && testoOp !== "N/D") {
+                            testoOp.split(',').forEach(p => {
+                                righe.push({ data: s.data || 'N/D', dipendente: p.trim(), cantiere: c.cliente, oreNum: s.ore || 8, ore: `${s.ore || 8} Ore` });
+                            });
                         }
                     });
                 }
@@ -750,7 +826,9 @@
             corpo.innerHTML = '';
 
             let righe = raccogliTutteLeRigheRiepilogo(ottieniCantieriAggiornati()).filter(r => {
-                return (dip === "" || r.dipendente === dip) && (data === "" || r.data.includes(data)) && (cant === "" || r.cantiere.toLowerCase().includes(cant));
+                return (dip === "" || r.dipendente.toLowerCase().includes(dip.toLowerCase())) && 
+                       (data === "" || r.data.includes(data)) && 
+                       (cant === "" || r.cantiere.toLowerCase().includes(cant));
             });
 
             let totOre = righe.reduce((acc, r) => acc + r.oreNum, 0);
