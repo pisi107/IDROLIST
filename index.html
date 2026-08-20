@@ -595,17 +595,22 @@
         }
 
         async function analizzaImmagineConGemini(base64Data) {
-            if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("INSERISCI")) return "BOLLA";
+            if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("INSERISCI")) return "LAVORO";
             try {
                 let cleanBase64 = base64Data.split(',')[1] || base64Data;
                 let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+                
                 let response = await fetch(url, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         contents: [{
                             parts: [
-                                { text: "Analizza questa immagine. Rispondi esattamente BOLLA se è un documento/DDT/fattura, LAVORO se è un cantiere/impianto/lavoro, o SCARTO se non è pertinente." },
+                                { text: "Sei un assistente per un'azienda idraulica e termoidraulica. Analizza attentamente questa foto e classificala in una di queste tre categorie:\n" +
+                                        "- BOLLA: se l'immagine mostra un documento cartaceo, un DDT (Documento di Trasporto), una fattura, un blocco notes con annotazioni di numeri o una bolla di consegna.\n" +
+                                        "- LAVORO: se l'immagine mostra tubature, caldaie, impianti di riscaldamento, radiatori, bagni in costruzione, scavi, cantieri, operai al lavoro o componenti idraulici installati o da installare.\n" +
+                                        "- SCARTO: se l'immagine è completamente sfocata, nera o non c'entra nulla con il lavoro o i documenti d'ufficio.\n\n" +
+                                        "Rispondi unicamente con una di queste tre parole: BOLLA, LAVORO o SCARTO." },
                                 { inline_data: { mime_type: "image/jpeg", data: cleanBase64 } }
                             ]
                         }]
@@ -621,7 +626,7 @@
             } catch (err) {
                 console.error("Errore Gemini:", err);
             }
-            return "BOLLA";
+            return "LAVORO";
         }
 
         async function gestisciCaricamentoFotoAI(inputElement, tipoSelezionato) {
@@ -629,7 +634,7 @@
             if (!files || files.length === 0) return;
 
             let spanStato = tipoSelezionato === 'bolle' ? document.getElementById('statoAiBolle') : document.getElementById('statoAiLavori');
-            spanStato.innerText = "🔄 Controllo IA...";
+            spanStato.innerText = "🔄 L'IA sta analizzando...";
 
             let bolleInput = document.getElementById('fotoBolleInput');
             let lavoriInput = document.getElementById('fotoLavoriInput');
@@ -640,22 +645,24 @@
                 let base64 = await comprimiEConvertiImmagine(fileCorrente);
                 let verdetto = await analizzaImmagineConGemini(base64);
 
-                if (verdetto === "SCARTO") {
-                    alert("🚫 Foto scartata dall'IA perché non pertinente.");
+                if ((tipoSelezionato === 'lavori' && verdetto === 'LAVORO') || (tipoSelezionato === 'bolle' && verdetto === 'BOLLA')) {
+                    fileListValidi.push(fileCorrente);
                 } else if (tipoSelezionato === 'lavori' && verdetto === "BOLLA") {
-                    let sposta = confirm("🤖 L'IA ha rilevato che una delle foto nei LAVORI sembra una BOLLA (DDT/Fattura).\n\nVuoi spostarla automaticamente nella sezione FOTO BOLLE?");
+                    let sposta = confirm("🤖 L'IA ha rilevato che questa foto sembra una BOLLA / FATTURA.\n\nVuoi spostarla automaticamente nella sezione Foto Bolle?");
                     if (sposta) {
                         aggiungiFileAInput(fileCorrente, bolleInput);
                     } else {
                         fileListValidi.push(fileCorrente);
                     }
                 } else if (tipoSelezionato === 'bolle' && verdetto === "LAVORO") {
-                    let sposta = confirm("🤖 L'IA ha rilevato che una delle foto nelle BOLLE sembra un FOTO LAVORO/CANTIERE.\n\nVuoi spostarla automaticamente nella sezione FOTO LAVORI?");
+                    let sposta = confirm("🤖 L'IA ha rilevato che questa foto sembra un CANTIERE / LAVORO.\n\nVuoi spostarla automaticamente nella sezione Foto Lavori?");
                     if (sposta) {
                         aggiungiFileAInput(fileCorrente, lavoriInput);
                     } else {
                         fileListValidi.push(fileCorrente);
                     }
+                } else if (verdetto === "SCARTO") {
+                    alert("🚫 Questa foto è stata scartata perché non sembra né un lavoro né un documento valido.");
                 } else {
                     fileListValidi.push(fileCorrente);
                 }
