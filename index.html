@@ -74,8 +74,10 @@
         .presenza-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px; }
         .user-logged-box { display: flex; justify-content: space-between; align-items: center; background: #e2e8f0; padding: 10px 14px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; }
 
-        .foto-thumb-container { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
-        .foto-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s; }
+        .folder-preview-box { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-top: 6px; }
+        .folder-title { font-size: 0.8rem; font-weight: 800; color: var(--brand-dark); text-transform: uppercase; display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+        .foto-thumb-container { display: flex; gap: 6px; flex-wrap: wrap; }
+        .foto-thumb { width: 55px; height: 55px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s; }
         .foto-thumb:hover { transform: scale(1.05); }
 
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 999; justify-content: center; align-items: center; padding: 15px; }
@@ -217,9 +219,24 @@
                     <div><label>Note / Lavori Eseguiti *</label><textarea id="noteInterventoUtente" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea></div>
                     
                     <div>
-                        <label>📷 Carica Foto e DDT (L'IA dividerà tutto in automatico)</label>
-                        <input type="file" id="fotoGenericheInput" accept="image/*" multiple>
-                        <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 4px;">💡 Carica foto lavori o bolle/DDT insieme: l'IA riconoscerà i documenti e catalogherà le foto nei rispettivi spazi!</div>
+                        <label>📷 Carica Foto e DDT</label>
+                        <input type="file" id="fotoGenericheInput" accept="image/*" multiple onchange="anteprimaElaborazioneIA(this)">
+                        <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 4px;">💡 Carica tutto insieme: l'IA analizzerà i file dividendoli in automatico nelle due cartelle sottostanti per il controllo.</div>
+                    </div>
+
+                    <!-- LE DUE CARTELLINE DI CONTROLLO RICHIESTE -->
+                    <div id="containerCartelleAnteprima" style="display: none; flex-direction: column; gap: 10px; background: #e2e8f0; padding: 12px; border-radius: 12px;">
+                        <div style="font-size: 0.8rem; font-weight: 800; color: var(--brand-dark);">🔍 Verifica Divisione IA:</div>
+                        
+                        <div class="folder-preview-box">
+                            <div class="folder-title">📁 DDT (Bolle e Documenti Riconosciuti)</div>
+                            <div id="anteprimaCartellaDDT" style="font-size: 0.8rem; color: var(--text-light);">Nessun DDT rilevato.</div>
+                        </div>
+
+                        <div class="folder-preview-box">
+                            <div class="folder-title">📁 Fogli Lavoro / Foto Cantiere</div>
+                            <div id="anteprimaCartellaFoto" class="foto-thumb-container"><span style="font-size: 0.8rem; color: var(--text-light);">Nessuna foto lavori.</span></div>
+                        </div>
                     </div>
 
                     <button class="action-btn btn-orange" id="btnSalvaFoglio" onclick="salvaFoglioLavoroUtente()">Salva Foglio di Lavoro</button>
@@ -347,6 +364,7 @@
         let utenteCorrente = "";
         let tipoUtenteCorrente = ""; 
         let cartellaCorrente = 'da_fare';
+        let datiAnalisiCorrenti = { noteAggiuntive: [], fotoLavori: [] };
 
         window.onload = function() {
             let oggiStr = new Date().toISOString().split('T')[0];
@@ -646,6 +664,33 @@
             return { noteAggiuntive, fotoLavori };
         }
 
+        async function anteprimaElaborazioneIA(input) {
+            if (!input.files || input.files.length === 0) return;
+            let containerCartelle = document.getElementById('containerCartelleAnteprima');
+            let boxDDT = document.getElementById('anteprimaCartellaDDT');
+            let boxFoto = document.getElementById('anteprimaCartellaFoto');
+
+            containerCartelle.style.display = 'flex';
+            boxDDT.innerHTML = "🤖 L'IA sta analizzando e dividendo i file...";
+            boxFoto.innerHTML = "Attendere...";
+
+            datiAnalisiCorrenti = await analizzaImmaginiInAutonomia(input.files);
+
+            // Popola cartella DDT
+            if (datiAnalisiCorrenti.noteAggiuntive.length > 0) {
+                boxDDT.innerHTML = `<ul style="margin: 0; padding-left: 15px;">` + datiAnalisiCorrenti.noteAggiuntive.map(n => `<li>${n}</li>`).join('') + `</ul>`;
+            } else {
+                boxDDT.innerHTML = `<span style="color: var(--text-light);">Nessun DDT o bolla rilevata tra i file caricati.</span>`;
+            }
+
+            // Popola cartella Foto Lavori
+            if (datiAnalisiCorrenti.fotoLavori.length > 0) {
+                boxFoto.innerHTML = datiAnalisiCorrenti.fotoLavori.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('');
+            } else {
+                boxFoto.innerHTML = `<span style="color: var(--text-light); font-size: 0.8rem;">Nessuna foto lavori rilevata.</span>`;
+            }
+        }
+
         async function salvaFoglioLavoroUtente() {
             let cIdx = document.getElementById('selectCantiereUtente').value;
             let stato = document.getElementById('selectStatoCantiereIntervento').value;
@@ -656,49 +701,50 @@
 
             if (cIdx === "" || stato === "" || !note) return alert("⚠️ Compila tutti i campi obbligatori!");
 
-            let btnSalva = document.getElementById('btnSalvaFoglio');
-            btnSalva.innerText = "🤖 L'IA sta dividendo DDT e Foto...";
-            btnSalva.disabled = true;
-
-            try {
-                let partecipanti = [`${utenteCorrente} (${ore}h)`];
-                document.querySelectorAll('input[name="collegaCheckbox"]:checked').forEach(cb => {
-                    let oCollega = document.getElementById(`ore_collega_${cb.value.replace(/\s+/g, '_')}`).value;
-                    participanti.push(`${cb.value} (${oCollega}h)`);
-                });
-
-                let fileInput = document.getElementById('fotoGenericheInput');
-                let risultatoAI = await analizzaImmaginiInAutonomia(fileInput.files);
-
-                let noteFinali = note;
-                if (risultatoAI.noteAggiuntive.length > 0) {
-                    noteFinali += "\n\n[DDT e Materiali Riconosciuti dall'IA]:\n" + risultatoAI.noteAggiuntive.join('\n');
-                }
-
-                let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-                if (!cantieriDB[cIdx].storico) cantieriDB[cIdx].storico = [];
-
-                cantieriDB[cIdx].storico.push({ 
-                    data, 
-                    tipo, 
-                    operai: partecipanti.join(', '), 
-                    note: noteFinali, 
-                    statoIntervento: stato, 
-                    fotoBolle: [], 
-                    fotoLavori: risultatoAI.fotoLavori 
-                });
-                cantieriDB[cIdx].completato = (stato === "Terminato");
-
-                localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-                alert("✅ Foglio di lavoro salvato! L'IA ha catalogato i file.");
-                
-                document.getElementById('noteInterventoUtente').value = '';
-                document.getElementById('fotoGenericheInput').value = '';
-                popolaCantieriUtente();
-            } finally {
+            let fileInput = document.getElementById('fotoGenericheInput');
+            // Se l'utente ha selezionato dei file ma non ha ancora atteso l'anteprima, li analizziamo ora
+            if (fileInput.files.length > 0 && datiAnalisiCorrenti.fotoLavori.length === 0 && datiAnalisiCorrenti.noteAggiuntive.length === 0) {
+                let btnSalva = document.getElementById('btnSalvaFoglio');
+                btnSalva.innerText = "🤖 L'IA sta elaborando i file...";
+                btnSalva.disabled = true;
+                datiAnalisiCorrenti = await analizzaImmaginiInAutonomia(fileInput.files);
                 btnSalva.innerText = "Salva Foglio di Lavoro";
                 btnSalva.disabled = false;
             }
+
+            let noteFinali = note;
+            if (datiAnalisiCorrenti.noteAggiuntive.length > 0) {
+                noteFinali += "\n\n[DDT e Materiali Riconosciuti dall'IA]:\n" + datiAnalisiCorrenti.noteAggiuntive.join('\n');
+            }
+
+            let partecipanti = [`${utenteCorrente} (${ore}h)`];
+            document.querySelectorAll('input[name="collegaCheckbox"]:checked').forEach(cb => {
+                let oCollega = document.getElementById(`ore_collega_${cb.value.replace(/\s+/g, '_')}`).value;
+                participanti.push(`${cb.value} (${oCollega}h)`);
+            });
+
+            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+            if (!cantieriDB[cIdx].storico) cantieriDB[cIdx].storico = [];
+
+            cantieriDB[cIdx].storico.push({ 
+                data, 
+                tipo, 
+                operai: partecipanti.join(', '), 
+                note: noteFinali, 
+                statoIntervento: stato, 
+                fotoBolle: [], 
+                fotoLavori: datiAnalisiCorrenti.fotoLavori 
+            });
+            cantieriDB[cIdx].completato = (stato === "Terminato");
+
+            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+            alert("✅ Foglio di lavoro salvato con successo!");
+            
+            document.getElementById('noteInterventoUtente').value = '';
+            document.getElementById('fotoGenericheInput').value = '';
+            document.getElementById('containerCartelleAnteprima').style.display = 'none';
+            datiAnalisiCorrenti = { noteAggiuntive: [], fotoLavori: [] };
+            popolaCantieriUtente();
         }
 
         function popolaSelectFiltroDipendenti() {
@@ -821,7 +867,7 @@
                                 <div style="background:#f1f5f9; padding:10px; border-radius:8px; margin-top:8px; font-size:0.8rem; border: 1px solid var(--border);">
                                     <div><b>📅 ${s.data}</b> (${s.tipo}) - ${s.operai}</div>
                                     <div style="margin-top:4px;"><i>${s.note.replace(/\n/g, '<br>')}</i></div>
-                                    <div style="margin-top:6px; font-weight:700; color:var(--brand-dark); font-size:0.75rem; text-transform:uppercase;">📸 Foto Lavori:</div>
+                                    <div style="margin-top:6px; font-weight:700; color:var(--brand-dark); font-size:0.75rem; text-transform:uppercase;">📸 Fogli Lavoro / Foto:</div>
                                     <div class="foto-thumb-container">${fl}</div>
                                 </div>`;
                         });
@@ -868,7 +914,7 @@
             tb.innerHTML = '';
             let righe = raccogliRighe(db).slice(0, 5);
             if (righe.length === 0) { tb.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-light);">Nessun dato.</td></tr>`; return; }
-            righe.exports = righe.forEach(r => tb.innerHTML += `<tr><td><b>${r.data}</b></td><td><b>${r.dipendente}</b></td><td>${r.cantiere}</td><td><b>${r.ore}</b></td></tr>`);
+            righe.forEach(r => tb.innerHTML += `<tr><td><b>${r.data}</b></td><td><b>${r.dipendente}</b></td><td>${r.cantiere}</td><td><b>${r.ore}</b></td></tr>`);
         }
 
         function filtraArchivioModale() {
@@ -904,7 +950,7 @@
                     }
                 });
             }
-            if(trovati === 0) tb.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var::success;">Tutti in regola! 🎉</td></tr>`;
+            if(trovati === 0) tb.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--success);">Tutti in regola! 🎉</td></tr>`;
         }
     </script>
 </body>
