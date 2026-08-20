@@ -440,7 +440,7 @@
     </div>
 
     <script>
-        // CONFIGURAZIONE GEMINI AI API KEY
+        // CONFIGURAZIONE GEMINI AI API KEY (Inserita correttamente)
         const GEMINI_API_KEY = "AQ.Ab8RN6KoCUPsAcMvjdL4laf6g9FCSYOajo_6r0zlaIsir9Tc9w";
 
         const elencoOperaiTotali = [
@@ -760,12 +760,12 @@
                 let base64 = await comprimiEConvertiImmagine(files[i]);
                 let verdetto = await analizzaImmagineConGemini(base64);
 
-                // Se l'utente ha messo una bolla nei lavori o viceversa
+                // Controllo rigido e spostamento automatico in caso di inversione
                 if (tipoSelezionato === 'bolle' && verdetto.includes("LAVORO")) {
-                    alert("⚠️ Attenzione! L'IA ha rilevato che questa foto è un LAVORO ESEGUITO, non una bolla. L'ho spostata automaticamente nella sezione corretta!");
+                    alert("⚠️ Attenzione! L'IA ha rilevato che questa foto è un LAVORO ESEGUITO, non una bolla. L'ho spostata automaticamente nella sezione Foto Lavori!");
                     spostaFileTraInput(files[i], inputElement, altroInput);
                 } else if (tipoSelezionato === 'lavori' && verdetto.includes("BOLLA")) {
-                    alert("⚠️ Attenzione! L'IA ha rilevato che questa foto è una BOLLA DI CONSEGNA, non un lavoro. L'ho spostata automaticamente nella sezione corretta!");
+                    alert("⚠️ Attenzione! L'IA ha rilevato che questa foto è una BOLLA DI CONSEGNA, non un lavoro. L'ho spostata automaticamente nella sezione Foto Bolle!");
                     spostaFileTraInput(files[i], inputElement, altroInput);
                 }
             }
@@ -774,7 +774,6 @@
         }
 
         function spostaFileTraInput(fileDaSpostare, inputOrigine, inputDestinazione) {
-            // Crea un DataTransfer per gestire i file negli input file del browser
             let dtOrigine = new DataTransfer();
             for (let f of inputOrigine.files) {
                 if (f !== fileDaSpostare) dtOrigine.items.add(f);
