@@ -908,8 +908,14 @@
             let ore = document.getElementById('mieOreLavorate').value;
             let note = document.getElementById('noteInterventoUtente').value.trim();
 
-            if (cIdx === "" || stato === "" || !note) return alert("⚠️ Compila tutti i campi obbligatori!");
-            if (!hasFirma || !firmaTempBase64) return alert("⚠️ La firma del cliente è obbligatoria! Clicca su 'Apri Schermata Firma' e fai firmare il cliente.");
+            if (cIdx === "" || stato === "" || !note) {
+                alert("⚠️ Compila tutti i campi obbligatori (Cantiere, Stato e Note)!");
+                return;
+            }
+            if (!hasFirma || !firmaTempBase64) {
+                alert("⚠️ La firma del cliente è obbligatoria! Clicca su 'Apri Schermata Firma' e fai firmare il cliente.");
+                return;
+            }
 
             let inputBolle = document.getElementById('inputBolleManuale').files;
             let fotoBolleBase64 = await elaboraFileList(inputBolle);
@@ -944,8 +950,6 @@
                 fotoLavori: [] 
             });
 
-            // MODIFICA CRUCIALE: L'operaio non chiude più direttamente il cantiere.
-            // Se seleziona "Terminato", impostiamo la richiesta di verifica per l'ufficio.
             if (stato === "Terminato") {
                 cantieriDB[cIdx].statoRichiestaChiusura = "In attesa di verifica";
             } else {
@@ -1156,7 +1160,6 @@
                         });
                     }
 
-                    // Pulsante di approvazione chiusura visibile solo se l'operaio ha chiesto di chiudere
                     let btnApprova = '';
                     if (c.statoRichiestaChiusura === "In attesa di verifica" && !c.completato) {
                         btnApprova = `<button class="action-btn btn-green" style="padding:6px; font-size:0.8rem; margin-bottom:6px;" onclick="approvaChiusuraCantiere(${idx})">✅ Approva Chiusura</button>`;
@@ -1184,7 +1187,6 @@
             aggiornaTabellaRiepilogo(db);
         }
 
-        // Funzione per l'ufficio per approvare la chiusura richiesta dall'operaio
         function approvaChiusuraCantiere(idx) {
             if (confirm("Confermi di voler chiudere definitivamente questo cantiere?")) {
                 let db = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
