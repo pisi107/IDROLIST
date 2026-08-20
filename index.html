@@ -215,7 +215,8 @@
                         <div style="font-size: 0.8rem; font-weight: 700; color: var(--brand-dark); margin-bottom: 6px;">➕ Cantiere non trovato? Crealo subito:</div>
                         <div style="display: flex; flex-direction: column; gap: 6px;">
                             <input type="text" id="nuovoClienteUtente" placeholder="Nome Cliente..." style="padding: 10px; font-size: 0.9rem;">
-                            <input type="text" id="nuovoIndirizzoUtente" placeholder="Indirizzo Cantiere..." style="padding: 10px; font-size: 0.9rem;">
+                            <!-- MODIFICA APPLICATA QUI SOTTO: autocomplete="street-address" -->
+                            <input type="text" id="nuovoIndirizzoUtente" placeholder="Indirizzo Cantiere..." autocomplete="street-address" style="padding: 10px; font-size: 0.9rem;">
                             <button type="button" class="action-btn btn-dark" style="padding: 10px; font-size: 0.85rem;" onclick="creaCantiereAlVoloUtente()">Crea e Seleziona Cantiere</button>
                         </div>
                     </div>
@@ -371,7 +372,8 @@
                 <div class="card-box">
                     <div style="font-size: 1rem; font-weight: 800; color: var(--brand-dark);">Inserisci Nuovo Cantiere</div>
                     <div><label>Cliente</label><input type="text" id="nuovoCliente" placeholder="Nome cliente..."></div>
-                    <div><label>Indirizzo</label><input type="text" id="nuovoIndirizzo" placeholder="Indirizzo..."></div>
+                    <!-- MODIFICA APPLICATA ANCHE QUI SOTTO: autocomplete="street-address" -->
+                    <div><label>Indirizzo</label><input type="text" id="nuovoIndirizzo" placeholder="Indirizzo..." autocomplete="street-address"></div>
                     <button class="action-btn btn-green" onclick="creaCantiereUfficio()">Crea Cantiere</button>
                 </div>
 
@@ -760,7 +762,6 @@
                 let base64 = await comprimiEConvertiImmagine(files[i]);
                 let verdetto = await analizzaImmagineConGemini(base64);
 
-                // Se l'utente ha messo una bolla nei lavori o viceversa
                 if (tipoSelezionato === 'bolle' && verdetto.includes("LAVORO")) {
                     alert("⚠️ Attenzione! L'IA ha rilevato che questa foto è un LAVORO ESEGUITO, non una bolla. L'ho spostata automaticamente nella sezione corretta!");
                     spostaFileTraInput(files[i], inputElement, altroInput);
@@ -774,7 +775,6 @@
         }
 
         function spostaFileTraInput(fileDaSpostare, inputOrigine, inputDestinazione) {
-            // Crea un DataTransfer per gestire i file negli input file del browser
             let dtOrigine = new DataTransfer();
             for (let f of inputOrigine.files) {
                 if (f !== fileDaSpostare) dtOrigine.items.add(f);
