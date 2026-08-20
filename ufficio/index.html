@@ -895,7 +895,7 @@
             let cantieriDB = ottieniCantieriAggiornati();
             let opzioni = cantieriDB
                 .map((c,idx)=>({c,idx}))
-                .filter(x => String(x.c.cliente || '') === cliente && !x.c.completato);
+                .filter(x => String(x.c.cliente || '') === cliente);
 
             selectCantiere.innerHTML = '<option value="">Tutti i cantieri del cliente</option>' +
                 opzioni.map(x => `<option value="${x.idx}">${x.c.cantiere || x.c.nomeCantiere || 'Cantiere'}${x.c.citta ? ' - ' + x.c.citta : ''}</option>`).join('');
