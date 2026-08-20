@@ -712,7 +712,7 @@
             });
         }
 
-        // ================= INTEGRAZIONE GEMINI AI (BASATA SU FOGLIO/DOCUMENTO VS CANTIERE) =================
+        // ================= INTEGRAZIONE GEMINI AI (CORRETTA E FORZATA) =================
         async function analizzaImmagineConGemini(base64Data) {
             if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("INSERISCI")) {
                 console.warn("⚠️ Chiave API Gemini non configurata.");
@@ -729,7 +729,7 @@
                     body: JSON.stringify({
                         contents: [{
                             parts: [
-                                { text: "Guarda attentamente questa foto. Se in primo piano c'è un foglio di carta, un documento, una bolla, una fattura o un modulo con scritte/testo stampato o compilato a mano, rispondi tassativamente solo 'BOLLA'. Se invece l'immagine mostra un ambiente di cantiere, tubi, impianti, apparecchiature installate o operai al lavoro senza fogli in primo piano, rispondi tassativamente solo 'LAVORO'. Non aggiungere altro." },
+                                { text: "Analizza questa immagine. Se in primo piano c'è un foglio di carta, un documento, una bolla, una fattura o un modulo con scritte, rispondi un'unica parola: BOLLA. Se invece l'immagine mostra un cantiere, tubi, impianti o lavori senza documenti in primo piano, rispondi un'unica parola: LAVORO. Non scrivere altro." },
                                 { inline_data: { mime_type: "image/jpeg", data: cleanBase64 } }
                             ]
                         }]
@@ -738,7 +738,9 @@
 
                 let data = await response.json();
                 if (data.candidates && data.candidates[0].content) {
-                    return data.candidates[0].content.parts[0].text.trim().toUpperCase();
+                    let risposta = data.candidates[0].content.parts[0].text.trim().toUpperCase();
+                    if (risposta.includes("BOLLA")) return "BOLLA";
+                    if (risposta.includes("LAVORO")) return "LAVORO";
                 }
             } catch (err) {
                 console.error("Errore chiamata Gemini:", err);
@@ -751,26 +753,30 @@
             if (!files || files.length === 0) return;
 
             let spanStato = tipoSelezionato === 'bolle' ? document.getElementById('statoAiBolle') : document.getElementById('statoAiLavori');
-            spanStato.innerText = "🔄 Controllo IA in corso...";
+            spanStato.innerText = "🔄 Controllo IA...";
 
-            let altroInputId = tipoSelezionato === 'bolle' ? 'fotoLavoriInput' : 'fotoBolleInput';
-            let altroInput = document.getElementById(altroInputId);
+            let bolleInput = document.getElementById('fotoBolleInput');
+            let lavoriInput = document.getElementById('fotoLavoriInput');
 
             for (let i = 0; i < files.length; i++) {
-                let base64 = await comprimiEConvertiImmagine(files[i]);
+                let fileCorrente = files[i];
+                let base64 = await comprimiEConvertiImmagine(fileCorrente);
                 let verdetto = await analizzaImmagineConGemini(base64);
 
-                let eBolla = verdetto.includes("BOLLA") || verdetto.includes("DOCUMENTO") || verdetto.includes("FATTURA");
-                let eLavoro = verdetto.includes("LAVORO") || verdetto.includes("CANTIERE") || verdetto.includes("IMPIANTO");
+                console.log("Verdetto IA:", verdetto, "Scelto dall'utente:", tipoSelezionato);
 
-                if (tipoSelezionato === 'bolle' && eLavoro && !eBolla) {
-                    alert("⚠️ L'IA ha rilevato che questa foto mostra un lavoro/cantiere senza fogli in primo piano. L'ho spostata automaticamente nella sezione Foto Lavori!");
-                    spostaFileTraInput(files[i], inputElement, altroInput);
-                } else if (tipoSelezionato === 'lavori' && eBolla && !eLavoro) {
-                    alert("⚠️ L'IA ha rilevato la presenza di un documento/foglio in primo piano. L'ho spostata automaticamente nella sezione Foto Bolle!");
-                    spostaFileTraInput(files[i], inputElement, altroInput);
+                // Se l'utente l'ha caricata in Lavori ma l'IA dice che è una Bolla
+                if (tipoSelezionato === 'lavori' && verdetto === "BOLLA") {
+                    alert("🤖 L'IA ha rilevato un documento/foglio: sposto automaticamente in FOTO BOLLE!");
+                    spostaFileTraInput(fileCorrente, lavoriInput, bolleInput);
+                } 
+                // Se l'utente l'ha caricata in Bolle ma l'IA dice che è un Lavoro
+                else if (tipoSelezionato === 'bolle' && verdetto === "LAVORO") {
+                    alert("🤖 L'IA ha rilevato un cantiere/lavoro: sposto automaticamente in FOTO LAVORI!");
+                    spostaFileTraInput(fileCorrente, bolleInput, lavoriInput);
                 }
             }
+            
             spanStato.innerText = "✅ Verificato";
             setTimeout(() => spanStato.innerText = "", 3000);
         }
