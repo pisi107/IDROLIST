@@ -42,6 +42,7 @@
         .btn-danger { background-color: var(--danger); color: white; padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; box-shadow: none; width: auto; }
         .btn-dark { background: var(--brand-dark); color: white; }
         .btn-artigiani { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; }
+        .btn-ai { background: linear-gradient(135deg, #7c3aed, #4f46e5); color: white; font-size: 0.85rem; padding: 10px; margin-top: 6px; }
 
         .card-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
         
@@ -215,7 +216,13 @@
                     <div><label>Le tue Ore Lavorate *</label><select id="mieOreLavorate"><option value="8" selected>8 Ore</option><option value="7">7 Ore</option><option value="6">6 Ore</option><option value="5">5 Ore</option><option value="4">4 Ore</option><option value="3">3 Ore</option><option value="2">2 Ore</option><option value="1">1 Ora</option></select></div>
                     <div><label>Colleghi presenti e ore dedicate</label><div class="container-colleghi-scroll" id="listaColleghiUtente"></div></div>
                     <div><label>Note / Lavori Eseguiti *</label><textarea id="noteInterventoUtente" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea></div>
-                    <div><label>📷 Foto Bolle / DDT</label><input type="file" id="fotoBolleInput" accept="image/*" multiple></div>
+                    
+                    <div>
+                        <label>📷 Foto Bolle / DDT</label>
+                        <input type="file" id="fotoBolleInput" accept="image/*" multiple>
+                        <button type="button" class="action-btn btn-ai" onclick="analizzaBollaConAI()">🤖 Leggi DDT con AI (Estrai Note)</button>
+                    </div>
+
                     <div><label>📷 Foto Lavori</label><input type="file" id="fotoLavoriInput" accept="image/*" multiple></div>
 
                     <button class="action-btn btn-orange" onclick="salvaFoglioLavoroUtente()">Salva Foglio di Lavoro</button>
@@ -601,6 +608,67 @@
                 if (b64) arr.push(b64);
             }
             return arr;
+        }
+
+        // --- FUNZIONE AI PER LEGGERE IL DDT E GENERARE NOTE PULITE ---
+        async function analizzaBollaConAI() {
+            let fileInput = document.getElementById('fotoBolleInput');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                return alert("⚠️ Carica prima almeno una foto di una bolla o DDT!");
+            }
+
+            let btnAI = event.target;
+            let testoOriginaleBtn = btnAI.innerText;
+            btnAI.innerText = "⏳ Analisi in corso...";
+            btnAI.disabled = true;
+
+            try {
+                let file = fileInput.files[0];
+                let base64Full = await comprimiEConvertiImmagine(file);
+                let base64Data = base64Full.split(',')[1];
+
+                // Regole ferree e strutturate per l'Intelligenza Artificiale
+                let promptRegole = "Sei un assistente tecnico esperto per Idrotech Varese. Analizza questa immagine di un DDT o bolla di consegna. " +
+                    "Segui tassativamente queste regole:\n" +
+                    "1. Estrai il numero della bolla/DDT, il fornitore (es. Arbo, Sgl, ecc.) e l'elenco dei materiali principali con relative quantità.\n" +
+                    "2. Non inventare dati che non leggi con certezza.\n" +
+                    "3. Restituisci una descrizione sintetica ma professionale adatta a un campo note di cantiere, strutturata così:\n" +
+                    "   'DDT [Numero] del [Fornitore]: [Materiali principali e quantità]'.\n" +
+                    "4. Evita frasi discorsive superflue, sii diretto ed essenziale.";
+
+                let response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [
+                                { text: promptRegole },
+                                { inline_data: { mime_type: "image/jpeg", data: base64Data } }
+                            ]
+                        }]
+                    })
+                });
+
+                let data = await response.json();
+                if (data.candidates && data.candidates[0].content) {
+                    let testoEstratto = data.candidates[0].content.parts[0].text.trim();
+                    let textareaNote = document.getElementById('noteInterventoUtente');
+                    if (textareaNote.value) {
+                        textareaNote.value += "\n" + testoEstratto;
+                    } else {
+                        textareaNote.value = testoEstratto;
+                    }
+                    alert("✅ DDT analizzato e note aggiornate con successo!");
+                } else {
+                    alert("⚠️ L'AI non è riuscita a leggere correttamente il documento. Riprova con una foto più nitida.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("⚠️ Errore di comunicazione con il servizio di intelligenza artificiale.");
+            } finally {
+                btnAI.innerText = testoOriginaleBtn;
+                btnAI.disabled = false;
+            }
         }
 
         async function salvaFoglioLavoroUtente() {
