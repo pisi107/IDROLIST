@@ -36,6 +36,7 @@
         .action-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
         .btn-green { background-color: var(--success); color: white; }
         .btn-orange { background: linear-gradient(135deg, #f28c1e, #d97712); color: white; }
+        .btn-purple { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: white; }
         .btn-danger { background-color: var(--danger); color: white; padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; box-shadow: none; width: auto; }
 
         .card-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
@@ -101,6 +102,7 @@
         <div class="content-body">
             
             <button class="action-btn btn-orange" style="font-size: 1.05rem; padding: 18px;" onclick="apriModaleCartellaClienti()">📁 Apri Archivio Cartella Clienti & Foto Lavori</button>
+            <button class="action-btn btn-purple" style="font-size: 1.05rem; padding: 18px;" onclick="apriModaleGaranzie()">🛡️ Archivio Foto Garanzie (Permanenti)</button>
 
             <div class="card-box" style="border-color: #ef4444; background: #fff5f5;">
                 <div style="font-size: 1.05rem; font-weight: 800; color: #b91c1c;">🚨 Controllo Ufficio: Mancati Fogli Lavoro (Ultimi 2 Giorni)</div>
@@ -210,6 +212,25 @@
         </div>
     </div>
 
+    <!-- MODALE ARCHIVIO GARANZIE -->
+    <div class="modal-overlay" id="modalGaranzie">
+        <div class="modal-card" style="max-width: 600px;">
+            <div class="modal-header" style="background: #6d28d9;">
+                <span>🛡️ Archivio Permanente Foto Garanzie</span>
+                <button class="close-modal-btn" onclick="chiudiModaleGaranzie()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <label>Filtra per Cliente o Indirizzo Cantiere</label>
+                    <input type="text" id="inputCercaGaranzia" placeholder="Cerca cliente o cantiere..." oninput="renderizzaAlberoGaranzie()">
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-light);">Le foto inserite qui rimangono salvate per sempre e protette, anche se il cantiere viene contrassegnato come terminato o archiviato. Puoi anche aggiungere nuove foto garanzia direttamente da qui.</div>
+                
+                <div id="contenitoreAlberoGaranzie" style="display: flex; flex-direction: column; gap: 8px; max-height: 55vh; overflow-y: auto;"></div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="modalCartellaClienti">
         <div class="modal-card" style="max-width: 580px;">
             <div class="modal-header">
@@ -303,6 +324,111 @@
                 console.error("Errore nell'avvio:", e);
             }
         };
+
+        // GESTIONE ARCHIVIO GARANZIE PERMANENTI
+        function apriModaleGaranzie() {
+            let m = document.getElementById('modalGaranzie');
+            if(m) m.classList.add('open');
+            renderizzaAlberoGaranzie();
+        }
+
+        function chiudiModaleGaranzie() {
+            let m = document.getElementById('modalGaranzie');
+            if(m) m.classList.remove('open');
+        }
+
+        function renderizzaAlberoGaranzie() {
+            let container = document.getElementById('contenitoreAlberoGaranzie');
+            let query = document.getElementById('inputCercaGaranzia').value.toLowerCase().trim();
+            if(!container) return;
+            container.innerHTML = '';
+
+            let cantieriDB = ottieniCantieriAggiornati();
+            let trovati = 0;
+
+            cantieriDB.forEach((c, cIdx) => {
+                let nomeClienteTesto = `${c.cliente} - ${c.indirizzo}`.toLowerCase();
+                if (query === '' || nomeClienteTesto.includes(query)) {
+                    trovati++;
+                    let idCorpo = `folder_garanzia_${cIdx}`;
+
+                    if (!c.fotoGaranzie || !Array.isArray(c.fotoGaranzie)) {
+                        c.fotoGaranzie = [];
+                    }
+
+                    let fotoHtml = '';
+                    if (c.fotoGaranzie.length > 0) {
+                        fotoHtml = `<div class="foto-thumb-container">`;
+                        c.fotoGaranzie.forEach((imgB64, gIdx) => {
+                            fotoHtml += `
+                                <div style="position:relative; display:inline-block;">
+                                    <img src="${imgB64}" class="foto-thumb" onclick="apriZoomFoto('${imgB64}')">
+                                    <button onclick="eliminaFotoGaranzia(${cIdx}, ${gIdx})" style="position:absolute; top:-5px; right:-5px; background:red; color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; cursor:pointer;">&times;</button>
+                                </div>
+                            `;
+                        });
+                        fotoHtml += `</div>`;
+                    } else {
+                        fotoHtml = `<div style="font-size: 0.75rem; color: var(--text-light); font-style: italic; margin-bottom: 6px;">Nessuna foto garanzia caricata per questo cliente.</div>`;
+                    }
+
+                    let statoLabel = c.completato ? '<span class="badge badge-fatto">Terminato</span>' : '<span class="badge badge-da-fare">Da terminare</span>';
+
+                    container.innerHTML += `
+                        <div class="folder-cliente-box" style="border-color: #8b5cf6;">
+                            <div class="folder-cliente-header" style="background: #6d28d9;" onclick="toggleFolderCliente('${idCorpo}', this)">
+                                <span>🛡️ ${c.cliente} <span style="font-size:0.75rem; font-weight:400; color:#ddd;">(${c.indirizzo})</span> ${statoLabel}</span>
+                                <span id="arrow_garanzia_${cIdx}">▼</span>
+                            </div>
+                            <div id="${idCorpo}" class="folder-cliente-body">
+                                <div style="font-size: 0.8rem; font-weight: bold; color: var(--brand-dark);">Foto Garanzie (Sempre Conservate):</div>
+                                ${fotoHtml}
+                                <div style="margin-top: 8px; display: flex; gap: 8px; align-items: center;">
+                                    <input type="file" id="fileGaranzia_${cIdx}" accept="image/*" multiple style="display:none;" onchange="caricaFotoGaranzia(${cIdx}, this)">
+                                    <button class="action-btn btn-purple" style="padding: 8px 12px; font-size: 0.8rem;" onclick="document.getElementById('fileGaranzia_${cIdx}').click()">➕ Aggiungi Foto Garanzia</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            if (trovati === 0) {
+                container.innerHTML = `<div style="text-align: center; color: var(--text-light); padding: 20px; font-size: 0.9rem;">Nessun cliente trovato.</div>`;
+            }
+        }
+
+        function caricaFotoGaranzia(cIdx, inputEl) {
+            if (inputEl.files && inputEl.files.length > 0) {
+                let cantieriDB = ottieniCantieriAggiornati();
+                if(!cantieriDB[cIdx].fotoGaranzie) cantieriDB[cIdx].fotoGaranzie = [];
+
+                let letti = 0;
+                Array.from(inputEl.files).forEach(file => {
+                    let reader = new FileReader();
+                    reader.onload = function(e) {
+                        cantieriDB[cIdx].fotoGaranzie.push(e.target.result);
+                        letti++;
+                        if(letti === inputEl.files.length) {
+                            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+                            renderizzaAlberoGaranzie();
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+
+        function eliminaFotoGaranzia(cIdx, gIdx) {
+            if(confirm("Vuoi rimuovere questa foto dalle garanzie?")) {
+                let cantieriDB = ottieniCantieriAggiornati();
+                if(cantieriDB[cIdx] && cantieriDB[cIdx].fotoGaranzie) {
+                    cantieriDB[cIdx].fotoGaranzie.splice(gIdx, 1);
+                    localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+                    renderizzaAlberoGaranzie();
+                }
+            }
+        }
 
         function apriModaleCartellaClienti() {
             let m = document.getElementById('modalCartellaClienti');
@@ -597,7 +723,6 @@
             let clienteNorm = cliente.toLowerCase().replace(/\s+/g, ' ');
             let indirizzoNorm = indirizzo.toLowerCase().replace(/\s+/g, ' ');
 
-            // Cerchiamo se esiste già un cantiere con lo stesso nome e indirizzo
             let cantiereEsistente = cantieriDB.find(c => 
                 c.cliente.toLowerCase().replace(/\s+/g, ' ') === clienteNorm && 
                 c.indirizzo.toLowerCase().replace(/\s+/g, ' ') === indirizzoNorm
@@ -607,7 +732,6 @@
                 let conferma = confirm(`⚠️ Esiste già una cartella per "${cantiereEsistente.cliente}" in "${cantiereEsistente.indirizzo}".\n\nÈ un nuovo intervento/foglio di lavoro per questo cantiere?\n\n(Premi OK per aggiungere un nuovo foglio di lavoro a questo cliente, oppure Annulla se è un omonimo / nuovo cliente con altra via).`);
                 
                 if (conferma) {
-                    // L'utente vuole aggiungere un nuovo intervento nello storico di questo cantiere
                     if (!cantiereEsistente.storico || !Array.isArray(cantiereEsistente.storico)) {
                         cantiereEsistente.storico = [];
                     }
@@ -625,7 +749,6 @@
                         dataStampa: ""
                     });
 
-                    // Se il cantiere era archiviato come terminato, lo rimettiamo in "Da Terminare"
                     cantiereEsistente.completato = false;
                     
                     localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
@@ -635,12 +758,12 @@
                     alert("✅ È stato aggiunto un nuovo foglio di lavoro nello storico del cantiere esistente! Lo trovi nella cartella 'Da Terminare'.");
                     return;
                 } else {
-                    // L'utente ha premuto Annulla -> Crea un nuovo cantiere separato (omonimo / nuovo indirizzo)
                     cantieriDB.push({
                         cliente: cliente,
                         indirizzo: indirizzo,
                         completato: false,
-                        storico: []
+                        storico: [],
+                        fotoGaranzie: []
                     });
                     alert("✅ È stata creata una nuova scheda cantiere separata.");
                 }
@@ -649,7 +772,8 @@
                     cliente: cliente,
                     indirizzo: indirizzo,
                     completato: false,
-                    storico: []
+                    storico: [],
+                    fotoGaranzie: []
                 });
                 alert("✅ Cantiere creato con successo!");
             }
@@ -726,6 +850,10 @@
             try {
                 cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
                 if(!Array.isArray(cantieriDB)) cantieriDB = [];
+                // Assicuriamoci che ogni cantiere abbia il campo fotoGaranzie
+                cantieriDB.forEach(c => {
+                    if(!c.fotoGaranzie) c.fotoGaranzie = [];
+                });
             } catch(e) {
                 cantieriDB = [];
             }
