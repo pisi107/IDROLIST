@@ -42,7 +42,6 @@
         .btn-danger { background-color: var(--danger); color: white; padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; box-shadow: none; width: auto; }
         .btn-dark { background: var(--brand-dark); color: white; }
         .btn-artigiani { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; }
-        .btn-ai { background: linear-gradient(135deg, #7c3aed, #4f46e5); color: white; font-size: 0.85rem; padding: 10px; margin-top: 6px; }
 
         .card-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
         
@@ -218,14 +217,12 @@
                     <div><label>Note / Lavori Eseguiti *</label><textarea id="noteInterventoUtente" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea></div>
                     
                     <div>
-                        <label>📷 Foto Bolle / DDT</label>
-                        <input type="file" id="fotoBolleInput" accept="image/*" multiple>
-                        <button type="button" class="action-btn btn-ai" onclick="analizzaBollaConAI()">🤖 Leggi DDT con AI (Estrai Note)</button>
+                        <label>📷 Foto e Documenti (DDT, Bolle o Lavori)</label>
+                        <input type="file" id="fotoGenericheInput" accept="image/*" multiple>
+                        <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 4px;">💡 Carica tutto qui: l'IA riconoscerà in automatico se c'è un DDT estraendone i materiali nelle note!</div>
                     </div>
 
-                    <div><label>📷 Foto Lavori</label><input type="file" id="fotoLavoriInput" accept="image/*" multiple></div>
-
-                    <button class="action-btn btn-orange" onclick="salvaFoglioLavoroUtente()">Salva Foglio di Lavoro</button>
+                    <button class="action-btn btn-orange" id="btnSalvaFoglio" onclick="salvaFoglioLavoroUtente()">Salva Foglio di Lavoro</button>
                 </div>
             </div>
 
@@ -601,74 +598,50 @@
             });
         }
 
-        async function elaboraListaFile(fileList) {
-            let arr = [];
+        // --- INTELLIGENZA ARTIFICIALE AUTONOMA SULLE FOTO CARICATE ---
+        async function analizzaImmaginiInAutonomia(fileList) {
+            let noteAggiuntive = [];
+            let immaginiBase64 = [];
+
             for (let i = 0; i < fileList.length; i++) {
-                let b64 = await comprimiEConvertiImmagine(fileList[i]);
-                if (b64) arr.push(b64);
-            }
-            return arr;
-        }
-
-        // --- FUNZIONE AI PER LEGGERE IL DDT E GENERARE NOTE PULITE ---
-        async function analizzaBollaConAI() {
-            let fileInput = document.getElementById('fotoBolleInput');
-            if (!fileInput.files || fileInput.files.length === 0) {
-                return alert("⚠️ Carica prima almeno una foto di una bolla o DDT!");
-            }
-
-            let btnAI = event.target;
-            let testoOriginaleBtn = btnAI.innerText;
-            btnAI.innerText = "⏳ Analisi in corso...";
-            btnAI.disabled = true;
-
-            try {
-                let file = fileInput.files[0];
-                let base64Full = await comprimiEConvertiImmagine(file);
+                let base64Full = await comprimiEConvertiImmagine(fileList[i]);
+                immaginiBase64.push(base64Full);
                 let base64Data = base64Full.split(',')[1];
 
-                // Regole ferree e strutturate per l'Intelligenza Artificiale
-                let promptRegole = "Sei un assistente tecnico esperto per Idrotech Varese. Analizza questa immagine di un DDT o bolla di consegna. " +
-                    "Segui tassativamente queste regole:\n" +
-                    "1. Estrai il numero della bolla/DDT, il fornitore (es. Arbo, Sgl, ecc.) e l'elenco dei materiali principali con relative quantità.\n" +
-                    "2. Non inventare dati che non leggi con certezza.\n" +
-                    "3. Restituisci una descrizione sintetica ma professionale adatta a un campo note di cantiere, strutturata così:\n" +
-                    "   'DDT [Numero] del [Fornitore]: [Materiali principali e quantità]'.\n" +
-                    "4. Evita frasi discorsive superflue, sii diretto ed essenziale.";
+                try {
+                    // Prompt strutturato per far decidere in autonomia all'IA se l'immagine è un DDT/Bolla o meno
+                    let promptAutonomo = "Sei un assistente tecnico per Idrotech Varese. Guarda questa immagine.\n" +
+                        "1. Stabilisci se si tratta di un DDT, bolla di consegna, fattura o documento di trasporto.\n" +
+                        "2. Se NON è un DDT (es. è una foto di un impianto, di un cantiere o di un lavoro eseguito), rispondi ESATTAMENTE con la parola: 'FOTOLAVORO'.\n" +
+                        "3. Se È un DDT o una bolla, estrai in modo sintetico il fornitore, il numero del documento e i materiali principali.\n" +
+                        "Formato obbligatorio se è un DDT: 'DDT [Numero] del [Fornitore]: [Materiali]'. Sii sintetico.";
 
-                let response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [
-                                { text: promptRegole },
-                                { inline_data: { mime_type: "image/jpeg", data: base64Data } }
-                            ]
-                        }]
-                    })
-                });
+                    let response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [
+                                    { text: promptAutonomo },
+                                    { inline_data: { mime_type: "image/jpeg", data: base64Data } }
+                                ]
+                            }]
+                        })
+                    });
 
-                let data = await response.json();
-                if (data.candidates && data.candidates[0].content) {
-                    let testoEstratto = data.candidates[0].content.parts[0].text.trim();
-                    let textareaNote = document.getElementById('noteInterventoUtente');
-                    if (textareaNote.value) {
-                        textareaNote.value += "\n" + testoEstratto;
-                    } else {
-                        textareaNote.value = testoEstratto;
+                    let data = await response.json();
+                    if (data.candidates && data.candidates[0].content) {
+                        let rispostaIA = data.candidates[0].content.parts[0].text.trim();
+                        if (!rispostaIA.toUpperCase().includes("FOTOLAVORO")) {
+                            noteAggiuntive.push(rispostaIA);
+                        }
                     }
-                    alert("✅ DDT analizzato e note aggiornate con successo!");
-                } else {
-                    alert("⚠️ L'AI non è riuscita a leggere correttamente il documento. Riprova con una foto più nitida.");
+                } catch (err) {
+                    console.error("Errore analisi AI autonoma foto:", err);
                 }
-            } catch (err) {
-                console.error(err);
-                alert("⚠️ Errore di comunicazione con il servizio di intelligenza artificiale.");
-            } finally {
-                btnAI.innerText = testoOriginaleBtn;
-                btnAI.disabled = false;
             }
+
+            return { noteAggiuntive, immaginiBase64 };
         }
 
         async function salvaFoglioLavoroUtente() {
@@ -681,27 +654,51 @@
 
             if (cIdx === "" || stato === "" || !note) return alert("⚠️ Compila tutti i campi obbligatori!");
 
-            let partecipanti = [`${utenteCorrente} (${ore}h)`];
-            document.querySelectorAll('input[name="collegaCheckbox"]:checked').forEach(cb => {
-                let oCollega = document.getElementById(`ore_collega_${cb.value.replace(/\s+/g, '_')}`).value;
-                participanti.push(`${cb.value} (${oCollega}h)`);
-            });
+            let btnSalva = document.getElementById('btnSalvaFoglio');
+            btnSalva.innerText = "🤖 Elaborazione IA in corso...";
+            btnSalva.disabled = true;
 
-            let bolle = await elaboraListaFile(document.getElementById('fotoBolleInput').files);
-            let lavori = await elaboraListaFile(document.getElementById('fotoLavoriInput').files);
+            try {
+                let partecipanti = [`${utenteCorrente} (${ore}h)`];
+                document.querySelectorAll('input[name="collegaCheckbox"]:checked').forEach(cb => {
+                    let oCollega = document.getElementById(`ore_collega_${cb.value.replace(/\s+/g, '_')}`).value;
+                    participanti.push(`${cb.value} (${oCollega}h)`);
+                });
 
-            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            if (!cantieriDB[cIdx].storico) cantieriDB[cIdx].storico = [];
+                // Analisi autonoma delle immagini caricate nell'unico campo
+                let fileInput = document.getElementById('fotoGenericheInput');
+                let risultatoAI = await analizzaImmaginiInAutonomia(fileInput.files);
 
-            cantieriDB[cIdx].storico.push({ data, tipo, operai: partecipanti.join(', '), note, statoIntervento: stato, fotoBolle: bolle, fotoLavori: lavori });
-            cantieriDB[cIdx].completato = (stato === "Terminato");
+                // Se l'IA ha riconosciuto dei DDT, li unisce autonomamente alle note scritte dall'utente
+                let note Finali = note;
+                if (risultatoAI.noteAggiuntive.length > 0) {
+                    noteFinali += "\n\n[DDT Rilevati dall'IA]:\n" + risultatoAI.noteAggiuntive.join('\n');
+                }
 
-            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            alert("✅ Salvato con successo!");
-            document.getElementById('noteInterventoUtente').value = '';
-            document.getElementById('fotoBolleInput').value = '';
-            document.getElementById('fotoLavoriInput').value = '';
-            popolaCantieriUtente();
+                let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
+                if (!cantieriDB[cIdx].storico) cantieriDB[cIdx].storico = [];
+
+                cantieriDB[cIdx].storico.push({ 
+                    data, 
+                    tipo, 
+                    operai: partecipanti.join(', '), 
+                    note: noteFinali, 
+                    statoIntervento: stato, 
+                    fotoBolle: [], // Unificato nel flusso generale o salvato nelle foto lavori
+                    fotoLavori: risultatoAI.immaginiBase64 
+                });
+                cantieriDB[cIdx].completato = (stato === "Terminato");
+
+                localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+                alert("✅ Foglio di lavoro salvato con successo!");
+                
+                document.getElementById('noteInterventoUtente').value = '';
+                document.getElementById('fotoGenericheInput').value = '';
+                popolaCantieriUtente();
+            } finally {
+                btnSalva.innerText = "Salva Foglio di Lavoro";
+                btnSalva.disabled = false;
+            }
         }
 
         function popolaSelectFiltroDipendenti() {
@@ -818,9 +815,8 @@
                     let stHtml = '';
                     if (c.storico) {
                         c.storico.forEach(s => {
-                            let fb = s.fotoBolle ? s.fotoBolle.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('') : '';
                             let fl = s.fotoLavori ? s.fotoLavori.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('') : '';
-                            stHtml += `<div style="background:#f1f5f9; padding:8px; border-radius:6px; margin-top:5px; font-size:0.8rem;"><b>${s.data}</b> - ${s.operai}<br><i>${s.note}</i><div class="foto-thumb-container">${fb}${fl}</div></div>`;
+                            stHtml += `<div style="background:#f1f5f9; padding:8px; border-radius:6px; margin-top:5px; font-size:0.8rem;"><b>${s.data}</b> - ${s.operai}<br><i>${s.note}</i><div class="foto-thumb-container">${fl}</div></div>`;
                         });
                     }
                     cont.innerHTML += `<div class="cantiere-card ${c.completato?'terminato':''}"><div style="font-weight:800;">${c.cliente}</div><div style="font-size:0.8rem; color:var(--text-light);">${c.indirizzo}</div>${stHtml}<div style="display:flex; gap:6px; margin-top:8px;"><button class="action-btn ${c.completato?'btn-green':'btn-orange'}" style="padding:6px; font-size:0.8rem;" onclick="toggleStato(${idx})">${c.completato?'Riapri':'Termina'}</button><button class="action-btn btn-danger" onclick="eliminaCantiere(${idx})">Elimina</button></div></div>`;
