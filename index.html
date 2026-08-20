@@ -217,9 +217,9 @@
                     <div><label>Note / Lavori Eseguiti *</label><textarea id="noteInterventoUtente" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea></div>
                     
                     <div>
-                        <label>📷 Foto e Documenti (DDT, Bolle o Lavori)</label>
+                        <label>📷 Carica Foto e DDT (L'IA dividerà tutto in automatico)</label>
                         <input type="file" id="fotoGenericheInput" accept="image/*" multiple>
-                        <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 4px;">💡 Carica tutto qui: l'IA riconoscerà in automatico se c'è un DDT estraendone i materiali nelle note!</div>
+                        <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 4px;">💡 Carica foto lavori o bolle/DDT insieme: l'IA riconoscerà i documenti e catalogherà le foto nei rispettivi spazi!</div>
                     </div>
 
                     <button class="action-btn btn-orange" id="btnSalvaFoglio" onclick="salvaFoglioLavoroUtente()">Salva Foglio di Lavoro</button>
@@ -600,11 +600,10 @@
 
         async function analizzaImmaginiInAutonomia(fileList) {
             let noteAggiuntive = [];
-            let immaginiBase64 = [];
+            let fotoLavori = [];
 
             for (let i = 0; i < fileList.length; i++) {
                 let base64Full = await comprimiEConvertiImmagine(fileList[i]);
-                immaginiBase64.push(base64Full);
                 let base64Data = base64Full.split(',')[1];
 
                 try {
@@ -630,16 +629,21 @@
                     let data = await response.json();
                     if (data.candidates && data.candidates[0].content) {
                         let rispostaIA = data.candidates[0].content.parts[0].text.trim();
-                        if (!rispostaIA.toUpperCase().includes("FOTOLAVORO")) {
+                        if (rispostaIA.toUpperCase().includes("FOTOLAVORO")) {
+                            fotoLavori.push(base64Full);
+                        } else {
                             noteAggiuntive.push(rispostaIA);
                         }
+                    } else {
+                        fotoLavori.push(base64Full);
                     }
                 } catch (err) {
                     console.error("Errore analisi AI autonoma foto:", err);
+                    fotoLavori.push(base64Full);
                 }
             }
 
-            return { noteAggiuntive, immaginiBase64 };
+            return { noteAggiuntive, fotoLavori };
         }
 
         async function salvaFoglioLavoroUtente() {
@@ -653,7 +657,7 @@
             if (cIdx === "" || stato === "" || !note) return alert("⚠️ Compila tutti i campi obbligatori!");
 
             let btnSalva = document.getElementById('btnSalvaFoglio');
-            btnSalva.innerText = "🤖 Elaborazione IA in corso...";
+            btnSalva.innerText = "🤖 L'IA sta dividendo DDT e Foto...";
             btnSalva.disabled = true;
 
             try {
@@ -668,7 +672,7 @@
 
                 let noteFinali = note;
                 if (risultatoAI.noteAggiuntive.length > 0) {
-                    noteFinali += "\n\n[DDT Rilevati dall'IA]:\n" + risultatoAI.noteAggiuntive.join('\n');
+                    noteFinali += "\n\n[DDT e Materiali Riconosciuti dall'IA]:\n" + risultatoAI.noteAggiuntive.join('\n');
                 }
 
                 let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
@@ -681,12 +685,12 @@
                     note: noteFinali, 
                     statoIntervento: stato, 
                     fotoBolle: [], 
-                    fotoLavori: risultatoAI.immaginiBase64 
+                    fotoLavori: risultatoAI.fotoLavori 
                 });
                 cantieriDB[cIdx].completato = (stato === "Terminato");
 
                 localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-                alert("✅ Foglio di lavoro salvato con successo!");
+                alert("✅ Foglio di lavoro salvato! L'IA ha catalogato i file.");
                 
                 document.getElementById('noteInterventoUtente').value = '';
                 document.getElementById('fotoGenericheInput').value = '';
@@ -811,8 +815,15 @@
                     let stHtml = '';
                     if (c.storico) {
                         c.storico.forEach(s => {
-                            let fl = s.fotoLavori ? s.fotoLavori.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('') : '';
-                            stHtml += `<div style="background:#f1f5f9; padding:8px; border-radius:6px; margin-top:5px; font-size:0.8rem;"><b>${s.data}</b> - ${s.operai}<br><i>${s.note}</i><div class="foto-thumb-container">${fl}</div></div>`;
+                            let fl = s.fotoLavori && s.fotoLavori.length > 0 ? s.fotoLavori.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('') : '<span style="font-size:0.75rem; color:var(--text-light);">Nessuna foto lavori</span>';
+                            
+                            stHtml += `
+                                <div style="background:#f1f5f9; padding:10px; border-radius:8px; margin-top:8px; font-size:0.8rem; border: 1px solid var(--border);">
+                                    <div><b>📅 ${s.data}</b> (${s.tipo}) - ${s.operai}</div>
+                                    <div style="margin-top:4px;"><i>${s.note.replace(/\n/g, '<br>')}</i></div>
+                                    <div style="margin-top:6px; font-weight:700; color:var(--brand-dark); font-size:0.75rem; text-transform:uppercase;">📸 Foto Lavori:</div>
+                                    <div class="foto-thumb-container">${fl}</div>
+                                </div>`;
                         });
                     }
                     cont.innerHTML += `<div class="cantiere-card ${c.completato?'terminato':''}"><div style="font-weight:800;">${c.cliente}</div><div style="font-size:0.8rem; color:var(--text-light);">${c.indirizzo}</div>${stHtml}<div style="display:flex; gap:6px; margin-top:8px;"><button class="action-btn ${c.completato?'btn-green':'btn-orange'}" style="padding:6px; font-size:0.8rem;" onclick="toggleStato(${idx})">${c.completato?'Riapri':'Termina'}</button><button class="action-btn btn-danger" onclick="eliminaCantiere(${idx})">Elimina</button></div></div>`;
@@ -857,7 +868,7 @@
             tb.innerHTML = '';
             let righe = raccogliRighe(db).slice(0, 5);
             if (righe.length === 0) { tb.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-light);">Nessun dato.</td></tr>`; return; }
-            righe.forEach(r => tb.innerHTML += `<tr><td><b>${r.data}</b></td><td><b>${r.dipendente}</b></td><td>${r.cantiere}</td><td><b>${r.ore}</b></td></tr>`);
+            righe.exports = righe.forEach(r => tb.innerHTML += `<tr><td><b>${r.data}</b></td><td><b>${r.dipendente}</b></td><td>${r.cantiere}</td><td><b>${r.ore}</b></td></tr>`);
         }
 
         function filtraArchivioModale() {
@@ -893,7 +904,7 @@
                     }
                 });
             }
-            if(trovati === 0) tb.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--success);">Tutti in regola! 🎉</td></tr>`;
+            if(trovati === 0) tb.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var::success;">Tutti in regola! 🎉</td></tr>`;
         }
     </script>
 </body>
