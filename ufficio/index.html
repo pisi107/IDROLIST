@@ -153,8 +153,10 @@
                         <div class="card-title">✏️ Registrazione Intervento per Conto Dipendenti</div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                             <div>
-                                <label>Cerca Cantiere Aperto</label>
-                                <input type="text" id="inputRicercaCantiereUfficio" placeholder="Filtra..." oninput="filtraSelectCantieriUfficio()">
+                                <label>Seleziona Cliente</label>
+                                <select id="filtroClienteInterventoUfficio" onchange="selezionaClienteInterventoUfficio()">
+                                    <option value="">Seleziona prima un cliente...</option>
+                                </select>
                             </div>
                             <div>
                                 <label>Data Intervento</label>
@@ -163,7 +165,9 @@
                         </div>
                         <div>
                             <label>Seleziona Cantiere</label>
-                            <select id="selectCantiereUfficio"></select>
+                            <select id="selectCantiereUfficio" disabled>
+                                <option value="">Seleziona prima un cliente...</option>
+                            </select>
                         </div>
                         <div>
                             <label>Seleziona Dipendenti e Relative Ore</label>
@@ -370,6 +374,7 @@
             let oggiInput = document.getElementById('dataInterventoUfficio');
             if(oggiInput) oggiInput.value = new Date().toISOString().split('T')[0];
             popolaDipendentiUfficioMultiplo();
+            popolaClientiInterventoUfficio();
             popolaTabellaPresenzeUfficio();
             popolaSelectFiltroDipendenti();
             aggiornaVistaUfficio();
@@ -616,6 +621,71 @@
             document.getElementById('modalStampaRapportino').classList.add('open');
         }
         function chiudiModaleStampa() { document.getElementById('modalStampaRapportino').classList.remove('open'); }
+
+        // Registrazione intervento: prima si seleziona il CLIENTE,
+        // poi si apre la tendina con esclusivamente i CANTIERI di quel cliente.
+        function popolaClientiInterventoUfficio() {
+            const selCliente = document.getElementById('filtroClienteInterventoUfficio');
+            const selCantiere = document.getElementById('selectCantiereUfficio');
+            if (!selCliente || !selCantiere) return;
+
+            const cantieriDB = ottieniCantieriAggiornati();
+            const clientePrecedente = selCliente.value;
+            const cantierePrecedente = selCantiere.value;
+
+            const clienti = [...new Set(
+                cantieriDB
+                    .map(c => String(c.cliente || '').trim())
+                    .filter(Boolean)
+            )].sort((a,b) => a.localeCompare(b));
+
+            selCliente.innerHTML = '<option value="">Seleziona un cliente...</option>' +
+                clienti.map(cl => `<option value="${cl.replace(/"/g, '&quot;')}">${cl}</option>`).join('');
+
+            if (clienti.includes(clientePrecedente)) {
+                selCliente.value = clientePrecedente;
+                popolaCantieriInterventoUfficio(clientePrecedente, cantierePrecedente);
+            } else {
+                selCantiere.innerHTML = '<option value="">Seleziona prima un cliente...</option>';
+                selCantiere.disabled = true;
+            }
+        }
+
+        function selezionaClienteInterventoUfficio() {
+            const cliente = document.getElementById('filtroClienteInterventoUfficio')?.value || '';
+            popolaCantieriInterventoUfficio(cliente, '');
+        }
+
+        function popolaCantieriInterventoUfficio(cliente, valorePrecedente) {
+            const selCantiere = document.getElementById('selectCantiereUfficio');
+            if (!selCantiere) return;
+
+            if (!cliente) {
+                selCantiere.innerHTML = '<option value="">Seleziona prima un cliente...</option>';
+                selCantiere.disabled = true;
+                return;
+            }
+
+            const cantieriDB = ottieniCantieriAggiornati();
+            const opzioni = cantieriDB
+                .map((c, idx) => ({ c, idx }))
+                .filter(x => String(x.c.cliente || '').trim() === cliente);
+
+            selCantiere.innerHTML = '<option value="">Seleziona un cantiere...</option>' +
+                opzioni.map(x => {
+                    const nome = x.c.cantiere || x.c.nomeCantiere || 'Cantiere';
+                    const citta = x.c.citta ? ` - ${x.c.citta}` : '';
+                    return `<option value="${x.idx}">${nome}${citta}</option>`;
+                }).join('');
+
+            selCantiere.disabled = opzioni.length === 0;
+
+            if (opzioni.some(x => String(x.idx) === String(valorePrecedente))) {
+                selCantiere.value = valorePrecedente;
+            } else {
+                selCantiere.value = '';
+            }
+        }
 
         function popolaDipendentiUfficioMultiplo() {
             let container = document.getElementById('listaDipendentiUfficioMultiplo');
