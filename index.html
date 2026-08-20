@@ -859,13 +859,28 @@
             let container = document.getElementById('listaColleghiUtente');
             container.innerHTML = '';
             let tuttiColleghi = [...elencoOperaiTotali, ...elencoArtigianiTotali];
-            tuttiColleghi.forEach(op => {
+            
+            tuttiColleghi.forEach((op, index) => {
                 if (op === utenteCorrente) return;
-                let idSelect = `ore_collega_${op.replace(/\s+/g, '_')}`;
+                let chkId = `chk_collega_${index}`;
+                let selectId = `ore_collega_${index}`;
+                
                 container.innerHTML += `
                     <div class="collega-card-item">
-                        <label><input type="checkbox" name="collegaCheckbox" value="${op}" onchange="document.getElementById('${idSelect}').disabled = !this.checked"> ${op}</label>
-                        <select id="${idSelect}" disabled><option value="8">8 Ore</option><option value="7">7 Ore</option><option value="6">6 Ore</option><option value="5">5 Ore</option><option value="4">4 Ore</option></select>
+                        <label>
+                            <input type="checkbox" id="${chkId}" name="collegaCheckbox" value="${op}" onchange="document.getElementById('${selectId}').disabled = !this.checked"> 
+                            ${op}
+                        </label>
+                        <select id="${selectId}" disabled>
+                            <option value="8">8 Ore</option>
+                            <option value="7">7 Ore</option>
+                            <option value="6">6 Ore</option>
+                            <option value="5">5 Ore</option>
+                            <option value="4">4 Ore</option>
+                            <option value="3">3 Ore</option>
+                            <option value="2">2 Ore</option>
+                            <option value="1">1 Ora</option>
+                        </select>
                     </div>
                 `;
             });
@@ -929,15 +944,18 @@
                 }
             });
 
-            // Raccolta dinamica dei colleghi selezionati
+            // Raccolta sicura dei colleghi selezionati tramite gli indici numerici
             let partecipanti = [`${utenteCorrente} (${ore}h)`];
-            let checkboxColleghi = document.querySelectorAll('input[name="collegaCheckbox"]:checked');
+            let tuttiColleghi = [...elencoOperaiTotali, ...elencoArtigianiTotali];
             
-            checkboxColleghi.forEach(cb => {
-                let idSelect = `ore_collega_${cb.value.replace(/\s+/g, '_')}`;
-                let selectCollega = document.getElementById(idSelect);
-                let oCollega = selectCollega ? selectCollega.value : "0";
-                participanti.push(`${cb.value} (${oCollega}h)`);
+            tuttiColleghi.forEach((op, index) => {
+                if (op === utenteCorrente) return;
+                let chk = document.getElementById(`chk_collega_${index}`);
+                if (chk && chk.checked) {
+                    let selOre = document.getElementById(`ore_collega_${index}`);
+                    let oCollega = selOre ? selOre.value : "8";
+                    participanti.push(`${op} (${oCollega}h)`);
+                }
             });
 
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
