@@ -359,18 +359,32 @@
             } catch(e) { return []; }
         }
 
-        // Funzione unificata per estrarre le foto da qualsiasi formato salvato dall'operaio
+        // Funzione potenziata per estrarre le foto indipendentemente dalla chiave usata dall'operaio
         function estraiFotoDaIntervento(s) {
             if (!s) return [];
             let listaFoto = [];
-            if (Array.isArray(s.fotoLavori)) listaFoto = listaFoto.concat(s.fotoLavori);
-            if (Array.isArray(s.lavori)) {
-                s.lavori.forEach(item => {
-                    if (typeof item === 'string' && (item.startsWith('data:image') || item.length > 100)) listaFoto.push(item);
-                });
-            }
-            if (Array.isArray(s.foto)) listaFoto = listaFoto.concat(s.foto);
-            return listaFoto;
+            
+            // Controlla tutte le possibili chiavi in cui l'app operaia potrebbe aver salvato le immagini
+            let possibiliCampi = ['fotoLavori', 'lavori', 'foto', 'immagini', 'allegati', 'images'];
+            possibiliCampi.forEach(campo => {
+                if (Array.isArray(s[campo])) {
+                    s[campo].forEach(item => {
+                        if (typeof item === 'string' && (item.startsWith('data:image') || item.startsWith('http') || item.length > 100)) {
+                            listaFoto.push(item);
+                        } else if (item && typeof item === 'object') {
+                            // Se l'elemento è un oggetto, cerca eventuali proprietà stringa che contengono dati immagine
+                            Object.values(item.val || item).forEach(valSub => {
+                                if (typeof valSub === 'string' && (valSub.startsWith('data:image') || valSub.length > 100)) {
+                                    listaFoto.push(valSub);
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+            // Rimuove eventuali duplicati
+            return [...new Set(listaFoto)];
         }
 
         function renderizzaGaranziePerClienti() {
@@ -750,7 +764,7 @@
         function azzeraFiltriModale() {
             document.getElementById('selectFiltroDipendente').value = "";
             document.getElementById('inputFiltroData').value = "";
-            document.getElementById('inputFiltroCanti_ere').value = "";
+            document.getElementById('inputFiltroCantiere').value = "";
             filtraArchivioModale();
         }
 
