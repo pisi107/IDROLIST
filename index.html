@@ -86,9 +86,14 @@
         .modal-body { padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
         .close-modal-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
 
-        /* Stili per la Firma Digitale */
-        .signature-pad-container { border: 2px dashed var(--border); border-radius: 12px; background: #fff; position: relative; overflow: hidden; margin-top: 5px; }
-        canvas.signature-canvas { width: 100%; height: 160px; touch-action: none; display: block; background: #fff; cursor: crosshair; }
+        /* Schermata Intera per la Firma Digitale */
+        .fullscreen-signature-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0f172a; z-index: 9999; flex-direction: column; padding: 20px; }
+        .fullscreen-signature-overlay.open { display: flex; }
+        .signature-top-bar { display: flex; justify-content: space-between; align-items: center; color: white; margin-bottom: 15px; }
+        .signature-top-bar h2 { margin: 0; font-size: 1.2rem; font-weight: 800; color: var(--brand-orange); }
+        .signature-drawing-area { flex: 1; background: #fff; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
+        canvas.fullscreen-canvas { width: 100%; height: 100%; touch-action: none; display: block; background: #fff; cursor: crosshair; }
+        .signature-bottom-actions { display: flex; gap: 10px; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -240,16 +245,13 @@
                         <input type="file" id="inputBolleManuale" accept="image/*" multiple>
                     </div>
 
-                    <!-- SEZIONE FIRMA DEL CLIENTE -->
+                    <!-- SEZIONE FIRMA DEL CLIENTE A SCHERMO INTERO -->
                     <div style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px;">
                         <label>✍️ Firma del Cliente *</label>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                            <span id="labelStatoFirma" style="font-size: 0.75rem; color: var(--danger); font-weight: 700;">Nessuna firma inserita</span>
-                            <button type="button" class="action-btn btn-dark" style="width: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="pulisciFirmaCanvas()">Pulisci Firma</button>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span id="labelStatoFirma" style="font-size: 0.8rem; color: var(--danger); font-weight: 700;">Nessuna firma inserita</span>
                         </div>
-                        <div class="signature-pad-container">
-                            <canvas id="canvasFirmaCliente" class="signature-canvas"></canvas>
-                        </div>
+                        <button type="button" class="action-btn btn-dark" style="background: #334155; font-size: 0.9rem;" onclick="apriSchermataFirmaFullscreen()">🖊️ Apri Schermata Firma</button>
                     </div>
 
                     <button class="action-btn btn-orange" onclick="salvaFoglioLavoroUtente()" style="margin-top: 10px;">Salva Foglio di Lavoro</button>
@@ -398,6 +400,22 @@
         </div>
     </div>
 
+    <!-- OVERLAY SCHERMO INTERO PER FIRMA DIGITALE -->
+    <div class="fullscreen-signature-overlay" id="overlayFirmaFullscreen">
+        <div class="signature-top-bar">
+            <h2>Firma del Cliente</h2>
+            <button class="action-btn btn-danger" style="width: auto; padding: 6px 14px; font-size: 0.8rem;" onclick="chiudiSchermataFirmaFullscreen()">✕ Chiudi</button>
+        </div>
+        <div style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 8px; text-align: center;">Invita il cliente a firmare nello spazio sottostante</div>
+        <div class="signature-drawing-area" id="containerAreaCanvas">
+            <canvas id="canvasFirmaCliente" class="fullscreen-canvas"></canvas>
+        </div>
+        <div class="signature-bottom-actions">
+            <button type="button" class="action-btn btn-dark" style="background: #475569; flex: 1;" onclick="pulisciFirmaCanvas()">Pulisci Lavagna</button>
+            <button type="button" class="action-btn btn-green" style="flex: 1;" onclick="confermaFirmaFullscreen()">Conferma Firma ✓</button>
+        </div>
+    </div>
+
     <!-- MODALE FILTRI -->
     <div class="modal-overlay" id="modalFiltri">
         <div class="modal-card">
@@ -443,6 +461,7 @@
         
         // Gestione Canvas Firma
         let canvasFirma, ctxFirma, isDrawingFirma = false, hasFirma = false;
+        let firmaTempBase64 = null;
 
         window.onload = function() {
             let oggiStr = new Date().toISOString().split('T')[0];
@@ -457,17 +476,20 @@
             if (!canvasFirma) return;
             ctxFirma = canvasFirma.getContext('2d');
             
-            // Imposta risoluzione interna per nitidezza
             function ridimensionaCanvas() {
-                let rect = canvasFirma.getBoundingClientRect();
+                let container = document.getElementById('containerAreaCanvas');
+                if (!container) return;
+                let rect = container.getBoundingClientRect();
                 canvasFirma.width = rect.width * window.devicePixelRatio;
                 canvasFirma.height = rect.height * window.devicePixelRatio;
                 ctxFirma.scale(window.devicePixelRatio, window.devicePixelRatio);
-                ctxFirma.lineWidth = 2.5;
+                ctxFirma.lineWidth = 3;
                 ctxFirma.lineCap = 'round';
                 ctxFirma.strokeStyle = '#0f172a';
             }
-            ridimensionaCanvas();
+            
+            // Ritarda leggermente per consentire il render del DOM fullscreen
+            setTimeout(ridimensionaCanvas, 100);
             window.addEventListener('resize', ridimensionaCanvas);
 
             // Eventi Mouse & Touch
@@ -479,6 +501,41 @@
             canvasFirma.addEventListener('touchstart', (e) => { e.preventDefault(); avviaDisegnoFirma(e.touches[0]); });
             canvasFirma.addEventListener('touchmove', (e) => { e.preventDefault(); disegnaFirma(e.touches[0]); });
             canvasFirma.addEventListener('touchend', (e) => { e.preventDefault(); fermaDisegnoFirma(); });
+        }
+
+        function apriSchermataFirmaFullscreen() {
+            document.getElementById('overlayFirmaFullscreen').classList.add('open');
+            // Ricalcola le dimensioni della lavagna a schermo intero
+            setTimeout(() => {
+                let container = document.getElementById('containerAreaCanvas');
+                let rect = container.getBoundingClientRect();
+                canvasFirma.width = rect.width * window.devicePixelRatio;
+                canvasFirma.height = rect.height * window.devicePixelRatio;
+                ctxFirma.scale(window.devicePixelRatio, window.devicePixelRatio);
+                ctxFirma.lineWidth = 3;
+                ctxFirma.lineCap = 'round';
+                ctxFirma.strokeStyle = '#0f172a';
+                if (firmaTempBase64) {
+                    let img = new Image();
+                    img.src = firmaTempBase64;
+                    img.onload = () => ctxFirma.drawImage(img, 0, 0, rect.width, rect.height);
+                }
+            }, 150);
+        }
+
+        function chiudiSchermataFirmaFullscreen() {
+            document.getElementById('overlayFirmaFullscreen').classList.remove('open');
+        }
+
+        function confermaFirmaFullscreen() {
+            if (!hasFirma) {
+                alert("⚠️ Nessuna firma tracciata!");
+                return;
+            }
+            firmaTempBase64 = canvasFirma.toDataURL('image/jpeg', 0.85);
+            document.getElementById('labelStatoFirma').innerText = "✅ Firma registrata con successo";
+            document.getElementById('labelStatoFirma').style.color = "var(--success)";
+            chiudiSchermataFirmaFullscreen();
         }
 
         function ottieniPosizioneFirma(e) {
@@ -499,8 +556,6 @@
             ctxFirma.lineTo(pos.x, pos.y);
             ctxFirma.stroke();
             hasFirma = true;
-            document.getElementById('labelStatoFirma').innerText = "✅ Firma registrata";
-            document.getElementById('labelStatoFirma').style.color = "var(--success)";
         }
 
         function fermaDisegnoFirma() {
@@ -510,6 +565,7 @@
         function pulisciFirmaCanvas() {
             ctxFirma.clearRect(0, 0, canvasFirma.width, canvasFirma.height);
             hasFirma = false;
+            firmaTempBase64 = null;
             document.getElementById('labelStatoFirma').innerText = "Nessuna firma inserita";
             document.getElementById('labelStatoFirma').style.color = "var(--danger)";
         }
@@ -702,7 +758,7 @@
             tutti.forEach(item => {
                 let db = item.tipo === 'operaio' ? opPassDB : artPassDB;
                 let haPersonalizzato = !!db[item.nome];
-                let statoTxt = haPersonalizzato ? "Personalizzata" : "Predefinita";
+                let statoTxt = haPersonalizzata ? "Personalizzata" : "Predefinita";
                 let safeId = item.nome.replace(/\s+/g, '_');
 
                 container.innerHTML += `
@@ -830,13 +886,10 @@
             let note = document.getElementById('noteInterventoUtente').value.trim();
 
             if (cIdx === "" || stato === "" || !note) return alert("⚠️ Compila tutti i campi obbligatori!");
-            if (!hasFirma) return alert("⚠️ La firma del cliente è obbligatoria per completare il foglio di lavoro!");
+            if (!hasFirma || !firmaTempBase64) return alert("⚠️ La firma del cliente è obbligatoria! Clicca su 'Apri Schermata Firma' e fai firmare il cliente.");
 
             let inputBolle = document.getElementById('inputBolleManuale').files;
             let fotoBolleBase64 = await elaboraFileList(inputBolle);
-
-            // Cattura la firma del cliente come immagine base64 compressa
-            let firmaBase64 = canvasFirma.toDataURL('image/jpeg', 0.8);
 
             let partecipanti = [`${utenteCorrente} (${ore}h)`];
             document.querySelectorAll('input[name="collegaCheckbox"]:checked').forEach(cb => {
@@ -854,7 +907,7 @@
                 note, 
                 statoIntervento: stato, 
                 fotoBolle: fotoBolleBase64, 
-                firmaCliente: firmaBase64,
+                firmaCliente: firmaTempBase64,
                 fotoLavori: [] 
             });
             cantieriDB[cIdx].completato = (stato === "Terminato");
