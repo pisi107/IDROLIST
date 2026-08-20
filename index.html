@@ -609,7 +609,7 @@
 
                 container.innerHTML += `
                     <div class="collega-card-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
-                        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                        <div style="display: flex; justify-content: space-width; width: 100%; align-items: center;">
                             <div><b>${item.nome}</b> <span style="font-size: 0.75rem; color: var(--text-light);">(${item.tipo})</span></div>
                             <button class="action-btn btn-danger" style="padding: 4px 8px; font-size: 0.7rem;" onclick="resettaPasswordUtente('${item.nome}', '${item.tipo}')">Resetta</button>
                         </div>
@@ -712,7 +712,7 @@
             });
         }
 
-        // ================= INTEGRAZIONE GEMINI AI (PROMPT BLINDATO CON SCARTO) =================
+        // ================= INTEGRAZIONE GEMINI AI (AGGIORNATO E PERMISSIVO SULLE BOLLE) =================
         async function analizzaImmagineConGemini(base64Data) {
             if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("INSERISCI")) {
                 console.warn("⚠️ Chiave API Gemini non configurata.");
@@ -723,7 +723,8 @@
                 let cleanBase64 = base64Data.split(',')[1] || base64Data;
                 let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
                 
-                let promptTesto = "Agisci come un analista di immagini ultra-rigoroso per un sistema di archiviazione aziendale. Analizza l'immagine e rispondi ESCLUSIVAMENTE con una di queste tre parole, senza alcuna spiegazione: BOLLA (se l'immagine mostra chiaramente un documento di trasporto, bolla o fattura compilata), LAVORO (se l'immagine mostra un cantiere, un intervento tecnico o attività lavorativa reale), SCARTO (se l'immagine è un modulo vuoto o facsimile, un paesaggio, una foto personale, un oggetto casuale o qualsiasi cosa non rientri nelle prime due).";
+                // Prompt aggiornato: accetta qualsiasi documento, bolla, fattura, modulo aziendale o facsimile (anche in bianco o vuoto)
+                let promptTesto = "Agisci come un analista di immagini per un sistema aziendale idraulico. Analizza l'immagine e rispondi ESCLUSIVAMENTE con una di queste tre parole, senza alcuna spiegazione: BOLLA (se l'immagine mostra una bolla, una fattura, un documento di trasporto, un modulo aziendale, un facsimile o un foglio/modulo di lavoro anche se parzialmente vuoto o in bianco), LAVORO (se l'immagine mostra un cantiere, tubazioni, impianti o attività lavorativa reale), SCARTO (se l'immagine è un paesaggio, un selfie, una foto personale, un oggetto casuale o qualsiasi elemento che non c'entri nulla con il lavoro o i documenti d'ufficio).";
 
                 let response = await fetch(url, {
                     method: "POST",
@@ -761,12 +762,6 @@
             let bolleInput = document.getElementById('fotoBolleInput');
             let lavoriInput = document.getElementById('fotoLavoriInput');
 
-            // Creiamo un DataTransfer per ripulire l'input corrente da eventuali file scartati
-            let dtCorrente = new DataTransfer();
-            for (let f of inputElement.files) {
-                dtCorrente.items.add(f);
-            }
-
             for (let i = 0; i < files.length; i++) {
                 let fileCorrente = files[i];
                 let base64 = await comprimiEConvertiImmagine(fileCorrente);
@@ -775,9 +770,7 @@
                 console.log("Verdetto IA:", verdetto, "Caricato in:", tipoSelezionato);
 
                 if (verdetto === "SCARTO") {
-                    alert("🚫 L'IA ha scartato questa foto (ritenuta non valida, paesaggio o modulo vuoto). Rimossa dal caricamento!");
-                    // Rimuoviamo il file dai file selezionati
-                    // Creiamo un nuovo DataTransfer escludendo questo file
+                    alert("🚫 L'IA ha scartato questa foto (ritenuta non valida, paesaggio o elemento non pertinente). Rimossa dal caricamento!");
                     let dtTemp = new DataTransfer();
                     for (let f of inputElement.files) {
                         if (f !== fileCorrente) dtTemp.items.add(f);
