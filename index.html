@@ -68,6 +68,11 @@
         .collega-card-item select { width: 110px; padding: 8px; font-size: 0.9rem; }
         .container-colleghi-scroll { max-height: 220px; overflow-y: auto; background: #fff; padding: 8px; border: 1px solid var(--border); border-radius: 10px; }
 
+        /* Stili Righe Materiale Extra */
+        .materiale-extra-row { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+        .materiale-extra-row input[type="text"] { flex: 2; padding: 10px; font-size: 0.9rem; }
+        .materiale-extra-row input[type="number"] { flex: 1; padding: 10px; font-size: 0.9rem; }
+
         .riepilogo-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
         .riepilogo-table th, .riepilogo-table td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
         .riepilogo-table th { background: #1e293b; color: white; font-size: 0.75rem; text-transform: uppercase; }
@@ -243,6 +248,16 @@
                     <div>
                         <label>📄 Carica Foto DDT</label>
                         <input type="file" id="inputBolleManuale" accept="image/*" multiple>
+                    </div>
+
+                    <!-- SEZIONE RIGHE MATERIALE EXTRA / FUORI DDT -->
+                    <div style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <label style="margin: 0;">📦 Materiale Extra / Fuori DDT</label>
+                            <button type="button" class="action-btn btn-dark" style="width: auto; padding: 6px 10px; font-size: 0.75rem;" onclick="aggiungiRigaMaterialeExtra()">+ Aggiungi Materiale</button>
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 8px;">Aggiungi qui eventuali materiali prelevati o usati non presenti sui DDT.</div>
+                        <div id="containerMaterialiExtra" style="display: flex; flex-direction: column; gap: 6px;"></div>
                     </div>
 
                     <!-- SEZIONE FIRMA DEL CLIENTE A SCHERMO INTERO -->
@@ -488,11 +503,9 @@
                 ctxFirma.strokeStyle = '#0f172a';
             }
             
-            // Ritarda leggermente per consentire il render del DOM fullscreen
             setTimeout(ridimensionaCanvas, 100);
             window.addEventListener('resize', ridimensionaCanvas);
 
-            // Eventi Mouse & Touch
             canvasFirma.addEventListener('mousedown', avviaDisegnoFirma);
             canvasFirma.addEventListener('mousemove', disegnaFirma);
             canvasFirma.addEventListener('mouseup', fermaDisegnoFirma);
@@ -505,7 +518,6 @@
 
         function apriSchermataFirmaFullscreen() {
             document.getElementById('overlayFirmaFullscreen').classList.add('open');
-            // Ricalcola le dimensioni della lavagna a schermo intero
             setTimeout(() => {
                 let container = document.getElementById('containerAreaCanvas');
                 let rect = container.getBoundingClientRect();
@@ -568,6 +580,22 @@
             firmaTempBase64 = null;
             document.getElementById('labelStatoFirma').innerText = "Nessuna firma inserita";
             document.getElementById('labelStatoFirma').style.color = "var(--danger)";
+        }
+
+        // Funzioni per la gestione delle righe materiale extra
+        function aggiungiRigaMaterialeExtra() {
+            let container = document.getElementById('containerMaterialiExtra');
+            let rigaId = 'mat_row_' + Date.now() + Math.floor(Math.random() * 1000);
+            
+            let div = document.createElement('div');
+            div.className = 'materiale-extra-row';
+            div.id = rigaId;
+            div.innerHTML = `
+                <input type="text" placeholder="Descrizione materiale..." class="input-desc-mat">
+                <input type="number" placeholder="Qtà" class="input-qta-mat" value="1" min="1">
+                <button type="button" class="action-btn btn-danger" style="padding: 10px 12px;" onclick="document.getElementById('${rigaId}').remove()">✕</button>
+            `;
+            container.appendChild(div);
         }
 
         function mostraVista(vista) {
@@ -699,6 +727,7 @@
                 document.getElementById('viewFormUtente').classList.add('active');
                 popolaCantieriUtente();
                 popolaColleghiUtente();
+                document.getElementById('containerMaterialiExtra').innerHTML = '';
                 pulisciFirmaCanvas();
             } else if (tipoSchermata === 'fotografie') {
                 document.getElementById('viewFotoImpianti').classList.add('active');
@@ -891,6 +920,16 @@
             let inputBolle = document.getElementById('inputBolleManuale').files;
             let fotoBolleBase64 = await elaboraFileList(inputBolle);
 
+            // Raccogli materiale extra
+            let materialiExtraList = [];
+            document.querySelectorAll('.materiale-extra-row').forEach(row => {
+                let desc = row.querySelector('.input-desc-mat').value.trim();
+                let qta = row.querySelector('.input-qta-mat').value.trim();
+                if (desc) {
+                    materialiExtraList.push(`${desc} (Qtà: ${qta || 1})`);
+                }
+            });
+
             let partecipanti = [`${utenteCorrente} (${ore}h)`];
             document.querySelectorAll('input[name="collegaCheckbox"]:checked').forEach(cb => {
                 let oCollega = document.getElementById(`ore_collega_${cb.value.replace(/\s+/g, '_')}`).value;
@@ -905,6 +944,7 @@
                 tipo, 
                 operai: partecipanti.join(', '), 
                 note, 
+                materialiExtra: materialiExtraList,
                 statoIntervento: stato, 
                 fotoBolle: fotoBolleBase64, 
                 firmaCliente: firmaTempBase64,
@@ -913,10 +953,11 @@
             cantieriDB[cIdx].completato = (stato === "Terminato");
 
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            alert("✅ Foglio di lavoro e firma salvati con successo!");
+            alert("✅ Foglio di lavoro, materiale extra e firma salvati con successo!");
             
             document.getElementById('noteInterventoUtente').value = '';
             document.getElementById('inputBolleManuale').value = '';
+            document.getElementById('containerMaterialiExtra').innerHTML = '';
             pulisciFirmaCanvas();
             tornaAlMenuUtente();
         }
@@ -1060,7 +1101,7 @@
 
             let db = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             if (!db[idx].storico) db[idx].storico = [];
-            db[idx].storico.push({ data, tipo: "Ufficio", operai: ops.join(', '), note, statoIntervento: "In Corso", fotoBolle: [], fotoLavori: [] });
+            db[idx].storico.push({ data, tipo: "Ufficio", operai: ops.join(', '), note, materialiExtra: [], statoIntervento: "In Corso", fotoBolle: [], fotoLavori: [] });
             localStorage.setItem('idra_cantieri_db', JSON.stringify(db));
             alert("✅ Registrato!");
             aggiornaVistaUfficio();
@@ -1084,12 +1125,14 @@
                     if (c.storico) {
                         c.storico.forEach(s => {
                             let fb = s.fotoBolle && s.fotoBolle.length > 0 ? s.fotoBolle.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('') : '';
+                            let matHtml = s.materialiExtra && s.materialiExtra.length > 0 ? `<div style="margin-top:4px; font-size:0.75rem; color:#b45309;"><b>📦 Materiale Extra / Fuori DDT:</b> ${s.materialiExtra.join(', ')}</div>` : '';
                             let firmaHtml = s.firmaCliente ? `<div style="margin-top:6px;"><span style="font-weight:700; color:var(--brand-dark); font-size:0.75rem; text-transform:uppercase;">✍️ Firma Cliente:</span><br><img src="${s.firmaCliente}" class="foto-thumb" style="width:120px; height:50px; object-fit:contain; background:#fff;" onclick="apriZoomFoto('${s.firmaCliente}')"></div>` : '';
                             
                             stHtml += `
                                 <div style="background:#f1f5f9; padding:10px; border-radius:8px; margin-top:8px; font-size:0.8rem; border: 1px solid var(--border);">
                                     <div><b>📅 ${s.data}</b> (${s.tipo}) - ${s.operai}</div>
                                     <div style="margin-top:4px;"><i>${s.note.replace(/\n/g, '<br>')}</i></div>
+                                    ${matHtml}
                                     ${fb ? `<div style="margin-top:6px; font-weight:700; color:var(--brand-dark); font-size:0.75rem; text-transform:uppercase;">📄 Foto DDT:</div><div class="foto-thumb-container">${fb}</div>` : ''}
                                     ${firmaHtml}
                                 </div>`;
