@@ -215,8 +215,8 @@
                     <div><label>Le tue Ore Lavorate *</label><select id="mieOreLavorate"><option value="8" selected>8 Ore</option><option value="7">7 Ore</option><option value="6">6 Ore</option><option value="5">5 Ore</option><option value="4">4 Ore</option><option value="3">3 Ore</option><option value="2">2 Ore</option><option value="1">1 Ora</option></select></div>
                     <div><label>Colleghi presenti e ore dedicate</label><div class="container-colleghi-scroll" id="listaColleghiUtente"></div></div>
                     <div><label>Note / Lavori Eseguiti *</label><textarea id="noteInterventoUtente" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea></div>
-                    <div><label>📷 Foto Bolle / DDT <span id="statoAiBolle" style="font-size:0.7rem; color:var(--brand-orange);"></span></label><input type="file" id="fotoBolleInput" accept="image/*" multiple onchange="gestisciCaricamentoFotoAI(this, 'bolle')"></div>
-                    <div><label>📷 Foto Lavori <span id="statoAiLavori" style="font-size:0.7rem; color:var(--brand-orange);"></span></label><input type="file" id="fotoLavoriInput" accept="image/*" multiple onchange="gestisciCaricamentoFotoAI(this, 'lavori')"></div>
+                    <div><label>📷 Foto Bolle / DDT</label><input type="file" id="fotoBolleInput" accept="image/*" multiple></div>
+                    <div><label>📷 Foto Lavori</label><input type="file" id="fotoLavoriInput" accept="image/*" multiple></div>
 
                     <button class="action-btn btn-orange" onclick="salvaFoglioLavoroUtente()">Salva Foglio di Lavoro</button>
                 </div>
@@ -594,90 +594,6 @@
             });
         }
 
-        async function analizzaImmagineConGemini(base64Data) {
-            if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("INSERISCI")) return "LAVORO";
-            try {
-                let cleanBase64 = base64Data.split(',')[1] || base64Data;
-                let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-                
-                let response = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [
-                                { text: "Sei un assistente per un'azienda idraulica. Analizza questa immagine e classificala rigorosamente in una di queste 3 categorie:\n\n" +
-                                        "1. BOLLA: Scegli questa se l'immagine contiene un documento cartaceo, un DDT (Documento di Trasporto), una fattura, un buono di consegna, una ricevuta fiscale, un foglio scritto o stampato con tabelle, codici o firme.\n" +
-                                        "2. LAVORO: Scegli questa se l'immagine mostra componenti idraulici, tubi, raccordi, caldaie, termosifoni, bagni, cantieri edili, operai o attività lavorative.\n" +
-                                        "3. SCARTO: Scegli questa solo se l'immagine è completamente nera, sfocata in modo illeggibile o totalmente estranea al lavoro.\n\n" +
-                                        "Rispondi unicamente con una sola parola: BOLLA, LAVORO o SCARTO." },
-                                { inline_data: { mime_type: "image/jpeg", data: cleanBase64 } }
-                            ]
-                        }]
-                    })
-                });
-                let data = await response.json();
-                if (data.candidates && data.candidates[0].content) {
-                    let risposta = data.candidates[0].content.parts[0].text.trim().toUpperCase();
-                    if (risposta.includes("BOLLA")) return "BOLLA";
-                    if (risposta.includes("LAVORO")) return "LAVORO";
-                    if (risposta.includes("SCARTO")) return "SCARTO";
-                }
-            } catch (err) {
-                console.error("Errore Gemini:", err);
-            }
-            return "LAVORO";
-        }
-
-        async function gestisciCaricamentoFotoAI(inputElement, tipoSelezionato) {
-            let files = inputElement.files;
-            if (!files || files.length === 0) return;
-
-            let spanStato = tipoSelezionato === 'bolle' ? document.getElementById('statoAiBolle') : document.getElementById('statoAiLavori');
-            spanStato.innerText = "🔄 L'IA sta analizzando...";
-
-            let bolleInput = document.getElementById('fotoBolleInput');
-            let lavoriInput = document.getElementById('fotoLavoriInput');
-            let fileListValidi = [];
-            let spostaEffettuato = false;
-            
-            for (let i = 0; i < files.length; i++) {
-                let fileCorrente = files[i];
-                let base64 = await comprimiEConvertiImmagine(fileCorrente);
-                let verdetto = await analizzaImmagineConGemini(base64);
-
-                if (tipoSelezionato === 'bolle' && verdetto === 'LAVORO') {
-                    aggiungiFileAInput(fileCorrente, lavoriInput);
-                    spostaEffettuato = true;
-                } else if (tipoSelezionato === 'lavori' && verdetto === 'BOLLA') {
-                    aggiungiFileAInput(fileCorrente, bolleInput);
-                    spostaEffettuato = true;
-                } else if (verdetto === "SCARTO") {
-                    alert("🚫 Questa foto è stata scartata perché non valida.");
-                } else {
-                    fileListValidi.push(fileCorrente);
-                }
-            }
-
-            let dtNuovo = new DataTransfer();
-            fileListValidi.forEach(f => dtNuovo.items.add(f));
-            inputElement.files = dtNuovo.files;
-            
-            if (spostaEffettuato) {
-                spanStato.innerText = "🔄 Foto riposizionata dall'IA!";
-            } else {
-                spanStato.innerText = "✅ Verificato";
-            }
-            setTimeout(() => spanStato.innerText = "", 4000);
-        }
-
-        function aggiungiFileAInput(fileDaAggiungere, inputDestinazione) {
-            let dt = new DataTransfer();
-            for (let f of inputDestinazione.files) dt.items.add(f);
-            dt.items.add(fileDaAggiungere);
-            inputDestinazione.files = dt.files;
-        }
-
         async function elaboraListaFile(fileList) {
             let arr = [];
             for (let i = 0; i < fileList.length; i++) {
@@ -917,7 +833,7 @@
                     }
                 });
             }
-            if(trovati === 0) tb.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--success);">Tutti in regola! 🎉</td></tr>`;
+            if(trovati === 0) tb.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var::success;">Tutti in regola! 🎉</td></tr>`;
         }
     </script>
 </body>
