@@ -215,8 +215,20 @@
                     <div><label>Le tue Ore Lavorate *</label><select id="mieOreLavorate"><option value="8" selected>8 Ore</option><option value="7">7 Ore</option><option value="6">6 Ore</option><option value="5">5 Ore</option><option value="4">4 Ore</option><option value="3">3 Ore</option><option value="2">2 Ore</option><option value="1">1 Ora</option></select></div>
                     <div><label>Colleghi presenti e ore dedicate</label><div class="container-colleghi-scroll" id="listaColleghiUtente"></div></div>
                     <div><label>Note / Lavori Eseguiti *</label><textarea id="noteInterventoUtente" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea></div>
-                    <div><label>📷 Foto Bolle <span id="statoAiBolle" style="font-size:0.7rem; color:var(--brand-orange);"></span></label><input type="file" id="fotoBolleInput" accept="image/*" multiple onchange="gestisciCaricamentoFotoAI(this, 'bolle')"></div>
-                    <div><label>📷 Foto Lavori <span id="statoAiLavori" style="font-size:0.7rem; color:var(--brand-orange);"></span></label><input type="file" id="fotoLavoriInput" accept="image/*" multiple onchange="gestisciCaricamentoFotoAI(this, 'lavori')"></div>
+                    
+                    <!-- FOTO BOLLE CON MULTIPLO E ACCUMULO -->
+                    <div>
+                        <label>📷 Foto Bolle <span id="statoAiBolle" style="font-size:0.7rem; color:var(--brand-orange);"></span></label>
+                        <input type="file" id="fotoBolleInput" accept="image/*" multiple onchange="gestisciCaricamentoFotoAI(this, 'bolle')">
+                        <div id="anteprimaBolle" style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;"></div>
+                    </div>
+
+                    <!-- FOTO LAVORI CON MULTIPLO E ACCUMULO -->
+                    <div>
+                        <label>📷 Foto Lavori <span id="statoAiLavori" style="font-size:0.7rem; color:var(--brand-orange);"></span></label>
+                        <input type="file" id="fotoLavoriInput" accept="image/*" multiple onchange="gestisciCaricamentoFotoAI(this, 'lavori')">
+                        <div id="anteprimaLavori" style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;"></div>
+                    </div>
 
                     <button class="action-btn btn-orange" onclick="salvaFoglioLavoroUtente()">Salva Foglio di Lavoro</button>
                 </div>
@@ -343,6 +355,10 @@
         let utenteCorrente = "";
         let tipoUtenteCorrente = ""; 
         let cartellaCorrente = 'da_fare';
+        
+        // Array globali per accumulare le foto selezionate progressivamente
+        let fotoBolleRaccolte = [];
+        let fotoLavoriRaccolte = [];
 
         window.onload = function() {
             let oggiStr = new Date().toISOString().split('T')[0];
@@ -461,6 +477,12 @@
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById('viewFormUtente').classList.add('active');
             document.getElementById('sottotitoloHeader').innerText = tipo === 'operaio' ? "Portale Operai" : "Portale Artigiani";
+            
+            // Resetta le foto all'avvio del modulo
+            fotoBolleRaccolte = [];
+            fotoLavoriRaccolte = [];
+            aggiornaAnteprimaFoto();
+
             popolaCantieriUtente();
             popolaColleghiUtente();
         }
@@ -631,10 +653,6 @@
             let spanStato = tipoSelezionato === 'bolle' ? document.getElementById('statoAiBolle') : document.getElementById('statoAiLavori');
             spanStato.innerText = "🔄 Controllo IA...";
 
-            let bolleInput = document.getElementById('fotoBolleInput');
-            let lavoriInput = document.getElementById('fotoLavoriInput');
-            let fileListValidi = [];
-            
             for (let i = 0; i < files.length; i++) {
                 let fileCorrente = files[i];
                 let base64 = await comprimiEConvertiImmagine(fileCorrente);
@@ -644,37 +662,53 @@
                     alert("🚫 Foto scartata dall'IA perché non pertinente.");
                 } else if (tipoSelezionato === 'lavori' && verdetto === "BOLLA") {
                     alert("🤖 Rilevata bolla: spostata in FOTO BOLLE.");
-                    aggiungiFileAInput(fileCorrente, bolleInput);
+                    fotoBolleRaccolte.push(base64);
                 } else if (tipoSelezionato === 'bolle' && verdetto === "LAVORO") {
                     alert("🤖 Rilevato lavoro: spostata in FOTO LAVORI.");
-                    aggiungiFileAInput(fileCorrente, lavoriInput);
+                    fotoLavoriRaccolte.push(base64);
                 } else {
-                    fileListValidi.push(fileCorrente);
+                    if (tipoSelezionato === 'bolle') {
+                        fotoBolleRaccolte.push(base64);
+                    } else {
+                        fotoLavoriRaccolte.push(base64);
+                    }
                 }
             }
 
-            let dtNuovo = new DataTransfer();
-            fileListValidi.forEach(f => dtNuovo.items.add(f));
-            inputElement.files = dtNuovo.files;
-            
+            // Pulisce l'input file per permettere di ricaricare gli stessi file se necessario
+            inputElement.value = '';
             spanStato.innerText = "✅ Verificato";
             setTimeout(() => spanStato.innerText = "", 3000);
+
+            aggiornaAnteprimaFoto();
         }
 
-        function aggiungiFileAInput(fileDaAggiungere, inputDestinazione) {
-            let dt = new DataTransfer();
-            for (let f of inputDestinazione.files) dt.items.add(f);
-            dt.items.add(fileDaAggiungere);
-            inputDestinazione.files = dt.files;
+        function aggiornaAnteprimaFoto() {
+            let contBolle = document.getElementById('anteprimaBolle');
+            let contLavori = document.getElementById('anteprimaLavori');
+            
+            contBolle.innerHTML = fotoBolleRaccolte.map((img, idx) => `
+                <div style="position:relative;">
+                    <img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">
+                    <button type="button" onclick="rimuoviFotoAccumulata('bolle', ${idx})" style="position:absolute; top:-5px; right:-5px; background:red; color:white; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; cursor:pointer;">×</button>
+                </div>
+            `).join('');
+
+            contLavori.innerHTML = fotoLavoriRaccolte.map((img, idx) => `
+                <div style="position:relative;">
+                    <img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">
+                    <button type="button" onclick="rimuoviFotoAccumulata('lavori', ${idx})" style="position:absolute; top:-5px; right:-5px; background:red; color:white; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; cursor:pointer;">×</button>
+                </div>
+            `).join('');
         }
 
-        async function elaboraListaFile(fileList) {
-            let arr = [];
-            for (let i = 0; i < fileList.length; i++) {
-                let b64 = await comprimiEConvertiImmagine(fileList[i]);
-                if (b64) arr.push(b64);
+        function rimuoviFotoAccumulata(tipo, idx) {
+            if (tipo === 'bolle') {
+                fotoBolleRaccolte.splice(idx, 1);
+            } else {
+                fotoLavoriRaccolte.splice(idx, 1);
             }
-            return arr;
+            aggiornaAnteprimaFoto();
         }
 
         async function salvaFoglioLavoroUtente() {
@@ -693,20 +727,28 @@
                 participanti.push(`${cb.value} (${oCollega}h)`);
             });
 
-            let bolle = await elaboraListaFile(document.getElementById('fotoBolleInput').files);
-            let lavori = await elaboraListaFile(document.getElementById('fotoLavoriInput').files);
-
             let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
             if (!cantieriDB[cIdx].storico) cantieriDB[cIdx].storico = [];
 
-            cantieriDB[cIdx].storico.push({ data, tipo, operai: partecipanti.join(', '), note, statoIntervento: stato, fotoBolle: bolle, fotoLavori: lavori });
+            cantieriDB[cIdx].storico.push({ 
+                data, 
+                tipo, 
+                operai: partecipanti.join(', '), 
+                note, 
+                statoIntervento: stato, 
+                fotoBolle: [...fotoBolleRaccolte], 
+                fotoLavori: [...fotoLavoriRaccolte] 
+            });
             cantieriDB[cIdx].completato = (stato === "Terminato");
 
             localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
             alert("✅ Salvato con successo!");
+            
+            // Reset campi e foto
             document.getElementById('noteInterventoUtente').value = '';
-            document.getElementById('fotoBolleInput').value = '';
-            document.getElementById('fotoLavoriInput').value = '';
+            fotoBolleRaccolte = [];
+            fotoLavoriRaccolte = [];
+            aggiornaAnteprimaFoto();
             popolaCantieriUtente();
         }
 
