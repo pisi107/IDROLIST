@@ -232,6 +232,20 @@
                         <button id="btnTabTerminati" class="tab-btn" onclick="cambiaCartella('terminati')">Terminati</button>
                     </div>
                 </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:16px 0;">
+                    <div>
+                        <label style="font-weight:700;">Cliente</label>
+                        <select id="filtroClienteCantieriUfficio" onchange="selezionaClienteCantieriUfficio()" style="width:100%; padding:10px; border:1px solid #d1d5db; border-radius:8px;">
+                            <option value="">Seleziona un cliente...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-weight:700;">Cantiere</label>
+                        <select id="filtroCantiereCantieriUfficio" onchange="selezionaCantiereCantieriUfficio()" disabled style="width:100%; padding:10px; border:1px solid #d1d5db; border-radius:8px;">
+                            <option value="">Seleziona prima un cliente...</option>
+                        </select>
+                    </div>
+                </div>
                 <div id="listaCantieriUfficio" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;"></div>
             </div>
         </div>
@@ -779,68 +793,123 @@
             let cantieriDB = ottieniCantieriAggiornati();
             let containerLista = document.getElementById('listaCantieriUfficio');
             if(!containerLista) return;
-            containerLista.innerHTML = '';
+
             popolaSelectCantieriUfficio();
 
+            let clienteSelezionato = document.getElementById('filtroClienteCantieriUfficio')?.value || '';
+            let cantiereSelezionato = document.getElementById('filtroCantiereCantieriUfficio')?.value || '';
+
+            containerLista.innerHTML = '';
             let count = 0;
+
             cantieriDB.forEach((c, idx) => {
                 let isCompletato = c.completato === true;
-                if ((cartellaCorrente === 'da_fare' && !isCompletato) || (cartellaCorrente === 'terminati' && isCompletato)) {
-                    count++;
-                    let storicoHtml = '';
-                    if (c.storico && c.storico.length > 0) {
-                        c.storico.forEach((s) => {
-                            let fotoArr = estraiFotoDaIntervento(s);
-                            let fHtml = fotoArr.length > 0 ? `<div class="foto-thumb-container">` + fotoArr.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('') + `</div>` : '';
-                            storicoHtml += `
-                                <div style="font-size: 0.8rem; background: #f8fafc; padding: 8px; border-radius: 6px; margin-top: 4px;">
-                                    <div><b>${s.data || 'N/D'}</b> - ${ottieniTestoOperaiEOre(s)}</div>
-                                    <div><i>${s.note || s.descrizione || s.lavoriEseguiti || ''}</i></div>
-                                    ${fHtml}
-                                </div>
-                            `;
-                        });
-                    } else { storicoHtml = '<div style="font-size: 0.75rem; color: var(--text-light);">Nessun intervento.</div>'; }
 
-                    containerLista.innerHTML += `
-                        <div class="cantiere-card-desktop ${isCompletato ? 'terminato' : 'aperto'}">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                                <div>
-                                    <div style="font-weight: 800; font-size: 0.95rem; color: var(--brand-dark);">${c.cliente}</div>
-                                    <div style="font-size: 0.8rem; color: var(--text-light);">${c.indirizzo}</div>
-                                </div>
-                                <span class="badge ${isCompletato ? 'badge-fatto' : 'badge-da-fare'}">${isCompletato ? 'Terminato' : 'Aperto'}</span>
-                            </div>
-                            <div>
-                                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-light); text-transform: uppercase;">Storico:</div>
-                                ${storicoHtml}
-                            </div>
-                            <div style="display: flex; gap: 8px; margin-top: auto;">
-                                <button class="action-btn btn-orange" style="padding: 6px 10px; font-size: 0.75rem;" onclick="cambiaStatoCantiere(${idx})">${isCompletato ? 'Riapri' : 'Concludi'}</button>
-                                <button class="action-btn btn-danger" onclick="eliminaCantiere(${idx})">Elimina</button>
-                            </div>
-                        </div>
-                    `;
+                if ((cartellaCorrente === 'da_fare' && isCompletato) ||
+                    (cartellaCorrente === 'terminati' && !isCompletato)) return;
+
+                if (clienteSelezionato && String(c.cliente || '') !== clienteSelezionato) return;
+                if (cantiereSelezionato && String(idx) !== cantiereSelezionato) return;
+
+                count++;
+                let storicoHtml = '';
+                if (c.storico && c.storico.length > 0) {
+                    c.storico.forEach((s) => {
+                        let fotoArr = estraiFotoDaIntervento(s);
+                        let fHtml = fotoArr.length > 0 ? `<div class="foto-thumb-container">` + fotoArr.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('') + `</div>` : '';
+                        storicoHtml += `
+                            <div style="font-size: 0.8rem; background: #f8fafc; padding: 8px; border-radius: 6px; margin-top: 4px;">
+                                <div><b>${s.data || 'N/D'}</b> - ${ottieniTestoOperaiEOre(s)}</div>
+                                <div><i>${s.note || s.descrizione || s.lavoriEseguiti || ''}</i></div>
+                                ${fHtml}
+                            </div>`;
+                    });
+                } else {
+                    storicoHtml = '<div style="font-size: 0.75rem; color: var(--text-light);">Nessun intervento.</div>';
                 }
+
+                containerLista.innerHTML += `
+                    <div class="cantiere-card-desktop ${isCompletato ? 'terminato' : 'aperto'}">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <div>
+                                <div style="font-weight:800; font-size:0.95rem; color:var(--brand-dark);">${c.cliente || ''}</div>
+                                <div style="font-weight:700; font-size:0.9rem;">🏗️ ${c.cantiere || c.nomeCantiere || 'Cantiere'}</div>
+                                <div style="font-size:0.8rem; color:var(--text-light);">${c.indirizzo || ''}${c.citta ? ' - ' + c.citta : ''}</div>
+                            </div>
+                            <span class="badge ${isCompletato ? 'badge-fatto' : 'badge-da-fare'}">${isCompletato ? 'Terminato' : 'Aperto'}</span>
+                        </div>
+                        <div>
+                            <div style="font-size:0.75rem; font-weight:700; color:var(--text-light); text-transform:uppercase;">Storico:</div>
+                            ${storicoHtml}
+                        </div>
+                        <div style="display:flex; gap:8px; margin-top:auto;">
+                            <button class="action-btn btn-orange" style="padding:6px 10px; font-size:0.75rem;" onclick="cambiaStatoCantiere(${idx})">${isCompletato ? 'Riapri' : 'Concludi'}</button>
+                            <button class="action-btn btn-danger" onclick="eliminaCantiere(${idx})">Elimina</button>
+                        </div>
+                    </div>`;
             });
-            if (count === 0) containerLista.innerHTML = `<div style="grid-column: span 2; text-align: center; color: var(--text-light); padding: 20px;">Nessun cantiere in questa cartella.</div>`;
+
+            if (count === 0) containerLista.innerHTML = `<div style="grid-column:span 2; text-align:center; color:var(--text-light); padding:20px;">Nessun cantiere per la selezione corrente.</div>`;
             aggiornaTabellaRiepilogo(cantieriDB);
         }
 
         function popolaSelectCantieriUfficio() {
-            let selectCantiere = document.getElementById('selectCantiereUfficio');
-            let query = document.getElementById('inputRicercaCantiereUfficio').value.toLowerCase().trim();
-            if(!selectCantiere) return;
-            selectCantiere.innerHTML = '';
+            let selectCliente = document.getElementById('filtroClienteCantieriUfficio');
+            let selectCantiere = document.getElementById('filtroCantiereCantieriUfficio');
+            if(!selectCliente || !selectCantiere) return;
+
             let cantieriDB = ottieniCantieriAggiornati();
-            let count = 0;
-            cantieriDB.forEach((c, idx) => {
-                if (!c.completato && (`${c.cliente} - ${c.indirizzo}`.toLowerCase().includes(query))) {
-                    selectCantiere.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo}</option>`;
-                    count++;
-                }
-            });
-            if (count === 0) selectCantiere.innerHTML = '<option value="">Nessun cantiere trovato</option>';
+            let clientePrecedente = selectCliente.value;
+            let cantierePrecedente = selectCantiere.value;
+
+            let clienti = [...new Set(cantieriDB.map(c => String(c.cliente || '').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+
+            selectCliente.innerHTML = '<option value="">Seleziona un cliente...</option>' +
+                clienti.map(cl => `<option value="${cl.replace(/"/g,'&quot;')}">${cl}</option>`).join('');
+
+            if (clienti.includes(clientePrecedente)) {
+                selectCliente.value = clientePrecedente;
+                popolaSecondaTendinaCantieriUfficio(clientePrecedente, cantierePrecedente);
+            } else {
+                selectCantiere.innerHTML = '<option value="">Seleziona prima un cliente...</option>';
+                selectCantiere.disabled = true;
+            }
+        }
+
+        function selezionaClienteCantieriUfficio() {
+            let cliente = document.getElementById('filtroClienteCantieriUfficio')?.value || '';
+            popolaSecondaTendinaCantieriUfficio(cliente, '');
+            aggiornaVistaUfficio();
+        }
+
+        function popolaSecondaTendinaCantieriUfficio(cliente, valorePrecedente) {
+            let selectCantiere = document.getElementById('filtroCantiereCantieriUfficio');
+            if(!selectCantiere) return;
+
+            if(!cliente) {
+                selectCantiere.innerHTML = '<option value="">Seleziona prima un cliente...</option>';
+                selectCantiere.disabled = true;
+                return;
+            }
+
+            let cantieriDB = ottieniCantieriAggiornati();
+            let opzioni = cantieriDB
+                .map((c,idx)=>({c,idx}))
+                .filter(x => String(x.c.cliente || '') === cliente && !x.c.completato);
+
+            selectCantiere.innerHTML = '<option value="">Tutti i cantieri del cliente</option>' +
+                opzioni.map(x => `<option value="${x.idx}">${x.c.cantiere || x.c.nomeCantiere || 'Cantiere'}${x.c.citta ? ' - ' + x.c.citta : ''}</option>`).join('');
+
+            selectCantiere.disabled = false;
+            if (opzioni.some(x => String(x.idx) === String(valorePrecedente))) {
+                selectCantiere.value = valorePrecedente;
+            } else {
+                selectCantiere.value = '';
+            }
+        }
+
+        function selezionaCantiereCantieriUfficio() {
+            aggiornaVistaUfficio();
         }
         function filtraSelectCantieriUfficio() { popolaSelectCantieriUfficio(); }
 
