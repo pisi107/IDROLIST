@@ -598,7 +598,6 @@
             });
         }
 
-        // --- INTELLIGENZA ARTIFICIALE AUTONOMA SULLE FOTO CARICATE ---
         async function analizzaImmaginiInAutonomia(fileList) {
             let noteAggiuntive = [];
             let immaginiBase64 = [];
@@ -609,7 +608,6 @@
                 let base64Data = base64Full.split(',')[1];
 
                 try {
-                    // Prompt strutturato per far decidere in autonomia all'IA se l'immagine è un DDT/Bolla o meno
                     let promptAutonomo = "Sei un assistente tecnico per Idrotech Varese. Guarda questa immagine.\n" +
                         "1. Stabilisci se si tratta di un DDT, bolla di consegna, fattura o documento di trasporto.\n" +
                         "2. Se NON è un DDT (es. è una foto di un impianto, di un cantiere o di un lavoro eseguito), rispondi ESATTAMENTE con la parola: 'FOTOLAVORO'.\n" +
@@ -665,12 +663,10 @@
                     participanti.push(`${cb.value} (${oCollega}h)`);
                 });
 
-                // Analisi autonoma delle immagini caricate nell'unico campo
                 let fileInput = document.getElementById('fotoGenericheInput');
                 let risultatoAI = await analizzaImmaginiInAutonomia(fileInput.files);
 
-                // Se l'IA ha riconosciuto dei DDT, li unisce autonomamente alle note scritte dall'utente
-                let note Finali = note;
+                let noteFinali = note;
                 if (risultatoAI.noteAggiuntive.length > 0) {
                     noteFinali += "\n\n[DDT Rilevati dall'IA]:\n" + risultatoAI.noteAggiuntive.join('\n');
                 }
@@ -684,7 +680,7 @@
                     operai: partecipanti.join(', '), 
                     note: noteFinali, 
                     statoIntervento: stato, 
-                    fotoBolle: [], // Unificato nel flusso generale o salvato nelle foto lavori
+                    fotoBolle: [], 
                     fotoLavori: risultatoAI.immaginiBase64 
                 });
                 cantieriDB[cIdx].completato = (stato === "Terminato");
@@ -897,7 +893,7 @@
                     }
                 });
             }
-            if(trovati === 0) tb.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var::success;">Tutti in regola! 🎉</td></tr>`;
+            if(trovati === 0) tb.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--success);">Tutti in regola! 🎉</td></tr>`;
         }
     </script>
 </body>
