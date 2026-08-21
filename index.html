@@ -1,1336 +1,1877 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Idrotech Varese - Gestione Totale</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --brand-orange: #f28c1e;
-            --brand-dark: #1e293b;
-            --success: #16a34a;
-            --danger: #dc2626;
-            --bg: #0b0f19;
-            --card-bg: #ffffff;
-            --text: #0f172a;
-            --text-light: #64748b;
-            --border: #cbd5e1;
-        }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; justify-content: center; min-height: 100vh; }
-        
-        .app-container { width: 100%; max-width: 500px; background: var(--card-bg); min-height: 100vh; display: flex; flex-direction: column; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
-        
-        .header-app { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 25px 20px 20px 20px; text-align: center; border-bottom: 4px solid var(--brand-orange); }
-        .header-app h1 { font-size: 1.5rem; font-weight: 800; margin: 0; }
-        .header-app h1 span { color: var(--brand-orange); }
-        .header-app p { font-size: 0.75rem; color: #94a3b8; margin: 5px 0 0 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        .content-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 16px; }
-        .view-section { display: none; flex-direction: column; gap: 16px; }
-        .view-section.active { display: flex; }
+<title>Foglio di Lavoro - Operai</title>
 
-        label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-        input, select, textarea { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; background-color: #f8fafc; color: var(--text); font-family: 'Inter', sans-serif; outline: none; }
-        input[type="date"] { appearance: none; -webkit-appearance: none; }
-        input[type="file"] { padding: 10px; font-size: 0.85rem; background: #fff; }
+<style>
 
-        .action-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
-        .btn-green { background-color: var(--success); color: white; }
-        .btn-orange { background: linear-gradient(135deg, #f28c1e, #d97712); color: white; }
-        .btn-danger { background-color: var(--danger); color: white; padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; box-shadow: none; width: auto; }
-        .btn-dark { background: var(--brand-dark); color: white; }
-        .btn-artigiani { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; }
-        .btn-blue-light { background: linear-gradient(135deg, #0284c7, #0284c7); color: white; }
-        .btn-purple { background: linear-gradient(135deg, #7c3aed, #6d28d9); color: white; }
+* {
+    box-sizing: border-box;
+}
 
-        .card-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-        
-        .accordion-header { background: #1e293b; color: white; padding: 16px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .accordion-content { display: none; flex-direction: column; gap: 12px; margin-top: 10px; padding-top: 5px; }
-        .accordion-content.open { display: flex; }
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f6f8;
+    color: #1f2937;
+}
 
-        .cantiere-card { background: #fff; border: 2px solid var(--border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
-        .cantiere-card.terminato { border-color: var(--success); background: #f0fdf4; }
-        
-        .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
-        .badge-alert { background: #fee2e2; color: #b91c1c; }
+/* HEADER */
 
-        .tabs-container { display: flex; gap: 8px; margin-bottom: 8px; }
-        .tab-btn { flex: 1; padding: 12px; border: 2px solid var(--border); background: #f1f5f9; font-weight: 700; font-size: 0.85rem; border-radius: 10px; cursor: pointer; color: var(--text-light); text-align: center; }
-        .tab-btn.active-da-fare { background: #fef3c7; border-color: #f59e0b; color: #b45309; }
-        .tab-btn.active-terminati { background: #dcfce7; border-color: var(--success); color: #15803d; }
+.header {
+    background: #111827;
+    color: white;
+    padding: 18px 25px;
 
-        .collega-card-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-        .collega-card-item label { margin: 0; font-size: 0.9rem; color: var(--text); text-transform: none; display: flex; align-items: center; gap: 8px; cursor: pointer; }
-        .collega-card-item input[type="checkbox"] { width: 18px; height: 18px; }
-        .collega-card-item select { width: 110px; padding: 8px; font-size: 0.9rem; }
-        .container-colleghi-scroll { max-height: 220px; overflow-y: auto; background: #fff; padding: 8px; border: 1px solid var(--border); border-radius: 10px; }
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-        .materiale-extra-row { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-        .materiale-extra-row input[type="text"] { flex: 2; padding: 10px; font-size: 0.9rem; }
-        .materiale-extra-row input[type="number"] { flex: 1; padding: 10px; font-size: 0.9rem; }
+.header h1 {
+    margin: 0;
+    font-size: 22px;
+}
 
-        .riepilogo-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
-        .riepilogo-table th, .riepilogo-table td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
-        .riepilogo-table th { background: #1e293b; color: white; font-size: 0.75rem; text-transform: uppercase; }
-        .riepilogo-table tr:last-child td { border-bottom: none; }
-        
-        .presenza-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px; }
-        .user-logged-box { display: flex; justify-content: space-between; align-items: center; background: #e2e8f0; padding: 10px 14px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; }
+.header span {
+    font-size: 14px;
+    opacity: .8;
+}
 
-        .foto-thumb-container { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
-        .foto-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; }
+/* CONTAINER */
 
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 999; justify-content: center; align-items: center; padding: 15px; }
-        .modal-overlay.open { display: flex; }
-        .modal-card { background: #fff; width: 100%; max-width: 480px; max-height: 90vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .modal-header { background: #1e293b; color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 1.1rem; }
-        .modal-body { padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
-        .close-modal-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+.container {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
 
-        .fullscreen-signature-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0f172a; z-index: 9999; flex-direction: column; padding: 20px; }
-        .fullscreen-signature-overlay.open { display: flex; }
-        .signature-top-bar { display: flex; justify-content: space-between; align-items: center; color: white; margin-bottom: 15px; }
-        .signature-top-bar h2 { margin: 0; font-size: 1.2rem; font-weight: 800; color: var(--brand-orange); }
-        .signature-drawing-area { flex: 1; background: #fff; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
-        canvas.fullscreen-canvas { width: 100%; height: 100%; touch-action: none; display: block; background: #fff; cursor: crosshair; }
-        .signature-bottom-actions { display: flex; gap: 10px; margin-top: 15px; }
-    </style>
+.login-screen {
+    max-width: 520px;
+    margin: 42px auto;
+    padding: 0 20px;
+}
+
+.login-screen[hidden],
+.container[hidden] { display: none; }
+
+.login-help { color: #6b7280; line-height: 1.5; }
+
+.login-error { display: none; margin: 0 0 16px; color: #b91c1c; font-weight: bold; }
+.login-error.visible { display: block; }
+
+/* PROGRESS */
+
+.progress {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 25px;
+}
+
+.progress-step {
+    flex: 1;
+    height: 8px;
+    background: #d1d5db;
+    border-radius: 10px;
+}
+
+.progress-step.active {
+    background: #2563eb;
+}
+
+/* CARD */
+
+.card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+
+    box-shadow: 0 5px 20px rgba(0,0,0,.08);
+}
+
+/* STEP */
+
+.step {
+    display: none;
+}
+
+.step.active {
+    display: block;
+}
+
+/* TITOLI */
+
+h2 {
+    margin-top: 0;
+    font-size: 25px;
+}
+
+.subtitle {
+    color: #6b7280;
+    margin-bottom: 25px;
+}
+
+/* FORM */
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 7px;
+}
+
+input,
+select,
+textarea {
+
+    width: 100%;
+
+    padding: 13px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 9px;
+
+    font-size: 15px;
+
+    margin-bottom: 18px;
+
+    background: white;
+}
+
+textarea {
+
+    min-height: 150px;
+
+    resize: vertical;
+}
+
+.row {
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 18px;
+}
+
+/* BUTTONS */
+
+.button-row {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    margin-top: 30px;
+
+    gap: 12px;
+}
+
+button {
+
+    border: 0;
+
+    border-radius: 9px;
+
+    padding: 13px 22px;
+
+    font-size: 15px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.btn-primary {
+
+    background: #2563eb;
+
+    color: white;
+}
+
+.btn-secondary {
+
+    background: #e5e7eb;
+
+    color: #111827;
+}
+
+.btn-success {
+
+    background: #16a34a;
+
+    color: white;
+}
+
+button:hover {
+
+    opacity: .9;
+}
+
+/* MATERIALI */
+
+.material-row {
+
+    display: grid;
+
+    grid-template-columns: 2fr 1fr auto;
+
+    gap: 10px;
+
+    margin-bottom: 10px;
+}
+
+/* LAVORATORI */
+
+.worker-row {
+
+    display: grid;
+
+    grid-template-columns: 2fr 1fr auto;
+
+    gap: 10px;
+
+    margin-bottom: 10px;
+}
+
+.add-btn {
+
+    background: #eef2ff;
+
+    color: #3730a3;
+
+    margin-bottom: 20px;
+}
+
+.remove-btn {
+
+    background: #fee2e2;
+
+    color: #991b1b;
+
+    padding: 10px 14px;
+
+    margin-bottom: 18px;
+}
+
+/* UPLOAD */
+
+.upload-box {
+
+    border: 2px dashed #cbd5e1;
+
+    border-radius: 12px;
+
+    padding: 25px;
+
+    text-align: center;
+
+    margin-bottom: 25px;
+}
+
+.preview-container {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 10px;
+}
+
+.preview-container img {
+
+    width: 130px;
+
+    height: 100px;
+
+    object-fit: cover;
+
+    border-radius: 8px;
+
+    border: 1px solid #ddd;
+}
+
+/* FIRMA */
+
+.signature-area {
+
+    border: 2px solid #cbd5e1;
+
+    border-radius: 10px;
+
+    background: #fff;
+
+    width: 100%;
+
+    height: 220px;
+
+    touch-action: none;
+}
+
+.signature-buttons {
+
+    margin-top: 10px;
+}
+
+/* RIEPILOGO */
+
+.summary {
+
+    background: #f9fafb;
+
+    border-radius: 12px;
+
+    padding: 20px;
+}
+
+.summary-section {
+
+    margin-bottom: 20px;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    padding-bottom: 15px;
+}
+
+.summary-section:last-child {
+
+    border-bottom: 0;
+}
+
+.summary-section h3 {
+
+    margin-top: 0;
+}
+
+/* SUCCESSO */
+
+.success {
+
+    text-align: center;
+
+    padding: 40px 10px;
+}
+
+.success-icon {
+
+    font-size: 60px;
+}
+
+/* MOBILE */
+
+@media(max-width:700px) {
+
+    .row {
+
+        grid-template-columns: 1fr;
+
+        gap: 0;
+    }
+
+    .material-row {
+
+        grid-template-columns: 1fr;
+    }
+
+    .worker-row {
+
+        grid-template-columns: 1fr;
+    }
+
+    .button-row {
+
+        flex-direction: column;
+    }
+
+    button {
+
+        width: 100%;
+    }
+
+    .card {
+
+        padding: 20px;
+    }
+
+}
+
+</style>
+
 </head>
+
 <body>
-    <div class="app-container">
-        <div class="header-app">
-            <h1>IDROTECH <span>VARESE</span></h1>
-            <p id="sottotitoloHeader">Portale Unificato</p>
-        </div>
 
-        <div class="content-body">
-            
-            <!-- SELETTORE MODALITA' -->
-            <div id="viewSelezioneRuolo" class="view-section active">
-                <div class="card-box" style="border-color: var(--brand-orange); text-align: center; padding: 30px 20px;">
-                    <div style="font-size: 1.2rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 10px;">👋 Benvenuto</div>
-                    <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 25px;">Seleziona come desideri accedere:</div>
-                    
-                    <button class="action-btn btn-orange" style="margin-bottom: 12px;" onclick="mostraVista('login_ufficio')">Accesso Ufficio / Admin</button>
-                    <button class="action-btn btn-dark" style="margin-bottom: 12px;" onclick="mostraVista('login_operaio')">Accesso Operai</button>
-                    <button class="action-btn btn-artigiani" onclick="mostraVista('login_artigiano')">Accesso Artigiani</button>
-                </div>
-            </div>
 
-            <!-- LOGIN UFFICIO -->
-            <div id="viewLoginUfficio" class="view-section">
-                <div class="card-box" style="border-color: var(--brand-orange); text-align: center; padding: 25px 15px;">
-                    <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 8px;">📊 Accesso Ufficio / Admin</div>
-                    <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 15px;">Inserisci la password (Predefinita: <b>ufficio2026</b>)</div>
+<!-- HEADER -->
 
-                    <div style="text-align: left; margin-bottom: 15px;">
-                        <label>Password Admin *</label>
-                        <input type="password" id="inputPasswordUfficio" placeholder="Password ufficio...">
-                    </div>
+<div class="header">
 
-                    <button class="action-btn btn-orange" style="margin-bottom: 8px;" onclick="effettuaLoginUfficio()">Accedi all'Ufficio</button>
-                    <button class="action-btn btn-dark" style="background: #64748b;" onclick="mostraVista('selezione')">← Indietro</button>
-                </div>
-            </div>
+    <h1>📋 Foglio di lavoro</h1>
 
-            <!-- LOGIN OPERAIO -->
-            <div id="viewLoginOperaio" class="view-section">
-                <div class="card-box" style="border-color: var(--brand-orange); text-align: center; padding: 25px 15px;">
-                    <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 8px;">🔐 Accesso Operai</div>
-                    
-                    <div style="text-align: left; margin-bottom: 10px;">
-                        <label>Seleziona il tuo Nome *</label>
-                        <select id="selectLoginOperaio"><option value="">-- Il mio nome --</option></select>
-                    </div>
+    <span>Area Operai</span>
 
-                    <div style="text-align: left; margin-bottom: 8px;">
-                        <label>Password *</label>
-                        <input type="password" id="inputPasswordLoginOperaio" placeholder="Inserisci password...">
-                    </div>
-                    
-                    <div style="text-align: right; margin-bottom: 15px;">
-                        <a href="#" onclick="alert('ℹ️ Per recuperare la password contatta l\'Ufficio.'); return false;" style="font-size: 0.75rem; color: var(--brand-orange); text-decoration: none; font-weight: 600;">Password dimenticata?</a>
-                    </div>
+</div>
 
-                    <button class="action-btn btn-orange" style="margin-bottom: 8px;" onclick="effettuaLoginOperaio()">Accedi</button>
-                    <button class="action-btn btn-dark" style="background: #64748b;" onclick="mostraVista('selezione')">← Indietro</button>
-                </div>
-            </div>
 
-            <!-- LOGIN ARTIGIANO -->
-            <div id="viewLoginArtigiano" class="view-section">
-                <div class="card-box" style="border-color: var(--brand-orange); text-align: center; padding: 25px 15px;">
-                    <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 8px;">🔧 Accesso Artigiani</div>
-                    
-                    <div style="text-align: left; margin-bottom: 10px;">
-                        <label>Seleziona il tuo Nome *</label>
-                        <select id="selectLoginArtigiano"><option value="">-- Il mio nome --</option></select>
-                    </div>
+<main class="login-screen" id="loginScreen">
+    <div class="card">
+        <h2>Accesso operaio</h2>
+        <p class="subtitle">Accedi con il tuo account prima di compilare il foglio di lavoro.</p>
+        <p class="login-error" id="loginError" role="alert"></p>
+        <label for="accountWorker">Operaio</label>
+        <select id="accountWorker"></select>
+        <label for="accountPassword">Password</label>
+        <input id="accountPassword" type="password" autocomplete="current-password" placeholder="Inserisci la password">
+        <p class="login-help">Al primo accesso usa la password temporanea ricevuta dall'ufficio, poi ne creerai una personale.</p>
+        <button class="btn-primary" type="button" onclick="accediOperaio()">Accedi</button>
+    </div>
+</main>
 
-                    <div style="text-align: left; margin-bottom: 8px;">
-                        <label>Password *</label>
-                        <input type="password" id="inputPasswordLoginArtigiano" placeholder="Inserisci password...">
-                    </div>
+<main class="login-screen" id="passwordScreen" hidden>
+    <div class="card">
+        <h2>Crea la tua password</h2>
+        <p class="subtitle" id="passwordWorkerName"></p>
+        <p class="login-error" id="passwordError" role="alert"></p>
+        <label for="newAccountPassword">Nuova password</label>
+        <input id="newAccountPassword" type="password" autocomplete="new-password" placeholder="Almeno 8 caratteri">
+        <label for="confirmAccountPassword">Conferma nuova password</label>
+        <input id="confirmAccountPassword" type="password" autocomplete="new-password" placeholder="Ripeti la password">
+        <button class="btn-primary" type="button" onclick="salvaNuovaPassword()">Salva e continua</button>
+    </div>
+</main>
 
-                    <div style="text-align: right; margin-bottom: 15px;">
-                        <a href="#" onclick="alert('ℹ️ Per recuperare la password contatta l\'Ufficio.'); return false;" style="font-size: 0.75rem; color: var(--brand-orange); text-decoration: none; font-weight: 600;">Password dimenticata?</a>
-                    </div>
 
-                    <button class="action-btn btn-artigiani" style="margin-bottom: 8px;" onclick="effettuaLoginArtigiano()">Accedi</button>
-                    <button class="action-btn btn-dark" style="background: #64748b;" onclick="mostraVista('selezione')">← Indietro</button>
-                </div>
-            </div>
+<div class="container" id="workArea" hidden>
 
-            <!-- CAMBIO PASSWORD -->
-            <div id="viewCambioPassword" class="view-section">
-                <div class="card-box" style="border-color: var(--brand-orange); padding: 25px 15px;">
-                    <div style="font-size: 1rem; font-weight: 800; color: var(--brand-dark); text-align: center; margin-bottom: 5px;">🔑 Cambio Password Obbligatorio</div>
-                    <div style="font-size: 0.75rem; color: var(--text-light); text-align: center; margin-bottom: 15px;">Scegli una nuova password personale (min 4 caratteri).</div>
 
-                    <div style="margin-bottom: 10px;"><label>Nuova Password *</label><input type="password" id="nuovaPasswordInput" placeholder="Nuova password..."></div>
-                    <div style="margin-bottom: 15px;"><label>Conferma Password *</label><input type="password" id="confermaPasswordInput" placeholder="Ripeti password..."></div>
+<!-- PROGRESS BAR -->
 
-                    <button class="action-btn btn-orange" onclick="salvaNuovaPassword()">Salva e Accedi</button>
-                </div>
-            </div>
+<div class="progress">
 
-            <!-- MENU PRINCIPALE UTENTE -->
-            <div id="viewMenuUtente" class="view-section">
-                <div class="user-logged-box">
-                    <span id="labelUtenteConnessoMenu">Utente: -</span>
-                    <button class="action-btn btn-dark" style="width: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="esciLoginUtente()">Esci</button>
-                </div>
+    <div class="progress-step active"></div>
 
-                <div class="card-box" style="border-color: var(--brand-orange); text-align: center; padding: 25px 15px;">
-                    <div style="font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); margin-bottom: 15px;">Seleziona operazione:</div>
-                    
-                    <button class="action-btn btn-orange" style="margin-bottom: 12px;" onclick="apriSchermata('foglio')">📋 FOGLIO DI LAVORO</button>
-                    <button class="action-btn btn-blue-light" style="margin-bottom: 12px;" onclick="apriSchermata('fotografie')">📷 FOTOGRAFIE</button>
-                    <button class="action-btn btn-purple" onclick="apriSchermata('garanzie')">🛡️ GARANZIE</button>
-                </div>
-            </div>
+    <div class="progress-step"></div>
 
-            <!-- 1. FOGLIO DI LAVORO -->
-            <div id="viewFormUtente" class="view-section">
-                <div class="user-logged-box">
-                    <span>📋 Foglio di Lavoro</span>
-                    <button class="action-btn btn-dark" style="width: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="tornaAlMenuUtente()">← Menu</button>
-                </div>
+    <div class="progress-step"></div>
 
-                <div class="card-box" style="border-color: var(--brand-orange);">
-                    <div>
-                        <label>Cerca Cantiere Aperto</label>
-                        <input type="text" id="inputRicercaCantiereUtente" placeholder="Scrivi per filtrare i cantieri..." oninput="popolaCantieriUtente()">
-                    </div>
+    <div class="progress-step"></div>
 
-                    <div style="background: #f1f5f9; padding: 12px; border-radius: 10px; border: 1px dashed var(--brand-orange);">
-                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--brand-dark); margin-bottom: 6px;">➕ Cantiere non trovato? Crealo subito:</div>
-                        <div style="display: flex; flex-direction: column; gap: 6px;">
-                            <input type="text" id="nuovoClienteUtente" placeholder="Nome Cliente..." style="padding: 10px; font-size: 0.9rem;">
-                            <input type="text" id="nuovoIndirizzoUtente" placeholder="Indirizzo Cantiere..." style="padding: 10px; font-size: 0.9rem;">
-                            <button type="button" class="action-btn btn-dark" style="padding: 10px; font-size: 0.85rem;" onclick="creaCantiereAlVoloUtente()">Crea e Seleziona Cantiere</button>
-                        </div>
-                    </div>
+    <div class="progress-step"></div>
 
-                    <div><label>Seleziona Cantiere *</label><select id="selectCantiereUtente"><option value="">Caricamento cantieri...</option></select></div>
-                    <div><label>Stato Cantiere per questo intervento *</label><select id="selectStatoCantiereIntervento"><option value="">Seleziona stato...</option><option value="In Corso">Cantiere in Corso</option><option value="Terminato">Cantiere Terminato</option></select></div>
-                    <div><label>Data Intervento</label><input type="date" id="dataInterventoUtente"></div>
-                    <div><label>Tipo di Lavoro</label><select id="tipoLavoroUtente"><option value="Nuovo Lavoro / Installazione">Nuovo Lavoro / Installazione</option><option value="Manutenzione / Riparazione">Manutenzione / Riparazione</option><option value="Sopralluogo / Preventivo">Sopralluogo / Preventivo</option></select></div>
-                    <div><label>Le tue Ore Lavorate *</label><select id="mieOreLavorate"><option value="8" selected>8 Ore</option><option value="7">7 Ore</option><option value="6">6 Ore</option><option value="5">5 Ore</option><option value="4">4 Ore</option><option value="3">3 Ore</option><option value="2">2 Ore</option><option value="1">1 Ora</option></select></div>
-                    <div><label>Colleghi presenti e ore dedicate</label><div class="container-colleghi-scroll" id="listaColleghiUtente"></div></div>
-                    <div><label>Note / Lavori Eseguiti *</label><textarea id="noteInterventoUtente" rows="3" placeholder="Descrivi il lavoro fatto..."></textarea></div>
-                    
-                    <div>
-                        <label>📄 Carica Foto DDT</label>
-                        <input type="file" id="inputBolleManuale" accept="image/*" multiple>
-                    </div>
+    <div class="progress-step"></div>
 
-                    <div style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <label style="margin: 0;">📦 Materiale Extra / Fuori DDT</label>
-                            <button type="button" class="action-btn btn-dark" style="width: auto; padding: 6px 10px; font-size: 0.75rem;" onclick="aggiungiRigaMaterialeExtra()">+ Aggiungi Materiale</button>
-                        </div>
-                        <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 8px;">Aggiungi qui eventuali materiali prelevati o usati non presenti sui DDT.</div>
-                        <div id="containerMaterialiExtra" style="display: flex; flex-direction: column; gap: 6px;"></div>
-                    </div>
+</div>
 
-                    <div style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px;">
-                        <label>✍️ Firma del Cliente *</label>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <span id="labelStatoFirma" style="font-size: 0.8rem; color: var(--danger); font-weight: 700;">Nessuna firma inserita</span>
-                        </div>
-                        <button type="button" class="action-btn btn-dark" style="background: #334155; font-size: 0.9rem;" onclick="apriSchermataFirmaFullscreen()">🖊️ Apri Schermata Firma</button>
-                    </div>
 
-                    <button type="button" class="action-btn btn-orange" onclick="salvaFoglioLavoroUtente()" style="margin-top: 10px;">Salva Foglio di Lavoro</button>
-                </div>
-            </div>
+<div class="card">
 
-            <!-- 2. FOTOGRAFIE -->
-            <div id="viewFotoImpianti" class="view-section">
-                <div class="user-logged-box">
-                    <span>📷 Fotografie Impianti</span>
-                    <button class="action-btn btn-dark" style="width: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="tornaAlMenuUtente()">← Menu</button>
-                </div>
 
-                <div class="card-box" style="border-color: #0284c7;">
-                    <div>
-                        <label>Cerca Cantiere Aperto</label>
-                        <input type="text" id="inputRicercaCantiereFoto" placeholder="Scrivi per filtrare i cantieri..." oninput="popolaSelectCantieriGenerico('selectCantiereFoto', 'inputRicercaCantiereFoto')">
-                    </div>
+<!-- ================================================= -->
+<!-- STEP 1 -->
+<!-- ================================================= -->
 
-                    <div style="background: #f1f5f9; padding: 12px; border-radius: 10px; border: 1px dashed #0284c7;">
-                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--brand-dark); margin-bottom: 6px;">➕ Cantiere non trovato? Crealo subito:</div>
-                        <div style="display: flex; flex-direction: column; gap: 6px;">
-                            <input type="text" id="nuovoClienteFoto" placeholder="Nome Cliente..." style="padding: 10px; font-size: 0.9rem;">
-                            <input type="text" id="nuovoIndirizzoFoto" placeholder="Indirizzo Cantiere..." style="padding: 10px; font-size: 0.9rem;">
-                            <button type="button" class="action-btn btn-dark" style="padding: 10px; font-size: 0.85rem;" onclick="creaCantiereAlVoloGenerico('nuovoClienteFoto', 'nuovoIndirizzoFoto', 'selectCantiereFoto', 'inputRicercaCantiereFoto')">Crea e Seleziona Cantiere</button>
-                        </div>
-                    </div>
+<div class="step active" id="step1">
 
-                    <div><label>Seleziona Cantiere *</label><select id="selectCantiereFoto"><option value="">Caricamento cantieri...</option></select></div>
-                    <div>
-                        <label>📷 Carica Foto Impianti *</label>
-                        <input type="file" id="inputFotoImpiantiExtra" accept="image/*" multiple>
-                    </div>
-                    <div><label>Descrizione Impianto / Note *</label><textarea id="noteFotoImpianti" rows="2" placeholder="Descrizione obbligatoria delle foto impianti..."></textarea></div>
+    <h2>1. Seleziona il cantiere</h2>
 
-                    <button class="action-btn btn-blue-light" onclick="salvaFotoImpianti()">Salva Fotografie Impianto</button>
-                </div>
-            </div>
+    <p class="subtitle">
+        Inserisci il cantiere presso cui hai lavorato oggi.
+    </p>
 
-            <!-- 3. GARANZIE -->
-            <div id="viewGaranzie" class="view-section">
-                <div class="user-logged-box">
-                    <span>🛡️ Garanzie - Etichette Macchine</span>
-                    <button class="action-btn btn-dark" style="width: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="tornaAlMenuUtente()">← Menu</button>
-                </div>
 
-                <div class="card-box" style="border-color: #7c3aed;">
-                    <div>
-                        <label>Cerca Cantiere Aperto</label>
-                        <input type="text" id="inputRicercaCantiereGaranzie" placeholder="Scrivi per filtrare i cantieri..." oninput="popolaSelectCantieriGenerico('selectCantiereGaranzie', 'inputRicercaCantiereGaranzie')">
-                    </div>
+    <label>Data del lavoro</label>
 
-                    <div style="background: #f1f5f9; padding: 12px; border-radius: 10px; border: 1px dashed #7c3aed;">
-                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--brand-dark); margin-bottom: 6px;">➕ Cantiere non trovato? Crealo subito:</div>
-                        <div style="display: flex; flex-direction: column; gap: 6px;">
-                            <input type="text" id="nuovoClienteGaranzie" placeholder="Nome Cliente..." style="padding: 10px; font-size: 0.9rem;">
-                            <input type="text" id="nuovoIndirizzoGaranzie" placeholder="Indirizzo Cantiere..." style="padding: 10px; font-size: 0.9rem;">
-                            <button type="button" class="action-btn btn-dark" style="padding: 10px; font-size: 0.85rem;" onclick="creaCantiereAlVoloGenerico('nuovoClienteGaranzie', 'nuovoIndirizzoGaranzie', 'selectCantiereGaranzie', 'inputRicercaCantiereGaranzie')">Crea e Seleziona Cantiere</button>
-                        </div>
-                    </div>
+    <input
+        type="date"
+        id="dataLavoro"
+    >
 
-                    <div><label>Seleziona Cantiere *</label><select id="selectCantiereGaranzie"><option value="">Caricamento cantieri...</option></select></div>
-                    <div>
-                        <label>🛡️ Carica Foto Etichette (Condizionatori, PDC, ecc.) *</label>
-                        <input type="file" id="inputFotoGaranzieExtra" accept="image/*" multiple>
-                    </div>
 
-                    <button class="action-btn btn-purple" onclick="salvaGaranzie()">Salva Etichette Garanzia</button>
-                </div>
-            </div>
+    <label for="cliente">Cliente</label>
 
-            <!-- PANNELLO UFFICIO -->
-            <div id="viewUfficio" class="view-section">
-                <div style="display: flex; justify-content: space-between; align-items: center; background: #e2e8f0; padding: 10px 14px; border-radius: 10px; font-weight: 700; font-size: 0.9rem;">
-                    <span>📊 Pannello Amministrazione</span>
-                    <button class="action-btn btn-dark" style="width: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="mostraVista('selezione')">Esci Ufficio</button>
-                </div>
+    <select id="cliente" onchange="caricaCantieriOperai()">
+        <option value="">-- Seleziona cliente --</option>
+    </select>
 
-                <div class="card-box" style="border-color: #ef4444; background: #fff5f5;">
-                    <div style="font-size: 1rem; font-weight: 800; color: #b91c1c;">🚨 Controllo Ufficio: Mancati Fogli (Ultimi 2 Giorni)</div>
-                    <div style="overflow-x: auto;">
-                        <table class="riepilogo-table" id="tabellaControlloMancanti">
-                            <thead><tr><th>Data</th><th>Dipendente</th><th>Ore</th></tr></thead>
-                            <tbody id="corpoTabellaControlloMancanti"></tbody>
-                        </table>
-                    </div>
-                </div>
 
-                <div>
-                    <div class="accordion-header" onclick="toggleAccordion('contentGestionePassword', this)"><span>🔑 Gestione Password Utenti</span><span>▼</span></div>
-                    <div id="contentGestionePassword" class="accordion-content card-box" style="border-color: var(--brand-orange);">
-                        <div class="container-colleghi-scroll" id="listaGestionePasswordUfficio" style="max-height: 250px;"></div>
-                    </div>
-                </div>
+    <label for="cantiere">Cantiere</label>
 
-                <div>
-                    <div class="accordion-header" onclick="toggleAccordion('contentPresenze', this)"><span>📋 Gestione Presenze / Assenze</span><span>▼</span></div>
-                    <div id="contentPresenze" class="accordion-content card-box" style="border-color: var(--brand-orange);">
-                        <div class="container-colleghi-scroll" id="listaPresenzeUfficio" style="max-height: 250px;"></div>
-                        <button class="action-btn btn-orange" onclick="salvaPresenzeUfficio()">Salva Stato Assenze</button>
-                    </div>
-                </div>
+    <select id="cantiere" disabled>
+        <option value="">-- Seleziona prima il cliente --</option>
+    </select>
 
-                <div>
-                    <div class="accordion-header" onclick="toggleAccordion('contentRegistrazione', this)"><span>✏️ Registra per conto Dipendenti</span><span>▼</span></div>
-                    <div id="contentRegistrazione" class="accordion-content card-box" style="border-color: var(--brand-orange);">
-                        <div><label>Cerca Cantiere</label><input type="text" id="inputRicercaCantiereUfficio" placeholder="Filtra cantieri..." oninput="popolaSelectCantieriUfficio()"></div>
-                        <div><label>Seleziona Cantiere</label><select id="selectCantiereUfficio"></select></div>
-                        <div><label>Data Intervento</label><input type="date" id="dataInterventoUfficio"></div>
-                        <div><label>Dipendenti e Ore</label><div class="container-colleghi-scroll" id="listaDipendentiUfficioMultiplo"></div></div>
-                        <div><label>Note</label><textarea id="noteUfficio" rows="2" placeholder="Dettagli..."></textarea></div>
-                        <button class="action-btn btn-orange" onclick="registraUfficioMultiplo()">Registra per conto Dipendenti</button>
-                    </div>
-                </div>
 
-                <div class="card-box">
-                    <div style="font-size: 1rem; font-weight: 800; color: var(--brand-dark);">Inserisci Nuovo Cantiere</div>
-                    <div><label>Cliente</label><input type="text" id="nuovoCliente" placeholder="Nome cliente..."></div>
-                    <div><label>Indirizzo</label><input type="text" id="nuovoIndirizzo" placeholder="Indirizzo..."></div>
-                    <button class="action-btn btn-green" onclick="creaCantiereUfficio()">Crea Cantiere</button>
-                </div>
+    <div class="button-row">
 
-                <div class="card-box">
-                    <div style="font-size: 1rem; font-weight: 800; color: var(--brand-dark);">Archivio Cantieri</div>
-                    <div class="tabs-container">
-                        <button id="btnTabDaFare" class="tab-btn active-da-fare" onclick="cambiaCartella('da_fare')">📁 Da Terminare</button>
-                        <button id="btnTabTerminati" class="tab-btn" onclick="cambiaCartella('terminati')">📁 Terminati</button>
-                    </div>
-                    <div id="listaCantieriUfficio"></div>
-                </div>
+        <div></div>
 
-                <div class="card-box">
-                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-                        <div style="font-size: 1rem; font-weight: 800; color: var(--brand-dark);">📊 Riepilogo Ore</div>
-                        <button class="action-btn btn-orange" style="width: auto; padding: 10px; font-size: 0.8rem;" onclick="apriModaleFiltri()">📁 Filtri Avanzati</button>
-                    </div>
-                    <div style="overflow-x: auto;">
-                        <table class="riepilogo-table">
-                            <thead><tr><th>Data</th><th>Dipendente</th><th>Cantiere</th><th>Ore</th></tr></thead>
-                            <tbody id="corpoTabellaRiepilogo"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+        <button
+            class="btn-primary"
+            onclick="nextStep()"
+        >
+            Avanti →
+        </button>
 
-        </div>
     </div>
 
-    <!-- OVERLAY SCHERMO INTERO PER FIRMA DIGITALE -->
-    <div class="fullscreen-signature-overlay" id="overlayFirmaFullscreen">
-        <div class="signature-top-bar">
-            <h2>Firma del Cliente</h2>
-            <button class="action-btn btn-danger" style="width: auto; padding: 6px 14px; font-size: 0.8rem;" onclick="chiudiSchermataFirmaFullscreen()">✕ Chiudi</button>
-        </div>
-        <div style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 8px; text-align: center;">Invita il cliente a firmare nello spazio sottostante</div>
-        <div class="signature-drawing-area" id="containerAreaCanvas">
-            <canvas id="canvasFirmaCliente" class="fullscreen-canvas"></canvas>
-        </div>
-        <div class="signature-bottom-actions">
-            <button type="button" class="action-btn btn-dark" style="background: #475569; flex: 1;" onclick="pulisciFirmaCanvas()">Pulisci Lavagna</button>
-            <button type="button" class="action-btn btn-green" style="flex: 1;" onclick="confermaFirmaFullscreen()">Conferma Firma ✓</button>
-        </div>
+</div>
+
+
+<!-- ================================================= -->
+<!-- STEP 2 -->
+<!-- ================================================= -->
+
+<div class="step" id="step2">
+
+    <h2>2. Descrizione del lavoro</h2>
+
+    <p class="subtitle">
+        Descrivi in modo chiaro il lavoro svolto durante la giornata.
+    </p>
+
+
+    <label>
+        Descrizione del lavoro
+    </label>
+
+    <textarea
+        id="descrizione"
+        placeholder="Esempio: installazione tubazioni bagno, sostituzione raccordi, collegamento scarico..."
+    ></textarea>
+
+
+    <label>
+        Eventuali note
+    </label>
+
+    <textarea
+        id="note"
+        placeholder="Inserisci eventuali informazioni utili per l'ufficio..."
+    ></textarea>
+
+
+    <div class="button-row">
+
+        <button
+            class="btn-secondary"
+            onclick="prevStep()"
+        >
+            ← Indietro
+        </button>
+
+        <button
+            class="btn-primary"
+            onclick="nextStep()"
+        >
+            Avanti →
+        </button>
+
     </div>
 
-    <!-- MODALE FILTRI -->
-    <div class="modal-overlay" id="modalFiltri">
-        <div class="modal-card">
-            <div class="modal-header">
-                <span>📁 Archivio e Filtri</span>
-                <button class="close-modal-btn" onclick="chiudiModaleFiltri()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div><label>Filtra per Dipendente</label><select id="selectFiltroDipendente" onchange="filtraArchivioModale()"><option value="">Tutti</option></select></div>
-                <div><label>Filtra per Data</label><input type="date" id="inputFiltroData" onchange="filtraArchivioModale()"></div>
-                <div><label>Cerca Cantiere</label><input type="text" id="inputFiltroCantiere" placeholder="Cerca..." oninput="filtraArchivioModale()"></div>
-                <div style="font-size: 0.8rem; color: var(--text-light);" id="infoTotaleOreFiltro"></div>
-                <div style="overflow-x: auto;">
-                    <table class="riepilogo-table">
-                        <thead><tr><th>Data</th><th>Dipendente</th><th>Cantiere</th><th>Ore</th></tr></thead>
-                        <tbody id="corpoTabellaModaleFiltri"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+</div>
+
+
+<!-- ================================================= -->
+<!-- STEP 3 -->
+<!-- ================================================= -->
+
+<div class="step" id="step3">
+
+    <h2>3. Materiali utilizzati</h2>
+
+    <p class="subtitle">
+        Inserisci tutti i materiali utilizzati durante il lavoro.
+    </p>
+
+
+    <div id="materiali"></div>
+
+
+    <button
+        class="add-btn"
+        onclick="aggiungiMateriale()"
+    >
+        + Aggiungi materiale
+    </button>
+
+
+    <div class="button-row">
+
+        <button
+            class="btn-secondary"
+            onclick="prevStep()"
+        >
+            ← Indietro
+        </button>
+
+        <button
+            class="btn-primary"
+            onclick="nextStep()"
+        >
+            Avanti →
+        </button>
+
     </div>
 
-    <!-- MODALE ZOOM FOTO -->
-    <div class="modal-overlay" id="modalFotoZoom" onclick="chiudiZoomFoto()">
-        <div style="max-width: 90%; max-height: 90%; display: flex; justify-content: center; align-items: center;" onclick="event.stopPropagation()">
-            <img id="imgZoomFull" src="" style="max-width: 100%; max-height: 85vh; border-radius: 10px;">
-        </div>
+</div>
+
+
+<!-- ================================================= -->
+<!-- STEP 4 -->
+<!-- ================================================= -->
+
+<div class="step" id="step4">
+
+    <h2>4. Ore lavorate</h2>
+
+    <p class="subtitle">
+        Seleziona gli operai presenti e inserisci le ore totali lavorate.
+    </p>
+
+
+    <div id="lavoratori"></div>
+
+
+    <button
+        class="add-btn"
+        onclick="aggiungiLavoratore()"
+    >
+        + Aggiungi lavoratore
+    </button>
+
+
+    <div class="button-row">
+
+        <button
+            class="btn-secondary"
+            onclick="prevStep()"
+        >
+            ← Indietro
+        </button>
+
+        <button
+            class="btn-primary"
+            onclick="nextStep()"
+        >
+            Avanti →
+        </button>
+
     </div>
 
-    <script>
-        const elencoOperaiTotali = [
-            "Assali Luca", "Bruno Nicola", "Comolli Alessandro", "Concato Filippo", 
-            "Coriglione Alessandro", "De Bosio Marcello", "Denti Claudio", "Doda Enjo", 
-            "Giaccone Federico", "Gjyly Moris", "Marinoni Alessandro", "Rocchetto Fabio", 
-            "Rosini Jean Paul", "Saleh Mohamed"
-        ];
+</div>
 
-        const elencoArtigianiTotali = ["SGL", "ARBO", "Clima Group Srl"];
 
-        let utenteCorrente = "";
-        let tipoUtenteCorrente = ""; 
-        let cartellaCorrente = 'da_fare';
-        
-        let canvasFirma, ctxFirma, isDrawingFirma = false, hasFirma = false;
-        let firmaTempBase64 = null;
+<!-- ================================================= -->
+<!-- STEP 5 -->
+<!-- ================================================= -->
 
-        window.onload = function() {
-            let oggiStr = new Date().toISOString().split('T')[0];
-            document.getElementById('dataInterventoUtente').value = oggiStr;
-            document.getElementById('dataInterventoUfficio').value = oggiStr;
-            popolaTendineLogin();
-            inizializzaCanvasFirma();
+<div class="step" id="step5">
+
+    <h2>5. Bolle e firma cliente</h2>
+
+    <p class="subtitle">
+        Carica le foto delle bolle dei fornitori e raccogli la firma del cliente.
+    </p>
+
+
+    <label>
+        Foto bolle fornitori
+    </label>
+
+
+    <div class="upload-box">
+
+        <input
+            type="file"
+            id="fotoBolle"
+            accept="image/*"
+            multiple
+            onchange="mostraFoto(event)"
+        >
+
+        <p>
+            📷 Seleziona una o più foto delle bolle
+        </p>
+
+    </div>
+
+
+    <div
+        class="preview-container"
+        id="anteprimaFoto"
+    ></div>
+
+
+    <br>
+
+
+    <label>
+        Firma del cliente
+    </label>
+
+
+    <canvas
+        id="firma"
+        class="signature-area"
+    ></canvas>
+
+
+    <div class="signature-buttons">
+
+        <button
+            class="btn-secondary"
+            onclick="cancellaFirma()"
+        >
+            Cancella firma
+        </button>
+
+    </div>
+
+
+    <div class="button-row">
+
+        <button
+            class="btn-secondary"
+            onclick="prevStep()"
+        >
+            ← Indietro
+        </button>
+
+        <button
+            class="btn-primary"
+            onclick="creaRiepilogo()"
+        >
+            Avanti →
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ================================================= -->
+<!-- STEP 6 -->
+<!-- ================================================= -->
+
+<div class="step" id="step6">
+
+    <h2>6. Riepilogo</h2>
+
+    <p class="subtitle">
+        Controlla tutte le informazioni prima di inviare il foglio all'ufficio.
+    </p>
+
+
+    <div
+        class="summary"
+        id="riepilogo"
+    ></div>
+
+
+    <div class="button-row">
+
+        <button
+            class="btn-secondary"
+            onclick="prevStep()"
+        >
+            ← Modifica
+        </button>
+
+        <button
+            class="btn-success"
+            onclick="inviaFoglio()"
+        >
+            ✓ CONFERMA E INVIA
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ================================================= -->
+<!-- SUCCESSO -->
+<!-- ================================================= -->
+
+<div
+    class="step"
+    id="success"
+>
+
+    <div class="success">
+
+        <div class="success-icon">
+            ✅
+        </div>
+
+
+        <h2>
+            Foglio di lavoro inviato!
+        </h2>
+
+
+        <p>
+            Il foglio di lavoro è stato registrato correttamente.
+        </p>
+
+
+        <button
+            class="btn-primary"
+            onclick="location.reload()"
+        >
+            Nuovo foglio di lavoro
+        </button>
+
+    </div>
+
+</div>
+
+
+</div>
+
+</div>
+
+
+<script>
+
+
+/* ================================================= */
+/* VARIABILI */
+/* ================================================= */
+
+let currentStep = 1;
+let firmaPresente = false;
+const IDROLIST_WORKERS = [
+    'ASSALI LUCA', 'BRUNO NICOLA', 'COMOLLI ALESSANDRO', 'CONCATO FILIPPO',
+    'CORIGLIONE ALESSANDRO', 'DE BOSIO MARCELLO', 'DENTI CLAUDIO', 'DODA ENJO',
+    'GIACCONE FEDERICO', 'GJYLY MORIS', 'MARINONI ALESSANDRO', 'ROCCHETTO FABIO',
+    'ROSINI JEAN PAUL', 'SALEH MOHAMED'
+];
+const IDROLIST_ACCOUNTS_KEY = 'idrolist_worker_accounts_v1';
+const IDROLIST_TEMPORARY_PASSWORD = 'Cantiere2026!';
+let idrolistCurrentWorker = '';
+
+
+/* ================================================= */
+/* DATA AUTOMATICA */
+/* ================================================= */
+
+document.getElementById("dataLavoro").value =
+    new Date().toISOString().split("T")[0];
+
+
+/* ================================================= */
+/* STEP SUCCESSIVO */
+/* ================================================= */
+
+function nextStep() {
+
+
+    if (currentStep === 1) {
+
+        if (document.getElementById("cliente").value === "") {
+
+            alert("Seleziona un cliente.");
+
+            return;
+        }
+
+        if (document.getElementById("cantiere").value === "") {
+
+            alert("Seleziona un cantiere.");
+
+            return;
+        }
+
+    }
+
+
+    if (currentStep === 2) {
+
+        if (
+            document.getElementById("descrizione").value.trim() === ""
+        ) {
+
+            alert("Inserisci la descrizione del lavoro.");
+
+            return;
+        }
+
+    }
+
+
+    if (currentStep < 6) {
+
+        document
+            .getElementById("step" + currentStep)
+            .classList.remove("active");
+
+
+        currentStep++;
+
+
+        document
+            .getElementById("step" + currentStep)
+            .classList.add("active");
+
+
+        aggiornaProgress();
+
+    }
+
+}
+
+
+/* ================================================= */
+/* STEP PRECEDENTE */
+/* ================================================= */
+
+function prevStep() {
+
+
+    if (currentStep > 1) {
+
+
+        document
+            .getElementById("step" + currentStep)
+            .classList.remove("active");
+
+
+        currentStep--;
+
+
+        document
+            .getElementById("step" + currentStep)
+            .classList.add("active");
+
+
+        aggiornaProgress();
+
+    }
+
+}
+
+
+/* ================================================= */
+/* PROGRESS BAR */
+/* ================================================= */
+
+function aggiornaProgress() {
+
+
+    document
+        .querySelectorAll(".progress-step")
+        .forEach((el, index) => {
+
+
+            el.classList.toggle(
+                "active",
+                index < currentStep
+            );
+
+
+        });
+
+}
+
+
+/* ================================================= */
+/* MATERIALI */
+/* ================================================= */
+
+function aggiungiMateriale() {
+
+
+    const div =
+        document.createElement("div");
+
+
+    div.className =
+        "material-row";
+
+
+    div.innerHTML = `
+
+        <input
+            type="text"
+            placeholder="Materiale"
+            class="materiale-nome"
+        >
+
+
+        <input
+            type="number"
+            placeholder="Quantità"
+            min="0"
+            class="materiale-quantita"
+        >
+
+
+        <button
+            class="remove-btn"
+            onclick="this.parentElement.remove()"
+        >
+            ✕
+        </button>
+
+    `;
+
+
+    document
+        .getElementById("materiali")
+        .appendChild(div);
+
+}
+
+
+/* ================================================= */
+/* LAVORATORI */
+/* ================================================= */
+
+function aggiungiLavoratoreLegacy() {
+
+
+    const div =
+        document.createElement("div");
+
+
+    div.className =
+        "worker-row";
+
+
+    div.innerHTML = `
+
+        <select class="worker-nome">
+
+            <option value="">
+                -- Seleziona operaio --
+            </option>
+
+            <option>
+                Mario Rossi
+            </option>
+
+            <option>
+                Luca Bianchi
+            </option>
+
+            <option>
+                Marco Verdi
+            </option>
+
+            <option>
+                Andrea Ferrari
+            </option>
+
+            <option>
+                Giuseppe Romano
+            </option>
+
+        </select>
+
+
+        <input
+            type="number"
+            placeholder="Ore totali"
+            min="0"
+            step="0.5"
+            class="worker-ore"
+        >
+
+
+        <button
+            class="remove-btn"
+            onclick="this.parentElement.remove()"
+        >
+            ✕
+        </button>
+
+    `;
+
+
+    document
+        .getElementById("lavoratori")
+        .appendChild(div);
+
+}
+
+
+/* ================================================= */
+/* FOTO BOLLE */
+/* ================================================= */
+
+function mostraFoto(event) {
+
+
+    const container =
+        document.getElementById("anteprimaFoto");
+
+
+    container.innerHTML = "";
+
+
+    [
+        ...event.target.files
+    ].forEach(file => {
+
+
+        const reader =
+            new FileReader();
+
+
+        reader.onload =
+            function(e) {
+
+
+                const img =
+                    document.createElement("img");
+
+
+                img.src =
+                    e.target.result;
+
+
+                container.appendChild(img);
+
+            };
+
+
+        reader.readAsDataURL(file);
+
+    });
+
+}
+
+
+/* ================================================= */
+/* FIRMA */
+/* ================================================= */
+
+const canvas =
+    document.getElementById("firma");
+
+
+const ctx =
+    canvas.getContext("2d");
+
+
+let drawing = false;
+
+
+function posizione(e) {
+
+
+    const rect =
+        canvas.getBoundingClientRect();
+
+
+    if (e.touches) {
+
+
+        return {
+
+            x:
+                e.touches[0].clientX -
+                rect.left,
+
+            y:
+                e.touches[0].clientY -
+                rect.top
+
         };
 
-        function inizializzaCanvasFirma() {
-            canvasFirma = document.getElementById('canvasFirmaCliente');
-            if (!canvasFirma) return;
-            ctxFirma = canvasFirma.getContext('2d');
-            
-            function ridimensionaCanvas() {
-                let container = document.getElementById('containerAreaCanvas');
-                if (!container) return;
-                let rect = container.getBoundingClientRect();
-                canvasFirma.width = rect.width * window.devicePixelRatio;
-                canvasFirma.height = rect.height * window.devicePixelRatio;
-                ctxFirma.scale(window.devicePixelRatio, window.devicePixelRatio);
-                ctxFirma.lineWidth = 3;
-                ctxFirma.lineCap = 'round';
-                ctxFirma.strokeStyle = '#0f172a';
-            }
-            
-            setTimeout(ridimensionaCanvas, 100);
-            window.addEventListener('resize', ridimensionaCanvas);
+    }
 
-            canvasFirma.addEventListener('mousedown', avviaDisegnoFirma);
-            canvasFirma.addEventListener('mousemove', disegnaFirma);
-            canvasFirma.addEventListener('mouseup', fermaDisegnoFirma);
-            canvasFirma.addEventListener('mouseleave', fermaDisegnoFirma);
 
-            canvasFirma.addEventListener('touchstart', (e) => { e.preventDefault(); avviaDisegnoFirma(e.touches[0]); });
-            canvasFirma.addEventListener('touchmove', (e) => { e.preventDefault(); disegnaFirma(e.touches[0]); });
-            canvasFirma.addEventListener('touchend', (e) => { e.preventDefault(); fermaDisegnoFirma(); });
-        }
+    return {
 
-        function apriSchermataFirmaFullscreen() {
-            document.getElementById('overlayFirmaFullscreen').classList.add('open');
-            setTimeout(() => {
-                let container = document.getElementById('containerAreaCanvas');
-                let rect = container.getBoundingClientRect();
-                canvasFirma.width = rect.width * window.devicePixelRatio;
-                canvasFirma.height = rect.height * window.devicePixelRatio;
-                ctxFirma.scale(window.devicePixelRatio, window.devicePixelRatio);
-                ctxFirma.lineWidth = 3;
-                ctxFirma.lineCap = 'round';
-                ctxFirma.strokeStyle = '#0f172a';
-                if (firmaTempBase64) {
-                    let img = new Image();
-                    img.src = firmaTempBase64;
-                    img.onload = () => ctxFirma.drawImage(img, 0, 0, rect.width, rect.height);
-                }
-            }, 150);
-        }
+        x:
+            e.clientX -
+            rect.left,
 
-        function chiudiSchermataFirmaFullscreen() {
-            document.getElementById('overlayFirmaFullscreen').classList.remove('open');
-        }
+        y:
+            e.clientY -
+            rect.top
 
-        function confermaFirmaFullscreen() {
-            if (!hasFirma) {
-                alert("⚠️ Nessuna firma tracciata!");
-                return;
-            }
-            firmaTempBase64 = canvasFirma.toDataURL('image/jpeg', 0.85);
-            document.getElementById('labelStatoFirma').innerText = "✅ Firma registrata con successo";
-            document.getElementById('labelStatoFirma').style.color = "var(--success)";
-            chiudiSchermataFirmaFullscreen();
-        }
+    };
 
-        function ottieniPosizioneFirma(e) {
-            let rect = canvasFirma.getBoundingClientRect();
-            return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-        }
+}
 
-        function avviaDisegnoFirma(e) {
-            isDrawingFirma = true;
-            let pos = ottieniPosizioneFirma(e);
-            ctxFirma.beginPath();
-            ctxFirma.moveTo(pos.x, pos.y);
-        }
 
-        function disegnaFirma(e) {
-            if (!isDrawingFirma) return;
-            let pos = ottieniPosizioneFirma(e);
-            ctxFirma.lineTo(pos.x, pos.y);
-            ctxFirma.stroke();
-            hasFirma = true;
-        }
+function iniziaFirma(e) {
 
-        function fermaDisegnoFirma() {
-            isDrawingFirma = false;
-        }
 
-        function pulisciFirmaCanvas() {
-            ctxFirma.clearRect(0, 0, canvasFirma.width, canvasFirma.height);
-            hasFirma = false;
-            firmaTempBase64 = null;
-            document.getElementById('labelStatoFirma').innerText = "Nessuna firma inserita";
-            document.getElementById('labelStatoFirma').style.color = "var(--danger)";
-        }
+    e.preventDefault();
 
-        function aggiungiRigaMaterialeExtra() {
-            let container = document.getElementById('containerMaterialiExtra');
-            let rigaId = 'mat_row_' + Date.now() + Math.floor(Math.random() * 1000);
-            
-            let div = document.createElement('div');
-            div.className = 'materiale-extra-row';
-            div.id = rigaId;
-            div.innerHTML = `
-                <input type="text" placeholder="Descrizione materiale..." class="input-desc-mat">
-                <input type="number" placeholder="Qtà" class="input-qta-mat" value="1" min="1">
-                <button type="button" class="action-btn btn-danger" style="padding: 10px 12px;" onclick="document.getElementById('${rigaId}').remove()">✕</button>
-            `;
-            container.appendChild(div);
-        }
 
-        function mostraVista(vista) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            let sub = document.getElementById('sottotitoloHeader');
+    drawing = true;
 
-            if (vista === 'selezione') {
-                document.getElementById('viewSelezioneRuolo').classList.add('active');
-                sub.innerText = "Portale Unificato";
-            } else if (vista === 'login_ufficio') {
-                document.getElementById('viewLoginUfficio').classList.add('active');
-                sub.innerText = "Accesso Ufficio";
-            } else if (vista === 'login_operaio') {
-                document.getElementById('viewLoginOperaio').classList.add('active');
-                sub.innerText = "Accesso Operai";
-            } else if (vista === 'login_artigiano') {
-                document.getElementById('viewLoginArtigiano').classList.add('active');
-                sub.innerText = "Accesso Artigiani";
-            } else if (vista === 'ufficio') {
-                document.getElementById('viewUfficio').classList.add('active');
-                sub.innerText = "Pannello Ufficio";
-                popolaDipendentiUfficioMultiplo();
-                popolaTabellaPresenzeUfficio();
-                popolaGestionePasswordUfficio();
-                popolaSelectFiltroDipendenti();
-                aggiornaVistaUfficio();
-                eseguiControlloMancantiUfficio();
-            }
-        }
 
-        function effettuaLoginUfficio() {
-            let passInserita = document.getElementById('inputPasswordUfficio').value.trim();
-            let passAdminSalvata = localStorage.getItem('idra_password_ufficio') || "ufficio2026";
+    const p =
+        posizione(e);
 
-            if (passInserita === passAdminSalvata) {
-                document.getElementById('inputPasswordUfficio').value = '';
-                mostraVista('ufficio');
-            } else {
-                alert("⚠️ Password Ufficio non corretta! (La predefinita è: ufficio2026)");
-            }
-        }
 
-        function popolaTendineLogin() {
-            let selectOp = document.getElementById('selectLoginOperaio');
-            selectOp.innerHTML = '<option value="">-- Il mio nome --</option>';
-            elencoOperaiTotali.forEach(op => selectOp.innerHTML += `<option value="${op}">${op}</option>`);
+    ctx.beginPath();
 
-            let selectArt = document.getElementById('selectLoginArtigiano');
-            selectArt.innerHTML = '<option value="">-- Il mio nome --</option>';
-            elencoArtigianiTotali.forEach(art => selectArt.innerHTML += `<option value="${art}">${art}</option>`);
-        }
 
-        function effettuaLoginOperaio() {
-            let nome = document.getElementById('selectLoginOperaio').value;
-            let passInserita = document.getElementById('inputPasswordLoginOperaio').value.trim();
-            if (!nome || !passInserita) return alert("⚠️ Seleziona nome e password!");
-            gestisciLoginUtente(nome, passInserita, "operaio");
-        }
+    ctx.moveTo(
+        p.x,
+        p.y
+    );
 
-        function effettuaLoginArtigiano() {
-            let nome = document.getElementById('selectLoginArtigiano').value;
-            let passInserita = document.getElementById('inputPasswordLoginArtigiano').value.trim();
-            if (!nome || !passInserita) return alert("⚠️ Seleziona nome e password!");
-            gestisciLoginUtente(nome, passInserita, "artigiano");
-        }
+}
 
-        function gestisciLoginUtente(nome, passInserita, tipo) {
-            tipoUtenteCorrente = tipo;
-            let dbKey = tipo === "operaio" ? 'idra_password_operai' : 'idra_password_artigiani';
-            let defPass = nome.toLowerCase().replace(/\s+/g, '');
-            let passwordDB = JSON.parse(localStorage.getItem(dbKey)) || {};
-            let customPass = passwordDB[nome];
 
-            if (!customPass) {
-                if (passInserita === defPass) {
-                    utenteCorrente = nome;
-                    document.getElementById('viewLoginOperaio').classList.remove('active');
-                    document.getElementById('viewLoginArtigiano').classList.remove('active');
-                    document.getElementById('viewCambioPassword').classList.add('active');
-                } else {
-                    alert("⚠️ Password errata! Al primo accesso usa il tuo nome tutto minuscolo.");
-                }
-            } else {
-                if (passInserita === customPass) {
-                    avviaSessioneUtente(nome, tipo);
-                } else {
-                    alert("⚠️ Password non corretta!");
-                }
-            }
-        }
+function disegnaFirma(e) {
 
-        function salvaNuovaPassword() {
-            let nuovaP = document.getElementById('nuovaPasswordInput').value.trim();
-            let confermaP = document.getElementById('confermaPasswordInput').value.trim();
-            if (nuovaP.length < 4 || nuovaP !== confermaP) return alert("⚠️ Controlla le password (min 4 caratteri e coincidenti)!");
 
-            let dbKey = tipoUtenteCorrente === "operaio" ? 'idra_password_operai' : 'idra_password_artigiani';
-            let passwordDB = JSON.parse(localStorage.getItem(dbKey)) || {};
-            passwordDB[utenteCorrente] = nuovaP;
-            localStorage.setItem(dbKey, JSON.stringify(passwordDB));
+    if (!drawing)
+        return;
 
-            alert("✅ Password salvata!");
-            avviaSessioneUtente(utenteCorrente, tipoUtenteCorrente);
-        }
+    firmaPresente = true;
 
-        function avviaSessioneUtente(nome, tipo) {
-            utenteCorrente = nome;
-            tipoUtenteCorrente = tipo;
-            document.getElementById('labelUtenteConnessoMenu').innerText = `Utente: ${utenteCorrente} (${tipo === 'operaio' ? 'Operaio' : 'Artigiano'})`;
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById('viewMenuUtente').classList.add('active');
-            document.getElementById('sottotitoloHeader').innerText = tipo === 'operaio' ? "Portale Operai" : "Portale Artigiani";
-        }
 
-        function tornaAlMenuUtente() {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById('viewMenuUtente').classList.add('active');
-        }
+    e.preventDefault();
 
-        function esciLoginUtente() {
-            utenteCorrente = "";
-            tipoUtenteCorrente = "";
-            mostraVista('selezione');
-        }
 
-        function apriSchermata(tipoSchermata) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            if (tipoSchermata === 'foglio') {
-                document.getElementById('viewFormUtente').classList.add('active');
-                popolaCantieriUtente();
-                popolaColleghiUtente();
-                document.getElementById('containerMaterialiExtra').innerHTML = '';
-                pulisciFirmaCanvas();
-            } else if (tipoSchermata === 'fotografie') {
-                document.getElementById('viewFotoImpianti').classList.add('active');
-                popolaSelectCantieriGenerico('selectCantiereFoto', 'inputRicercaCantiereFoto');
-            } else if (tipoSchermata === 'garanzie') {
-                document.getElementById('viewGaranzie').classList.add('active');
-                popolaSelectCantieriGenerico('selectCantiereGaranzie', 'inputRicercaCantiereGaranzie');
-            }
-        }
+    const p =
+        posizione(e);
 
-        function popolaSelectCantieriGenerico(selectId, inputQueryId) {
-            let select = document.getElementById(selectId);
-            let query = document.getElementById(inputQueryId).value.toLowerCase().trim();
-            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            select.innerHTML = '';
-            let count = 0;
-            cantieriDB.forEach((c, idx) => {
-                if (!c.completato && (`${c.cliente} - ${c.indirizzo}`.toLowerCase().includes(query))) {
-                    select.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo}</option>`;
-                    count++;
-                }
-            });
-            if (count === 0) select.innerHTML = '<option value="">Nessun cantiere trovato</option>';
-        }
 
-        function creaCantiereAlVoloGenerico(idCli, idInd, idSelect, idQuery) {
-            let cliente = document.getElementById(idCli).value.trim();
-            let indirizzo = document.getElementById(idInd).value.trim();
-            if (!cliente || !indirizzo) return alert("⚠️ Inserisci cliente e indirizzo!");
+    ctx.lineTo(
+        p.x,
+        p.y
+    );
 
-            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            cantieriDB.push({ cliente: cliente, indirizzo: indirizzo, completato: false, statoRichiestaChiusura: null, storico: [], fotoImpianti: [], garanzie: [] });
-            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
 
-            document.getElementById(idCli).value = '';
-            document.getElementById(idInd).value = '';
-            document.getElementById(idQuery).value = '';
-            
-            popolaSelectCantieriGenerico(idSelect, idQuery);
-            let sel = document.getElementById(idSelect);
-            sel.selectedIndex = sel.options.length - 1;
-            alert("✅ Cantiere creato e selezionato!");
-        }
+    ctx.strokeStyle =
+        "#111827";
 
-        function popolaGestionePasswordUfficio() {
-            let container = document.getElementById('listaGestionePasswordUfficio');
-            container.innerHTML = '';
 
-            let opPassDB = JSON.parse(localStorage.getItem('idra_password_operai')) || {};
-            let artPassDB = JSON.parse(localStorage.getItem('idra_password_artigiani')) || {};
+    ctx.lineWidth =
+        2;
 
-            let tutti = [
-                ...elencoOperaiTotali.map(n => ({ nome: n, tipo: 'operaio' })),
-                ...elencoArtigianiTotali.map(n => ({ nome: n, tipo: 'artigiano' }))
-            ];
 
-            tutti.forEach(item => {
-                let db = item.tipo === 'operaio' ? opPassDB : artPassDB;
-                let haPersonalizzato = !!db[item.nome];
-                let statoTxt = haPersonalizzato ? "Personalizzata" : "Predefinita";
-                let safeId = item.nome.replace(/\s+/g, '_');
+    ctx.lineCap =
+        "round";
 
-                container.innerHTML += `
-                    <div class="collega-card-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
-                        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                            <div><b>${item.nome}</b> <span style="font-size: 0.75rem; color: var(--text-light);">(${item.tipo})</span></div>
-                            <button class="action-btn btn-danger" style="padding: 4px 8px; font-size: 0.7rem;" onclick="resettaPasswordUtente('${item.nome}', '${item.tipo}')">Resetta</button>
-                        </div>
-                        <div style="font-size: 0.75rem; color: ${haPersonalizzato ? 'var(--success)' : 'var(--text-light)'};">Stato: <b>${statoTxt}</b></div>
-                        <div style="display: flex; gap: 6px; width: 100%;">
-                            <input type="text" id="new_pass_${safeId}" placeholder="Nuova password..." style="padding: 6px 10px; font-size: 0.8rem;">
-                            <button class="action-btn btn-orange" style="width: auto; padding: 6px 12px; font-size: 0.8rem;" onclick="impostaPasswordAlVolo('${item.nome}', '${item.tipo}', '${safeId}')">Imposta</button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
 
-        function resettaPasswordUtente(nome, tipo) {
-            if (confirm(`Azzerare la password di ${nome}?`)) {
-                let dbKey = tipo === 'operaio' ? 'idra_password_operai' : 'idra_password_artigiani';
-                let db = JSON.parse(localStorage.getItem(dbKey)) || {};
-                delete db[nome];
-                localStorage.setItem(dbKey, JSON.stringify(db));
-                popolaGestionePasswordUfficio();
-            }
-        }
+    ctx.stroke();
 
-        function impostaPasswordAlVolo(nome, tipo, safeId) {
-            let inputVal = document.getElementById(`new_pass_${safeId}`).value.trim();
-            if (inputVal.length < 4) return alert("⚠️ Minimo 4 caratteri!");
-            let dbKey = tipo === 'operaio' ? 'idra_password_operai' : 'idra_password_artigiani';
-            let db = JSON.parse(localStorage.getItem(dbKey)) || {};
-            db[nome] = inputVal;
-            localStorage.setItem(dbKey, JSON.stringify(db));
-            document.getElementById(`new_pass_${safeId}`).value = '';
-            popolaGestionePasswordUfficio();
-        }
+}
 
-        function creaCantiereAlVoloUtente() {
-            let cliente = document.getElementById('nuovoClienteUtente').value.trim();
-            let indirizzo = document.getElementById('nuovoIndirizzoUtente').value.trim();
-            if (!cliente || !indirizzo) return alert("⚠️ Inserisci cliente e indirizzo!");
 
-            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            cantieriDB.push({ cliente: cliente, indirizzo: indirizzo, completato: false, statoRichiestaChiusura: null, storico: [], fotoImpianti: [], garanzie: [] });
-            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
+function terminaFirma() {
 
-            document.getElementById('nuovoClienteUtente').value = '';
-            document.getElementById('nuovoIndirizzoUtente').value = '';
-            document.getElementById('inputRicercaCantiereUtente').value = '';
-            popolaCantieriUtente();
-            let selectCantiere = document.getElementById('selectCantiereUtente');
-            selectCantiere.selectedIndex = selectCantiere.options.length - 1;
-            alert("✅ Cantiere creato e selezionato!");
-        }
+    drawing = false;
 
-        function popolaCantieriUtente() {
-            let select = document.getElementById('selectCantiereUtente');
-            let query = document.getElementById('inputRicercaCantiereUtente').value.toLowerCase().trim();
-            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            select.innerHTML = '';
+}
 
-            let count = 0;
-            cantieriDB.forEach((c, idx) => {
-                if (!c.completato && (`${c.cliente} - ${c.indirizzo}`.toLowerCase().includes(query))) {
-                    select.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo}</option>`;
-                    count++;
-                }
-            });
-            if (count === 0) select.innerHTML = '<option value="">Nessun cantiere trovato</option>';
-        }
 
-        function popolaColleghiUtente() {
-            const container = document.getElementById('listaColleghiUtente');
-            if (!container) return;
+canvas.addEventListener(
+    "mousedown",
+    iniziaFirma
+);
 
-            container.innerHTML = '';
-            const tuttiColleghi = [...elencoOperaiTotali, ...elencoArtigianiTotali];
-            let indiceCollega = 0;
 
-            tuttiColleghi.forEach((op) => {
-                // Non mostrare l'utente che ha effettuato l'accesso.
-                if (op === utenteCorrente) return;
+canvas.addEventListener(
+    "mousemove",
+    disegnaFirma
+);
 
-                const safeIndex = indiceCollega++;
-                const chkId = `chk_collega_${safeIndex}`;
-                const selectId = `ore_collega_${safeIndex}`;
 
-                const card = document.createElement('div');
-                card.className = 'collega-card-item';
+canvas.addEventListener(
+    "mouseup",
+    terminaFirma
+);
 
-                const label = document.createElement('label');
-                label.htmlFor = chkId;
 
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.id = chkId;
-                checkbox.name = 'collegaCheckbox';
-                checkbox.value = op;
-                checkbox.dataset.selectId = selectId;
+canvas.addEventListener(
+    "mouseleave",
+    terminaFirma
+);
 
-                const nome = document.createTextNode(' ' + op);
 
-                const select = document.createElement('select');
-                select.id = selectId;
-                select.disabled = true;
-                select.innerHTML = `
-                    <option value="8">8 Ore</option>
-                    <option value="7">7 Ore</option>
-                    <option value="6">6 Ore</option>
-                    <option value="5">5 Ore</option>
-                    <option value="4">4 Ore</option>
-                    <option value="3">3 Ore</option>
-                    <option value="2">2 Ore</option>
-                    <option value="1">1 Ora</option>
+canvas.addEventListener(
+    "touchstart",
+    iniziaFirma
+);
+
+
+canvas.addEventListener(
+    "touchmove",
+    disegnaFirma
+);
+
+
+canvas.addEventListener(
+    "touchend",
+    terminaFirma
+);
+
+
+/* ================================================= */
+/* CANCELLA FIRMA */
+/* ================================================= */
+
+function cancellaFirma() {
+
+
+    ctx.clearRect(
+
+        0,
+        0,
+        canvas.width,
+        canvas.height
+
+    );
+
+    firmaPresente = false;
+
+}
+
+
+/* ================================================= */
+/* CREA RIEPILOGO */
+/* ================================================= */
+
+function creaRiepilogo() {
+
+    if (!firmaPresente) {
+        alert("Acquisisci la firma del cliente prima di continuare.");
+        return;
+    }
+
+
+    const cantiere =
+        document.getElementById("cantiere").value;
+
+
+    const data =
+        document.getElementById("dataLavoro").value;
+
+
+    const descrizione =
+        document.getElementById("descrizione").value;
+
+
+    const note =
+        document.getElementById("note").value;
+
+
+/* ================= MATERIALI ================= */
+
+
+    let materialiHTML = "";
+
+
+    document
+        .querySelectorAll(".material-row")
+        .forEach(row => {
+
+
+            const nome =
+                row.querySelector(
+                    ".materiale-nome"
+                ).value;
+
+
+            const quantita =
+                row.querySelector(
+                    ".materiale-quantita"
+                ).value;
+
+
+            if (nome) {
+
+
+                materialiHTML += `
+
+                    <li>
+                        ${nome}
+                        — Quantità:
+                        ${quantita || "-"}
+                    </li>
+
                 `;
 
-                checkbox.addEventListener('change', function () {
-                    select.disabled = !this.checked;
-                });
-
-                label.appendChild(checkbox);
-                label.appendChild(nome);
-                card.appendChild(label);
-                card.appendChild(select);
-                container.appendChild(card);
-            });
-        }
-
-        function comprimiEConvertiImmagine(file) {
-            return new Promise((resolve) => {
-                let reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = function(e) {
-                    let img = new Image();
-                    img.src = e.target.result;
-                    img.onload = function() {
-                        let canvas = document.createElement('canvas');
-                        let maxDim = 1000, w = img.width, h = img.height;
-                        if (w > h && w > maxDim) { h *= maxDim / w; w = maxDim; }
-                        else if (h > maxDim) { w *= maxDim / h; h = maxDim; }
-                        canvas.width = w; canvas.height = h;
-                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                        resolve(canvas.toDataURL('image/jpeg', 0.75));
-                    };
-                };
-            });
-        }
-
-        async function elaboraFileList(files) {
-            let arr = [];
-            for (let i = 0; i < files.length; i++) {
-                let base64 = await comprimiEConvertiImmagine(files[i]);
-                arr.push(base64);
-            }
-            return arr;
-        }
-
-        async function salvaFoglioLavoroUtente() {
-            let cIdx = document.getElementById('selectCantiereUtente').value;
-            let stato = document.getElementById('selectStatoCantiereIntervento').value;
-            let data = document.getElementById('dataInterventoUtente').value;
-            let tipo = document.getElementById('tipoLavoroUtente').value;
-            let ore = document.getElementById('mieOreLavorate').value;
-            let note = document.getElementById('noteInterventoUtente').value.trim();
-
-            if (cIdx === "" || stato === "" || !note) {
-                alert("⚠️ Compila tutti i campi obbligatori (Cantiere, Stato e Note)!");
-                return;
-            }
-            if (!hasFirma || !firmaTempBase64) {
-                alert("⚠️ La firma del cliente è obbligatoria! Clicca su 'Apri Schermata Firma' e fai firmare il cliente.");
-                return;
             }
 
-            let inputBolle = document.getElementById('inputBolleManuale').files;
-            let fotoBolleBase64 = await elaboraFileList(inputBolle);
+        });
 
-            let materialiExtraList = [];
-            document.querySelectorAll('.materiale-extra-row').forEach(row => {
-                let desc = row.querySelector('.input-desc-mat').value.trim();
-                let qta = row.querySelector('.input-qta-mat').value.trim();
-                if (desc) {
-                    materialiExtraList.push(`${desc} (Qtà: ${qta || 1})`);
-                }
-            });
 
-            // Raccolta robusta dei colleghi selezionati.
-            // Non dipende più dagli indici dell'elenco originale.
-            let partecipanti = [`${utenteCorrente} (${ore}h)`];
+    if (!materialiHTML) {
 
-            document.querySelectorAll('#listaColleghiUtente input[name="collegaCheckbox"]:checked').forEach(chk => {
-                const selectId = chk.dataset.selectId;
-                const selOre = selectId ? document.getElementById(selectId) : null;
-                const oCollega = selOre ? selOre.value : "8";
-                partecipanti.push(`${chk.value} (${oCollega}h)`);
-            });
+        materialiHTML =
+            "<li>Nessun materiale inserito</li>";
 
-            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            if (!Array.isArray(cantieriDB) || !cantieriDB[cIdx]) {
-                alert("⚠️ Il cantiere selezionato non è più disponibile. Aggiorna la pagina e riprova.");
-                return;
+    }
+
+
+/* ================= LAVORATORI ================= */
+
+
+    let lavoratoriHTML = "";
+
+
+    document
+        .querySelectorAll(".worker-row")
+        .forEach(row => {
+
+
+            const nome =
+                row.querySelector(
+                    ".worker-nome"
+                ).value;
+
+
+            const ore =
+                row.querySelector(
+                    ".worker-ore"
+                ).value;
+
+
+            if (nome) {
+
+
+                lavoratoriHTML += `
+
+                    <li>
+
+                        <strong>
+                            ${nome}
+                        </strong>
+
+                        —
+                        Ore totali:
+                        ${ore || "0"}
+
+                    </li>
+
+                `;
+
             }
-            if (!cantieriDB[cIdx].storico) cantieriDB[cIdx].storico = [];
 
-            cantieriDB[cIdx].storico.push({ 
-                data, 
-                tipo, 
-                operai: partecipanti.join(', '), 
-                note, 
-                materialiExtra: materialiExtraList,
-                statoIntervento: stato, 
-                fotoBolle: fotoBolleBase64, 
-                firmaCliente: firmaTempBase64,
-                fotoLavori: [] 
-            });
+        });
 
-            cantieriDB[cIdx].statoRichiestaChiusura = (stato === "Terminato") ? "In attesa di verifica" : null;
-            cantieriDB[cIdx].completato = false; 
 
-            try {
-                localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            } catch (erroreSalvataggio) {
-                console.error('Errore salvataggio foglio di lavoro:', erroreSalvataggio);
-                if (erroreSalvataggio && (erroreSalvataggio.name === 'QuotaExceededError' || erroreSalvataggio.code === 22)) {
-                    alert('⚠️ Memoria locale piena. Le foto/immagini salvate nel browser hanno raggiunto il limite. Elimina qualche vecchio allegato oppure esporta/archivia i dati prima di continuare.');
-                } else {
-                    alert('⚠️ Errore durante il salvataggio del foglio. Controlla la console del browser per i dettagli.');
-                }
-                return;
+    if (!lavoratoriHTML) {
+
+        lavoratoriHTML =
+            "<li>Nessun lavoratore inserito</li>";
+
+    }
+
+
+/* ================= FOTO ================= */
+
+
+    const foto =
+        document.getElementById(
+            "fotoBolle"
+        ).files.length;
+
+
+/* ================= RIEPILOGO ================= */
+
+
+    document.getElementById(
+        "riepilogo"
+    ).innerHTML = `
+
+
+        <div class="summary-section">
+
+            <h3>
+                📍 Cantiere
+            </h3>
+
+            <p>
+
+                <strong>
+                    ${cantiere}
+                </strong>
+
+                <br>
+
+                Data:
+                ${data}
+
+            </p>
+
+        </div>
+
+
+        <div class="summary-section">
+
+            <h3>
+                🔧 Lavoro eseguito
+            </h3>
+
+            <p>
+                ${descrizione}
+            </p>
+
+
+            ${
+                note
+
+                ?
+
+                `<p>
+                    <strong>
+                        Note:
+                    </strong>
+
+                    <br>
+
+                    ${note}
+
+                </p>`
+
+                :
+
+                ""
+
             }
-            alert("✅ Foglio di lavoro inviato con successo! L'ufficio verificherà la richiesta.");
-            
-            document.getElementById('noteInterventoUtente').value = '';
-            document.getElementById('inputBolleManuale').value = '';
-            document.getElementById('containerMaterialiExtra').innerHTML = '';
-            pulisciFirmaCanvas();
-            tornaAlMenuUtente();
+
+        </div>
+
+
+        <div class="summary-section">
+
+            <h3>
+                📦 Materiali
+            </h3>
+
+            <ul>
+
+                ${materialiHTML}
+
+            </ul>
+
+        </div>
+
+
+        <div class="summary-section">
+
+            <h3>
+                👷 Lavoratori e ore
+            </h3>
+
+            <ul>
+
+                ${lavoratoriHTML}
+
+            </ul>
+
+        </div>
+
+
+        <div class="summary-section">
+
+            <h3>
+                📷 Bolle
+            </h3>
+
+            <p>
+
+                ${foto}
+                foto caricate
+
+            </p>
+
+        </div>
+
+
+        <div class="summary-section">
+
+            <h3>
+                ✍️ Firma cliente
+            </h3>
+
+            <p>
+                Firma acquisita sul dispositivo.
+            </p>
+
+        </div>
+
+    `;
+
+
+    document
+        .getElementById("step5")
+        .classList.remove("active");
+
+
+    document
+        .getElementById("step6")
+        .classList.add("active");
+
+
+    currentStep = 6;
+
+
+    aggiornaProgress();
+
+}
+
+
+/* ================================================= */
+/* INVIO */
+/* ================================================= */
+
+function inviaFoglioLegacy() {
+
+
+    /*
+    
+    PER ORA L'INVIO È UNA SIMULAZIONE.
+
+    In seguito collegheremo questa funzione
+    al database e all'interfaccia dell'ufficio.
+
+    */
+
+
+    document
+        .getElementById("step6")
+        .classList.remove("active");
+
+
+    document
+        .querySelector(".progress")
+        .style.display = "none";
+
+
+    document
+        .getElementById("success")
+        .classList.add("active");
+
+}
+
+
+
+/* =====================================================
+   IDROLIST - COLLEGAMENTO CON UFFICIO
+   PROTOTIPO LOCALE: stesso browser/origine
+===================================================== */
+
+const IDROLIST_SHARED_KEY='idrolist_shared_data_v1';
+
+function idrolistGetAccounts(){
+    try{return JSON.parse(localStorage.getItem(IDROLIST_ACCOUNTS_KEY))||{};}catch(e){return {};}
+}
+
+function idrolistSetAccounts(accounts){
+    localStorage.setItem(IDROLIST_ACCOUNTS_KEY,JSON.stringify(accounts));
+}
+
+function mostraErrore(id,testo){
+    const element=document.getElementById(id);
+    element.textContent=testo;
+    element.classList.add('visible');
+}
+
+function nascondiErrore(id){
+    document.getElementById(id).classList.remove('visible');
+}
+
+function inizializzaAccesso(){
+    const select=document.getElementById('accountWorker');
+    select.innerHTML='<option value="">-- Seleziona il tuo nome --</option>'+IDROLIST_WORKERS.map(function(nome){
+        return `<option value="${idrolistEscapeHtml(nome)}">${idrolistEscapeHtml(nome)}</option>`;
+    }).join('');
+}
+
+function accediOperaio(){
+    nascondiErrore('loginError');
+    const nome=document.getElementById('accountWorker').value;
+    const password=document.getElementById('accountPassword').value;
+    if(!nome||!password){mostraErrore('loginError','Seleziona il tuo nome e inserisci la password.');return;}
+    const accounts=idrolistGetAccounts();
+    if(!accounts[nome]){
+        if(password!==IDROLIST_TEMPORARY_PASSWORD){
+            mostraErrore('loginError','Password temporanea non corretta.');
+            return;
         }
+        document.getElementById('passwordWorkerName').textContent='Operaio: '+nome;
+        document.getElementById('loginScreen').hidden=true;
+        document.getElementById('passwordScreen').hidden=false;
+        window.idrolistPendingWorker=nome;
+        return;
+    }
+    if(accounts[nome].password!==password){mostraErrore('loginError','Password non corretta.');return;}
+    apriAreaLavoro(nome);
+}
 
-        async function salvaFotoImpianti() {
-            let cIdx = document.getElementById('selectCantiereFoto').value;
-            let files = document.getElementById('inputFotoImpiantiExtra').files;
-            let note = document.getElementById('noteFotoImpianti').value.trim();
+function salvaNuovaPassword(){
+    nascondiErrore('passwordError');
+    const password=document.getElementById('newAccountPassword').value;
+    const conferma=document.getElementById('confirmAccountPassword').value;
+    if(password.length<8){mostraErrore('passwordError','La password deve contenere almeno 8 caratteri.');return;}
+    if(password!==conferma){mostraErrore('passwordError','Le due password non coincidono.');return;}
+    const nome=window.idrolistPendingWorker;
+    if(!nome)return;
+    const accounts=idrolistGetAccounts();
+    accounts[nome]={password:password, aggiornatoIl:new Date().toISOString()};
+    idrolistSetAccounts(accounts);
+    apriAreaLavoro(nome);
+}
 
-            if (cIdx === "" || files.length === 0) return alert("⚠️ Seleziona un cantiere e almeno una foto degli impianti!");
-            if (!note) return alert("⚠️ La descrizione/nota delle foto impianti è obbligatoria!");
+function apriAreaLavoro(nome){
+    idrolistCurrentWorker=nome;
+    document.getElementById('loginScreen').hidden=true;
+    document.getElementById('passwordScreen').hidden=true;
+    document.getElementById('workArea').hidden=false;
+    document.querySelector('.header span').textContent=nome;
+    caricaClientiOperai();
+}
 
-            let fotoBase64 = await elaboraFileList(files);
-            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            if (!cantieriDB[cIdx].fotoImpianti) cantieriDB[cIdx].fotoImpianti = [];
+function idrolistEscapeHtml(value){
+    return String(value ?? '').replace(/[&<>'"]/g,function(char){
+        return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char];
+    });
+}
 
-            cantieriDB[cIdx].fotoImpianti.push({
-                data: new Date().toISOString().split('T')[0],
-                utente: utenteCorrente,
-                note: note,
-                foto: fotoBase64
-            });
+function idrolistGetData(){
+    try{
+        const raw=localStorage.getItem(IDROLIST_SHARED_KEY);
+        if(!raw)return {operai:IDROLIST_WORKERS.slice(),cantieri:[],rapportini:[]};
+        const data=JSON.parse(raw);
+        data.operai=IDROLIST_WORKERS.slice();
+        data.cantieri=data.cantieri||[];
+        data.rapportini=data.rapportini||[];
+        return data;
+    }catch(e){
+        return {operai:[],cantieri:[],rapportini:[]};
+    }
+}
 
-            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            alert("✅ Foto impianti salvate con successo!");
-            document.getElementById('inputFotoImpiantiExtra').value = '';
-            document.getElementById('noteFotoImpianti').value = '';
-            tornaAlMenuUtente();
-        }
+function idrolistSaveData(data){
+    localStorage.setItem(IDROLIST_SHARED_KEY,JSON.stringify(data));
+}
 
-        async function salvaGaranzie() {
-            let cIdx = document.getElementById('selectCantiereGaranzie').value;
-            let files = document.getElementById('inputFotoGaranzieExtra').files;
+function caricaClientiOperai(){
+    const select=document.getElementById('cliente');
+    if(!select)return;
+    const data=idrolistGetData();
+    const current=select.value;
+    const clienti=[...new Set(data.cantieri
+        .filter(c=>c.stato!=='Chiuso'&&String(c.nome||'').trim())
+        .map(c=>String(c.nome).trim()))].sort((a,b)=>a.localeCompare(b,'it'));
+    select.innerHTML='<option value="">-- Seleziona cliente --</option>';
+    clienti.forEach(nome=>{
+        const opt=document.createElement('option');
+        opt.value=nome;
+        opt.textContent=nome;
+        select.appendChild(opt);
+    });
+    if(clienti.includes(current))select.value=current;
+    caricaCantieriOperai();
+}
 
-            if (cIdx === "" || files.length === 0) return alert("⚠️ Seleziona un cantiere e almeno una foto dell'etichetta di garanzia!");
+function caricaCantieriOperai(){
+    const select=document.getElementById('cantiere');
+    const cliente=document.getElementById('cliente');
+    if(!select||!cliente)return;
+    const data=idrolistGetData();
+    const current=select.value;
+    select.innerHTML='';
+    if(!cliente.value){
+        select.disabled=true;
+        select.innerHTML='<option value="">-- Seleziona prima il cliente --</option>';
+        return;
+    }
+    const cantieri=data.cantieri.filter(c=>c.stato!=='Chiuso'&&String(c.nome||'').trim()===cliente.value);
+    select.disabled=false;
+    select.innerHTML='<option value="">-- Seleziona cantiere --</option>';
+    cantieri.forEach(c=>{
+        const opt=document.createElement('option');
+        opt.value=c.id;
+        opt.textContent=c.indirizzo+(c.operaio?' — '+c.operaio:'');
+        select.appendChild(opt);
+    });
+    if(cantieri.some(c=>c.id===current))select.value=current;
+}
 
-            let fotoBase64 = await elaboraFileList(files);
-            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            if (!cantieriDB[cIdx].garanzie) cantieriDB[cIdx].garanzie = [];
+function creaSelectOperai(){
+    return idrolistGetData().operai.map(n=>`<option value="${idrolistEscapeHtml(n)}">${idrolistEscapeHtml(n)}</option>`).join('');
+}
 
-            cantieriDB[cIdx].garanzie.push({
-                data: new Date().toISOString().split('T')[0],
-                utente: utenteCorrente,
-                foto: fotoBase64
-            });
+function aggiungiLavoratore(){
+    const div=document.createElement('div');
+    div.className='worker-row';
+    div.innerHTML=`
+        <select class="worker-nome">
+            <option value="">-- Seleziona operaio --</option>
+            ${creaSelectOperai()}
+        </select>
+        <input type="number" placeholder="Ore totali" min="0" step="0.5" class="worker-ore">
+        <button class="remove-btn" onclick="this.parentElement.remove()">✕</button>
+    `;
+    document.getElementById('lavoratori').appendChild(div);
+}
 
-            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            alert("✅ Foto etichette garanzia salvate con successo!");
-            document.getElementById('inputFotoGaranzieExtra').value = '';
-            tornaAlMenuUtente();
-        }
+function inviaFoglio(){
+    const data=idrolistGetData();
+    const select=document.getElementById('cantiere');
+    const cantiere=data.cantieri.find(c=>c.id===select.value);
+    if(!cantiere){alert('Seleziona un cantiere.');return;}
 
-        function popolaSelectFiltroDipendenti() {
-            let sel = document.getElementById('selectFiltroDipendente');
-            sel.innerHTML = '<option value="">Tutti</option>';
-            let tutti = [...elencoOperaiTotali, ...elencoArtigianiTotali];
-            tutti.forEach(op => sel.innerHTML += `<option value="${op}">${op}</option>`);
-        }
+    const materiali=[];
+    document.querySelectorAll('.material-row').forEach(row=>{
+        const nome=row.querySelector('.materiale-nome')?.value.trim();
+        const quantita=row.querySelector('.materiale-quantita')?.value;
+        if(nome)materiali.push({nome,quantita:quantita||0});
+    });
 
-        function apriModaleFiltri() { document.getElementById('modalFiltri').classList.add('open'); filtraArchivioModale(); }
-        function chiudiModaleFiltri() { document.getElementById('modalFiltri').classList.remove('open'); }
-        function apriZoomFoto(src) { document.getElementById('imgZoomFull').src = src; document.getElementById('modalFotoZoom').classList.add('open'); }
-        function chiudiZoomFoto() { document.getElementById('modalFotoZoom').classList.remove('open'); }
-        function toggleAccordion(id, el) { 
-            let content = document.getElementById(id);
-            content.classList.toggle('open'); 
-            el.querySelector('span:last-child').innerText = content.classList.contains('open') ? '▲' : '▼'; 
-        }
+    const lavoratori=[];
+    document.querySelectorAll('.worker-row').forEach(row=>{
+        const nome=row.querySelector('.worker-nome')?.value;
+        const ore=row.querySelector('.worker-ore')?.value;
+        if(nome)lavoratori.push({nome,ore:Number(ore||0)});
+    });
 
-        function popolaDipendentiUfficioMultiplo() {
-            let c = document.getElementById('listaDipendentiUfficioMultiplo');
-            c.innerHTML = '';
-            let tutti = [...elencoOperaiTotali, ...elencoArtigianiTotali];
-            tutti.forEach(op => {
-                let id = `ore_uff_${op.replace(/\s+/g, '_')}`;
-                c.innerHTML += `<div class="collega-card-item"><label><input type="checkbox" name="dipUffChk" value="${op}" onchange="document.getElementById('${id}').disabled = !this.checked"> ${op}</label><select id="${id}" disabled><option value="8">8h</option><option value="7">7h</option><option value="6">6h</option><option value="5">5h</option><option value="4">4h</option></select></div>`;
-            });
-        }
+    if(!lavoratori.length){alert('Inserisci almeno un lavoratore.');return;}
 
-        function popolaTabellaPresenzeUfficio() {
-            let c = document.getElementById('listaPresenzeUfficio');
-            c.innerHTML = '';
-            let assenzeDB = JSON.parse(localStorage.getItem('idra_assenze_dettaglio_db')) || {};
-            let tutti = [...elencoOperaiTotali, ...elencoArtigianiTotali];
-            tutti.forEach(op => {
-                let sId = op.replace(/\s+/g, '_');
-                let d = assenzeDB[op] || { stato: 'Presente', finoA: '', tipo: 'Ferie' };
-                c.innerHTML += `<div class="presenza-item"><b>${op}</b><select id="st_${sId}" onchange="document.getElementById('det_${sId}').style.display = (this.value==='Assente'?'flex':'none')"><option value="Presente" ${d.stato==='Presente'?'selected':''}>Presente</option><option value="Assente" ${d.stato==='Assente'?'selected':''}>Assente</option></select><div id="det_${sId}" style="display:${d.stato==='Assente'?'flex':'none'}; gap:5px;"><select id="tp_${sId}"><option value="Ferie">Ferie</option><option value="Malattia">Malattia</option></select><input type="date" id="fn_${sId}" value="${d.finoA}"></div></div>`;
-            });
-        }
+    const fotoInput=document.getElementById('fotoBolle');
+    const rapportino={
+        id:'RAP-'+Date.now(),
+        data:document.getElementById('dataLavoro')?.value||new Date().toISOString().slice(0,10),
+        cantiereId:cantiere.id,
+        cantiere:cantiere.nome,
+        indirizzo:cantiere.indirizzo,
+        descrizione:document.getElementById('descrizione')?.value.trim()||'',
+        note:document.getElementById('note')?.value.trim()||'',
+        materiali,
+        lavoratori,
+        compilatoDa:idrolistCurrentWorker,
+        numeroFotoBolle:fotoInput?fotoInput.files.length:0,
+        firmaCliente:firmaPresente,
+        stato:'Da verificare',
+        creatoIl:new Date().toISOString()
+    };
 
-        function salvaPresenzeUfficio() {
-            let db = {};
-            let tutti = [...elencoOperaiTotali, ...elencoArtigianiTotali];
-            tutti.forEach(op => {
-                let id = op.replace(/\s+/g, '_');
-                db[op] = { stato: document.getElementById(`st_${id}`).value, tipo: document.getElementById(`tp_${id}`).value, finoA: document.getElementById(`fn_${id}`).value };
-            });
-            localStorage.setItem('idra_assenze_dettaglio_db', JSON.stringify(db));
-            alert("✅ Presenze salvate!");
-            eseguiControlloMancantiUfficio();
-        }
+    data.rapportini.push(rapportino);
+    idrolistSaveData(data);
 
-        function creaCantiereUfficio() {
-            let cliente = document.getElementById('nuovoCliente').value.trim();
-            let indirizzo = document.getElementById('nuovoIndirizzo').value.trim();
-            if (!cliente || !indirizzo) return alert("Inserisci cliente e indirizzo!");
-            let cantieriDB = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            cantieriDB.push({ cliente, indirizzo, completato: false, statoRichiestaChiusura: null, storico: [], fotoImpianti: [], garanzie: [] });
-            localStorage.setItem('idra_cantieri_db', JSON.stringify(cantieriDB));
-            document.getElementById('nuovoCliente').value = ''; 
-            document.getElementById('nuovoIndirizzo').value = '';
-            aggiornaVistaUfficio();
-            alert("✅ Cantiere creato!");
-        }
+    document.getElementById('step6')?.classList.remove('active');
+    document.getElementById('success')?.classList.add('active');
+    document.querySelector('.progress')?.style.setProperty('display','none');
+}
 
-        function popolaSelectCantieriUfficio() {
-            let sel = document.getElementById('selectCantiereUfficio');
-            let q = document.getElementById('inputRicercaCantiereUfficio').value.toLowerCase().trim();
-            let db = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            sel.innerHTML = '';
-            db.forEach((c, idx) => {
-                if (!c.completato && `${c.cliente} - ${c.indirizzo}`.toLowerCase().includes(q)) {
-                    sel.innerHTML += `<option value="${idx}">${c.cliente} - ${c.indirizzo}</option>`;
-                }
-            });
-        }
+window.addEventListener('storage',function(e){
+    if(e.key===IDROLIST_SHARED_KEY)caricaClientiOperai();
+});
 
-        function registraUfficioMultiplo() {
-            let idx = document.getElementById('selectCantiereUfficio').value;
-            let data = document.getElementById('dataInterventoUfficio').value;
-            let note = document.getElementById('noteUfficio').value.trim();
-            if (idx === "") return alert("Seleziona cantiere!");
+document.addEventListener('DOMContentLoaded',function(){
+    inizializzaAccesso();
+});
+</script>
 
-            let ops = [];
-            document.querySelectorAll('input[name="dipUffChk"]:checked').forEach(cb => {
-                let o = document.getElementById(`ore_uff_${cb.value.replace(/\s+/g, '_')}`).value;
-                ops.push(`${cb.value} (${o}h)`);
-            });
-            if (ops.length === 0) return alert("Seleziona dipendenti!");
-
-            let db = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            if (!db[idx].storico) db[idx].storico = [];
-            db[idx].storico.push({ data, tipo: "Ufficio", operai: ops.join(', '), note, materialiExtra: [], statoIntervento: "In Corso", fotoBolle: [], fotoLavori: [] });
-            localStorage.setItem('idra_cantieri_db', JSON.stringify(db));
-            alert("✅ Registrato!");
-            aggiornaVistaUfficio();
-        }
-
-        function cambiaCartella(t) {
-            cartellaCorrente = t;
-            document.getElementById('btnTabDaFare').className = t === 'da_fare' ? 'tab-btn active-da-fare' : 'tab-btn';
-            document.getElementById('btnTabTerminati').className = t === 'terminati' ? 'tab-btn active-terminati' : 'tab-btn';
-            aggiornaVistaUfficio();
-        }
-
-        function aggiornaVistaUfficio() {
-            popolaSelectCantieriUfficio();
-            let db = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            let cont = document.getElementById('listaCantieriUfficio');
-            cont.innerHTML = '';
-            db.forEach((c, idx) => {
-                if ((cartellaCorrente === 'da_fare' && !c.completato) || (cartellaCorrente === 'terminati' && c.completato)) {
-                    let stHtml = '';
-                    if (c.storico) {
-                        c.storico.forEach(s => {
-                            let fb = s.fotoBolle && s.fotoBolle.length > 0 ? s.fotoBolle.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('') : '';
-                            let matHtml = s.materialiExtra && s.materialiExtra.length > 0 ? `<div style="margin-top:4px; font-size:0.75rem; color:#b45309;"><b>📦 Materiale Extra / Fuori DDT:</b> ${s.materialiExtra.join(', ')}</div>` : '';
-                            let firmaHtml = s.firmaCliente ? `<div style="margin-top:6px;"><span style="font-weight:700; color:var(--brand-dark); font-size:0.75rem; text-transform:uppercase;">✍️ Firma Cliente:</span><br><img src="${s.firmaCliente}" class="foto-thumb" style="width:120px; height:50px; object-fit:contain; background:#fff;" onclick="apriZoomFoto('${s.firmaCliente}')"></div>` : '';
-                            
-                            stHtml += `
-                                <div style="background:#f1f5f9; padding:10px; border-radius:8px; margin-top:8px; font-size:0.8rem; border: 1px solid var(--border);">
-                                    <div><b>📅 ${s.data}</b> (${s.tipo}) - ${s.operai}</div>
-                                    <div style="margin-top:4px;"><i>${s.note.replace(/\n/g, '<br>')}</i></div>
-                                    ${matHtml}
-                                    ${fb ? `<div style="margin-top:6px; font-weight:700; color:var(--brand-dark); font-size:0.75rem; text-transform:uppercase;">📄 Foto DDT:</div><div class="foto-thumb-container">${fb}</div>` : ''}
-                                    ${firmaHtml}
-                                </div>`;
-                        });
-                    }
-
-                    let fotoImpiantiHtml = '';
-                    if (c.fotoImpianti && c.fotoImpianti.length > 0) {
-                        c.fotoImpianti.forEach(fi => {
-                            let fList = fi.foto.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('');
-                            fotoImpiantiHtml += `<div style="background:#e0f2fe; padding:8px; border-radius:8px; margin-top:6px; font-size:0.8rem;"><div><b>📷 Impianto (${fi.data})</b> - ${fi.utente}</div>${fi.note ? `<div><i>${fi.note}</i></div>` : ''}<div class="foto-thumb-container">${fList}</div></div>`;
-                        });
-                    }
-
-                    let garanzieHtml = '';
-                    if (c.garanzie && c.garanzie.length > 0) {
-                        c.garanzie.forEach(g => {
-                            let gList = g.foto.map(img => `<img src="${img}" class="foto-thumb" onclick="apriZoomFoto('${img}')">`).join('');
-                            garanzieHtml += `<div style="background:#f3e8ff; padding:8px; border-radius:8px; margin-top:6px; font-size:0.8rem;"><div><b>🛡️ Garanzia / Etichetta (${g.data})</b> - ${g.utente}</div><div class="foto-thumb-container">${gList}</div></div>`;
-                        });
-                    }
-
-                    let btnApprova = '';
-                    if (c.statoRichiestaChiusura === "In attesa di verifica" && !c.completato) {
-                        btnApprova = `<button class="action-btn btn-green" style="padding:6px; font-size:0.8rem; margin-bottom:6px;" onclick="approvaChiusuraCantiere(${idx})">✅ Approva Chiusura</button>`;
-                    }
-
-                    let badgeRichiesta = c.statoRichiestaChiusura ? `<span class="badge badge-alert" style="margin-left: 6px;">Richiesta Chiusura</span>` : '';
-
-                    cont.innerHTML += `
-                        <div class="cantiere-card ${c.completato?'terminato':''}">
-                            <div style="font-weight:800;">${c.cliente} ${badgeRichiesta}</div>
-                            <div style="font-size:0.8rem; color:var(--text-light);">${c.indirizzo}</div>
-                            ${stHtml}
-                            ${fotoImpiantiHtml}
-                            ${garanzieHtml}
-                            <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
-                                ${btnApprova}
-                                <div style="display:flex; gap:6px;">
-                                    <button class="action-btn ${c.completato?'btn-green':'btn-orange'}" style="padding:6px; font-size:0.8rem;" onclick="toggleStato(${idx})">${c.completato?'Riapri':'Termina'}</button>
-                                    <button class="action-btn btn-danger" onclick="eliminaCantiere(${idx})">Elimina</button>
-                                </div>
-                            </div>
-                        </div>`;
-                }
-            });
-            aggiornaTabellaRiepilogo(db);
-        }
-
-        function approvaChiusuraCantiere(idx) {
-            if (confirm("Confermi di voler chiudere definitivamente questo cantiere?")) {
-                let db = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-                db[idx].completato = true;
-                db[idx].statoRichiestaChiusura = null;
-                localStorage.setItem('idra_cantieri_db', JSON.stringify(db));
-                aggiornaVistaUfficio();
-                alert("✅ Cantiere chiuso con successo!");
-            }
-        }
-
-        function toggleStato(idx) {
-            let db = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            db[idx].completato = !db[idx].completato;
-            if (db[idx].completato) {
-                db[idx].statoRichiestaChiusura = null;
-            }
-            localStorage.setItem('idra_cantieri_db', JSON.stringify(db));
-            aggiornaVistaUfficio();
-        }
-
-        function eliminaCantiere(idx) {
-            if (confirm("Eliminare?")) {
-                let db = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-                db.splice(idx, 1);
-                localStorage.setItem('idra_cantieri_db', JSON.stringify(db));
-                aggiornaVistaUfficio();
-            }
-        }
-
-        function raccogliRighe(db) {
-            let righe = [];
-            db.forEach(c => {
-                if (c.storico) {
-                    c.storico.forEach(s => {
-                        s.operai.split(',').forEach(p => {
-                            let m = p.trim().match(/^(.*?)\s*\(([\d.]+)h\)$/);
-                            if (m) righe.push({ data: s.data, dipendente: m[1].trim(), cantiere: c.cliente, oreNum: parseFloat(m[2]) || 0, ore: `${m[2]}h` });
-                        });
-                    });
-                }
-            });
-            return righe;
-        }
-
-        function aggiornaTabellaRiepilogo(db) {
-            let tb = document.getElementById('corpoTabellaRiepilogo');
-            tb.innerHTML = '';
-            let righe = raccogliRighe(db).slice(0, 5);
-            if (righe.length === 0) { tb.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-light);">Nessun dato.</td></tr>`; return; }
-            righe.forEach(r => tb.innerHTML += `<tr><td><b>${r.data}</b></td><td><b>${r.dipendente}</b></td><td>${r.cantiere}</td><td><b>${r.ore}</b></td></tr>`);
-        }
-
-        function filtraArchivioModale() {
-            let dF = document.getElementById('selectFiltroDipendente').value;
-            let dtF = document.getElementById('inputFiltroData').value;
-            let cF = document.getElementById('inputFiltroCantiere').value.toLowerCase().trim();
-            let tb = document.getElementById('corpoTabellaModaleFiltri');
-            tb.innerHTML = '';
-            let righe = raccogliRighe(JSON.parse(localStorage.getItem('idra_cantieri_db')) || []).filter(r => (dF === "" || r.dipendente === dF) && (dtF === "" || r.data.includes(dtF)) && (cF === "" || r.cantiere.toLowerCase().includes(cF)));
-            let tot = 0;
-            righe.forEach(r => { tot += r.oreNum; tb.innerHTML += `<tr><td><b>${r.data}</b></td><td><b>${r.dipendente}</b></td><td>${r.cantiere}</td><td><b>${r.ore}</b></td></tr>`; });
-            document.getElementById('infoTotaleOreFiltro').innerHTML = `<b>Totale Ore:</b> ${tot}h`;
-        }
-
-        function eseguiControlloMancantiUfficio() {
-            let tb = document.getElementById('corpoTabellaControlloMancanti');
-            tb.innerHTML = '';
-            let db = JSON.parse(localStorage.getItem('idra_cantieri_db')) || [];
-            let oggi = new Date(), trovati = 0;
-            const operaiEsclusi = ["Bruno Nicola", "Coriglione Alessandro", "Marinoni Alessandro"];
-            let tuttiPerControllo = [...elencoOperaiTotali, ...elencoArtigianiTotali];
-
-            for (let i = 1; i <= 2; i++) {
-                let d = new Date(); d.setDate(oggi.getDate() - i);
-                let dStr = d.toISOString().split('T')[0];
-                tuttiPerControllo.forEach(op => {
-                    if (operaiEsclusi.includes(op)) return;
-                    let oreTot = 0;
-                    db.forEach(c => { if(c.storico) c.storico.forEach(s => { if(s.data === dStr && s.operai.includes(op)) oreTot += 8; }); });
-                    if(oreTot < 8) {
-                        trovati++;
-                        tb.innerHTML += `<tr><td>${dStr}</td><td>${op}</td><td><span class="badge badge-alert">Mancano ${8-oreTot}h</span></td></tr>`;
-                    }
-                });
-            }
-            if(trovati === 0) tb.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--success);">Tutti in regola! 🎉</td></tr>`;
-        }
-    </script>
 </body>
 </html>
