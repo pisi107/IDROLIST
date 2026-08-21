@@ -4110,7 +4110,6 @@ function openNewRapportinoUfficio(){
     const data=idrolistGetData();
     const cantieriAperti=(data.cantieri||[]).filter(c=>idrolistStatoCantiere(c)==='aperti');
     const clienti=[...new Set(cantieriAperti.map(c=>c.nome).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it'));
-    if(!clienti.length){alert('Non ci sono cantieri aperti disponibili.');return;}
     openModal('📋 Nuovo rapportino',`
         <div style="display:flex;gap:8px;margin:0 0 20px"><span id="nuovoRapportinoIndicatore" style="font-weight:700;color:#1769d1">Passaggio 1 di 7 — Cliente e cantiere</span></div>
         <section data-step-rapportino="1">
