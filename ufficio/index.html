@@ -27,6 +27,41 @@ body{
     overflow-y:auto;
 }
 
+.company-logos{
+    display:grid;
+    gap:10px;
+    margin:0 0 18px;
+}
+
+.company-logos img{
+    width:100%;
+    display:block;
+    background:#fff;
+    border-radius:8px;
+    padding:5px;
+    object-fit:contain;
+}
+
+.company-logos .idrotech-logo{height:102px}
+.company-logos .daikin-logo{height:50px}
+
+.impianti-gallery{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+    gap:12px;
+    margin-top:12px;
+}
+
+.impianti-gallery a{display:block}
+.impianti-gallery img{
+    display:block;
+    width:100%;
+    height:135px;
+    object-fit:cover;
+    border-radius:8px;
+    border:1px solid #dce3eb;
+}
+
 .logo{
     font-size:28px;
     font-weight:800;
@@ -58,10 +93,29 @@ body{
 main{
     margin-left:235px;
     padding:30px;
+    min-width:0;
 }
+
+.mobile-bar{display:none}
 
 .page{display:none}
 .page.active{display:block}
+
+/* Anagrafiche e riepiloghi del personale sempre in maiuscolo */
+#operai .list-card,
+#operaioDettaglio .card,
+#presenze .calendar,
+#presenze .calendar *,
+#presenze .detail-grid,
+#presenze .detail-grid *,
+#presenze select{
+    text-transform:uppercase !important;
+}
+
+.presenze-giornaliere,
+.presenze-giornaliere *{
+    text-transform:uppercase !important;
+}
 
 .topbar{
     display:flex;
@@ -94,6 +148,38 @@ h3{
     border-radius:10px;
     outline:none;
     font-size:14px;
+}
+
+.report-filters{
+    display:grid;
+    grid-template-columns:minmax(230px,1fr) minmax(230px,1fr);
+    gap:14px;
+    margin-bottom:18px;
+}
+
+.report-filters label{
+    display:block;
+    margin-bottom:6px;
+    color:#687487;
+    font-size:12px;
+    font-weight:700;
+}
+
+.report-filters select{
+    width:100%;
+    padding:12px;
+    border:1px solid #dce3eb;
+    border-radius:9px;
+    background:white;
+    font:inherit;
+}
+
+.report-client-group td{
+    padding:12px 13px;
+    color:#10243e;
+    background:#eaf2fd;
+    font-size:14px;
+    font-weight:800;
 }
 
 .card{
@@ -460,6 +546,54 @@ tr.clickable:hover{
     background:#f7fbff;
 }
 
+.calendar .holiday-number{
+    color:#dc2626;
+}
+
+.notification-bell{
+    position:relative;
+    width:auto;
+    background:#dc2626;
+    color:#fff;
+    border:0;
+    border-radius:12px;
+    padding:12px 16px;
+    font-size:22px;
+    cursor:pointer;
+    animation:idrolist-ring 2.2s ease-in-out infinite;
+}
+
+.notification-count{
+    position:absolute;
+    top:-8px;
+    right:-8px;
+    min-width:20px;
+    height:20px;
+    padding:0 4px;
+    border-radius:999px;
+    background:#111827;
+    color:#fff;
+    font-size:12px;
+    line-height:20px;
+    font-weight:800;
+}
+
+.notification-panel{display:none;}
+.notification-panel.open{display:block;}
+
+.nav.submenu{
+    margin-left:14px;
+    font-size:14px;
+    opacity:.9;
+}
+
+@keyframes idrolist-ring{
+    0%,85%,100%{transform:rotate(0)}
+    88%{transform:rotate(-12deg)}
+    92%{transform:rotate(12deg)}
+    96%{transform:rotate(-8deg)}
+}
+
 .day-number{
     font-weight:800;
     margin-bottom:8px;
@@ -476,11 +610,6 @@ tr.clickable:hover{
 .state-present{
     background:#e7f7ee;
     color:#16834a;
-}
-
-.state-absent{
-    background:#eee;
-    color:#777;
 }
 
 .state-sick{
@@ -578,6 +707,16 @@ tr.clickable:hover{
     font:inherit;
 }
 
+.signature-area{
+    display:block;
+    width:100%;
+    height:180px;
+    border:1px dashed #9da9b8;
+    border-radius:10px;
+    background:white;
+    touch-action:none;
+}
+
 .modal-footer{
     display:flex;
     justify-content:flex-end;
@@ -605,6 +744,16 @@ tr.clickable:hover{
 .detail-box strong{
     display:block;
     margin-top:5px;
+}
+
+.detail-box select{
+    width:100%;
+    margin-top:8px;
+    padding:10px;
+    border:1px solid #dce3eb;
+    border-radius:8px;
+    background:white;
+    font:inherit;
 }
 
 .notification{
@@ -646,7 +795,43 @@ tr.clickable:hover{
 @media(max-width:900px){
 
     .sidebar{
-        display:none;
+        display:block;
+        width:min(290px,82vw);
+        z-index:9000;
+        transform:translateX(-105%);
+        transition:transform .22s ease;
+        box-shadow:12px 0 30px rgba(7,20,38,.22);
+    }
+
+    .sidebar.open{
+        transform:translateX(0);
+    }
+
+    .mobile-bar{
+        position:sticky;
+        top:0;
+        z-index:8000;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        padding:12px 18px;
+        color:white;
+        background:#10243e;
+        box-shadow:0 2px 12px rgba(7,20,38,.15);
+    }
+
+    .mobile-logo{font-size:21px;font-weight:800}
+    .mobile-logo span{color:#58aaff}
+    .mobile-menu-toggle{
+        border:0;
+        border-radius:9px;
+        padding:9px 12px;
+        color:white;
+        background:#1d426a;
+        font:inherit;
+        font-weight:700;
+        cursor:pointer;
     }
 
     main{
@@ -673,9 +858,40 @@ tr.clickable:hover{
     .docs{
         grid-template-columns:1fr;
     }
+
+    .report-filters{grid-template-columns:1fr}
+
+    .card{overflow-x:auto}
 }
 
 @media(max-width:600px){
+
+    main{padding:14px 12px}
+    .mobile-bar{padding:10px 12px}
+    h1{font-size:25px}
+    .card{padding:14px;border-radius:12px}
+
+    table{min-width:620px}
+    .calendar{min-width:600px}
+
+    .list-card{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:10px;
+        align-items:center;
+    }
+
+    .list-card strong:first-child{grid-column:1/-1}
+    .list-card input{width:100%}
+
+    .modal-bg{padding:10px}
+    .modal{padding:16px;border-radius:14px;max-height:94vh}
+    .modal-header{gap:12px;align-items:flex-start}
+    .modal-header h2{font-size:20px}
+    .modal-footer{flex-wrap:wrap}
+    .modal-footer .btn{flex:1 1 auto}
+    .detail-grid{grid-template-columns:1fr}
+    .notification{right:12px;left:12px;bottom:12px}
 
     .info-grid,
     .stats-grid,
@@ -705,8 +921,9 @@ tr.clickable:hover{
 
 <aside class="sidebar">
 
-<div class="logo">
-IDRO<span>LIST</span>
+<div class="company-logos" aria-label="Loghi aziendali">
+<img class="idrotech-logo" src="idrolist-assets/idrotech-varese.jpeg" alt="Idrotech Varese">
+<img class="daikin-logo" src="idrolist-assets/daikin-aerotech.jpeg" alt="Daikin Aerotech">
 </div>
 
 <div class="nav-title">Gestione</div>
@@ -715,12 +932,16 @@ IDRO<span>LIST</span>
 📊 Dashboard
 </div>
 
-<div class="nav" onclick="go('cantieri',this)">
-📍 Cantieri
-</div>
-
 <div class="nav" onclick="go('clienti',this)">
 👥 Clienti
+</div>
+
+<div class="nav submenu" onclick="go('cantieri',this)">
+↳ Cantieri
+</div>
+
+<div class="nav submenu" onclick="go('fotoImpianti',this)">
+↳ 📷 Foto impianti
 </div>
 
 <div class="nav" onclick="go('rapportini',this)">
@@ -728,7 +949,11 @@ IDRO<span>LIST</span>
 </div>
 
 <div class="nav" onclick="go('operai',this)">
-👷 Operai
+👷 Dipendenti
+</div>
+
+<div class="nav" onclick="go('presenze',this)">
+📅 Presenze
 </div>
 
 <div class="nav" onclick="go('garanzie',this)">
@@ -747,6 +972,10 @@ IDRO<span>LIST</span>
 
 </aside>
 
+<header class="mobile-bar">
+    <div class="mobile-logo">IDRO<span>LIST</span></div>
+    <button class="mobile-menu-toggle" type="button" onclick="toggleMobileMenu()">☰ Menu</button>
+</header>
 
 <main>
 
@@ -770,6 +999,10 @@ Panoramica dell'attività aziendale
 class="search"
 placeholder="🔎 Cerca..."
 >
+
+<button id="notificationBell" class="notification-bell" type="button" onclick="toggleNotifiche()" aria-label="Apri notifiche">🔔<span id="notificationCount" class="notification-count" hidden>0</span></button>
+
+<button class="btn btn-primary" type="button" onclick="apriCompilazionePresenzeOggi()">📅 Compila presenze</button>
 
 </div>
 
@@ -802,6 +1035,10 @@ placeholder="🔎 Cerca..."
 
 </div>
 
+<div class="card notification-panel" id="notificheDashboard">
+<h2>🔔 Notifiche fogli di lavoro</h2>
+<p class="muted">Confronto tra ore segnate nelle presenze e ore inserite nei fogli di lavoro.</p>
+</div>
 
 <div class="card">
 
@@ -882,6 +1119,16 @@ onclick="newCantiere()">
 
 </div>
 
+<div class="report-filters">
+    <div>
+        <label for="filtroStatoCantieri">Visualizza</label>
+        <select id="filtroStatoCantieri" onchange="idrolistRenderCantieri()">
+            <option value="aperti">Cantieri aperti</option>
+            <option value="da-fatturare">Cantieri chiusi in attesa di fatturazione</option>
+            <option value="fatturati">Cantieri fatturati</option>
+        </select>
+    </div>
+</div>
 
 <div class="card">
 
@@ -2190,6 +2437,28 @@ onclick="openNewRapportinoUfficio()">
 
 </div>
 
+<div class="report-filters">
+    <div>
+        <label for="filtroStatoRapportini">Stato intervento</label>
+        <select id="filtroStatoRapportini" onchange="idrolistRenderRapportini()">
+            <option value="aperti">Interventi aperti</option>
+            <option value="da-fatturare">Interventi chiusi da fatturare</option>
+            <option value="fatturati">Interventi fatturati</option>
+        </select>
+    </div>
+    <div>
+        <label for="filtroClienteRapportini">Cliente</label>
+        <select id="filtroClienteRapportini" onchange="idrolistRenderRapportini()">
+            <option value="tutti">Tutti i clienti</option>
+        </select>
+    </div>
+    <div>
+        <label for="filtroCantiereRapportini">Cantiere</label>
+        <select id="filtroCantiereRapportini" onchange="idrolistRenderRapportini()">
+            <option value="tutti">Tutti i cantieri</option>
+        </select>
+    </div>
+</div>
 
 <div class="card">
 
@@ -2320,7 +2589,7 @@ Squadra, attività e presenze
 <button
 class="btn btn-primary"
 onclick="newOperaio()">
-＋ Nuovo operaio
+＋ Aggiungi dipendente
 </button>
 
 </div>
@@ -2503,12 +2772,6 @@ onclick="operaioTab('attivitaOperaio',this)">
 📋 Attività
 </button>
 
-<button
-class="tab"
-onclick="operaioTab('presenzeOperaio',this)">
-📅 Presenze
-</button>
-
 </div>
 
 
@@ -2621,7 +2884,7 @@ Via Dante 8 · Installazione
 <!-- PRESENZE -->
 
 <div
-id="presenzeOperaio"
+id="presenzeOperaioLegacy"
 class="panel">
 
 <div class="calendar-controls">
@@ -2633,7 +2896,7 @@ onclick="previousMonth()">
 </button>
 
 <div
-id="calendarMonth"
+id="calendarMonthLegacy"
 class="calendar-month">
 Agosto 2026
 </div>
@@ -2654,7 +2917,6 @@ Legenda:
 </strong>
 
 🟢 Presente ·
-⚪ Assente ·
 🔴 Malattia ·
 🔵 Ferie ·
 🟣 Straordinario
@@ -2682,7 +2944,7 @@ Legenda:
 
 </thead>
 
-<tbody id="calendarBody">
+<tbody id="calendarBodyLegacy">
 
 </tbody>
 
@@ -2691,6 +2953,57 @@ Legenda:
 </div>
 
 </section>
+
+</section>
+
+
+<!-- =====================================================
+     PRESENZE
+===================================================== -->
+
+<section id="presenze" class="page">
+
+<div class="topbar">
+<div><h1>Presenze</h1><div class="muted">Calendario presenze e ore per dipendente</div></div>
+</div>
+
+<div class="card">
+<label for="selezioneOperaioPresenze">Dipendente</label>
+<select id="selezioneOperaioPresenze" onchange="selezionaOperaioPresenze()"></select>
+
+<div id="statisticheAnnuePresenze" class="detail-grid" style="margin-top:18px"></div>
+<h3 style="margin:24px 0 10px">Statistiche generali squadra</h3>
+<div id="statisticheAnnueGeneraliPresenze" class="detail-grid"></div>
+
+<div class="calendar-controls">
+<button class="btn" onclick="previousMonth()">←</button>
+<div id="calendarMonth" class="calendar-month"></div>
+<button class="btn" onclick="nextMonth()">→</button>
+</div>
+
+<div class="note"><strong>Legenda:</strong> 🟢 Presente · 🔴 Malattia · 🔵 Ferie · 🟣 Straordinario</div>
+<br>
+<table class="calendar"><thead><tr><th>Lun</th><th>Mar</th><th>Mer</th><th>Gio</th><th>Ven</th><th>Sab</th><th>Dom</th></tr></thead><tbody id="calendarBody"></tbody></table>
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     FOTO IMPIANTI
+===================================================== -->
+
+<section id="fotoImpianti" class="page">
+
+<div class="topbar">
+<div>
+<h1>Foto impianti</h1>
+<div class="muted">Archivio fotografico di lavori e impianti, suddiviso per cliente, cantiere e data</div>
+</div>
+<button class="btn btn-primary" type="button" onclick="apriCaricaFotoImpianto()">＋ Carica foto</button>
+</div>
+
+<div id="archivioFotoImpianti"></div>
 
 </section>
 
@@ -2947,6 +3260,14 @@ onclick="showNotification('Impostazioni salvate')">
 </div>
 
 
+<div class="card" id="costiManodopera">
+<h3>👷 Costi e prezzi della manodopera</h3>
+<p class="muted">Per ogni dipendente inserisci il costo orario interno e il prezzo orario esposto al cliente.</p>
+<div id="elencoCostiManodopera"></div>
+<button class="btn btn-primary" type="button" onclick="salvaCostiManodopera()">💾 Salva costi e prezzi</button>
+</div>
+
+
 <div class="card">
 
 <h3>
@@ -3021,7 +3342,13 @@ class="notification">
    NAVIGAZIONE
 ===================================================== */
 
+function toggleMobileMenu(){
+    document.querySelector('.sidebar')?.classList.toggle('open');
+}
+
 function go(page,element){
+
+document.querySelector('.sidebar')?.classList.remove('open');
 
 document.querySelectorAll(".page").forEach(function(p){
 p.classList.remove("active");
@@ -3177,6 +3504,8 @@ renderCalendar();
 
 function openOperaio(name,initials){
 
+window.idrolistCurrentOfficeWorker=name;
+
 document.querySelectorAll(".page").forEach(function(p){
 p.classList.remove("active");
 });
@@ -3225,12 +3554,145 @@ var attendance={
 
 };
 
+function idrolistPresenza(operaio,key){
+    const dati=idrolistGetData();
+    const presenza=(dati.presenze?.[operaio]?.[key])||{stato:attendance[key]||'',ore:0};
+    if(!presenza.causali){
+        presenza.causali={present:presenza.stato==='present'?Number(presenza.ore||0):0,holiday:presenza.stato==='holiday'?Number(presenza.ore||0):0,sick:presenza.stato==='sick'?Number(presenza.ore||0):0,extra:presenza.stato==='extra'?Number(presenza.ore||0):0};
+    }
+    return presenza;
+}
+
+function idrolistOrePresenza(presenza){
+    const causali=presenza.causali||{};
+    return Number(causali.present||0)+Number(causali.extra||0);
+}
+
+function idrolistStatoPresenza(presenza){
+    const c=presenza.causali||{};
+    if(Number(c.present||0)>0)return 'present';
+    if(Number(c.holiday||0)>0)return 'holiday';
+    if(Number(c.sick||0)>0)return 'sick';
+    if(Number(c.extra||0)>0)return 'extra';
+    return '';
+}
+
+function idrolistOreRapportini(operaio,key){
+    return idrolistGetData().rapportini.filter(r=>r.data===key).flatMap(r=>(r.lavoratori||[]).filter(x=>x.nome===operaio)).reduce((totale,x)=>totale+Number(x.ore||0),0);
+}
+
+function idrolistDataPasqua(anno){
+    const a=anno%19,b=Math.floor(anno/100),c=anno%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mese=Math.floor((h+l-7*m+114)/31)-1,giorno=(h+l-7*m+114)%31+1;
+    return new Date(Date.UTC(anno,mese,giorno));
+}
+
+function idrolistSoloStraordinario(key){
+    const data=new Date(key+'T00:00:00');
+    if(data.getDay()===0||data.getDay()===6)return true;
+    const fissi=['01-01','01-06','04-25','05-01','05-08','06-02','08-15','11-01','12-08','12-25','12-26'];
+    if(fissi.includes(key.slice(5)))return true;
+    const pasqua=idrolistDataPasqua(data.getFullYear());
+    const pasquetta=new Date(pasqua.getTime()+86400000);
+    return key===pasqua.toISOString().slice(0,10)||key===pasquetta.toISOString().slice(0,10);
+}
+
+function idrolistNomeFestivita(key){
+    const nomi={'01-01':'Capodanno','01-06':'Epifania','04-25':'Liberazione','05-01':'Festa del Lavoro','05-08':'Festa patronale','06-02':'Festa della Repubblica','08-15':'Ferragosto','11-01':'Ognissanti','12-08':'Immacolata','12-25':'Natale','12-26':'Santo Stefano'};
+    if(nomi[key.slice(5)])return nomi[key.slice(5)];
+    const data=new Date(key+'T00:00:00');
+    const pasqua=idrolistDataPasqua(data.getFullYear());
+    const pasquetta=new Date(pasqua.getTime()+86400000);
+    if(key===pasqua.toISOString().slice(0,10))return 'Pasqua';
+    if(key===pasquetta.toISOString().slice(0,10))return 'Pasquetta';
+    return '';
+}
+
+function idrolistClientiRapportini(operaio,key){
+    return [...new Set(idrolistGetData().rapportini.filter(r=>r.data===key&&((r.lavoratori||[]).some(x=>x.nome===operaio)||r.compilatoDa===operaio)).map(r=>r.cantiere).filter(Boolean))];
+}
+
+function idrolistRenderPresenze(){
+    const select=document.getElementById('selezioneOperaioPresenze');
+    if(!select)return;
+    const dati=idrolistGetData();
+    const operai=(dati.operai||[]).filter(nome=>idrolistDipendenteAttivo(nome,dati));
+    if(!window.idrolistCurrentOfficeWorker||!operai.includes(window.idrolistCurrentOfficeWorker))window.idrolistCurrentOfficeWorker=operai[0]||'';
+    select.innerHTML=operai.map(nome=>`<option value="${escapeHtml(nome)}">${escapeHtml(nome)}</option>`).join('');
+    select.value=window.idrolistCurrentOfficeWorker;
+    renderCalendar();
+}
+
+function selezionaOperaioPresenze(){
+    window.idrolistCurrentOfficeWorker=document.getElementById('selezioneOperaioPresenze').value;
+    renderCalendar();
+}
+
+function idrolistRenderStatisticheAnnuePresenze(operaio,anno){
+    const contenitore=document.getElementById('statisticheAnnuePresenze');
+    if(!contenitore)return;
+    const presenze=idrolistGetData().presenze?.[operaio]||{};
+    const totali={present:{giorni:0,ore:0},holiday:{giorni:0,ore:0},sick:{giorni:0,ore:0},extra:{giorni:0,ore:0}};
+    Object.entries(presenze).forEach(([data,presenza])=>{
+        if(!String(data).startsWith(anno+'-'))return;
+        const causali=presenza.causali||{present:presenza.stato==='present'?Number(presenza.ore||0):0,holiday:presenza.stato==='holiday'?Number(presenza.ore||0):0,sick:presenza.stato==='sick'?Number(presenza.ore||0):0,extra:presenza.stato==='extra'?Number(presenza.ore||0):0};
+        ['present','holiday','sick','extra'].forEach(causale=>{
+            const ore=Number(causali[causale]||0);
+            if(ore>0){totali[causale].giorni++;totali[causale].ore+=ore;}
+        });
+        const straordinarioDaRapportino=Math.max(0,idrolistOreRapportini(operaio,data)-8);
+        totali.extra.ore+=Math.max(0,straordinarioDaRapportino-Number(causali.extra||0));
+    });
+    contenitore.innerHTML=`
+        <div class="detail-box"><small>Presenze ${anno}</small><strong>${totali.present.giorni} giorni · ${totali.present.ore} h</strong></div>
+        <div class="detail-box"><small>Straordinari ${anno}</small><strong>${totali.extra.ore} h</strong></div>
+        <div class="detail-box"><small>Malattia ${anno}</small><strong>${totali.sick.ore} h</strong></div>
+        <div class="detail-box"><small>Ferie ${anno}</small><strong>${totali.holiday.ore} h</strong></div>`;
+}
+
+function idrolistRenderStatisticheAnnueGeneraliPresenze(anno){
+    const contenitore=document.getElementById('statisticheAnnueGeneraliPresenze');
+    if(!contenitore)return;
+    const dati=idrolistGetData();
+    const totali={present:{giorni:0,ore:0},holiday:{giorni:0,ore:0},sick:{giorni:0,ore:0},extra:{giorni:0,ore:0}};
+    (dati.operai||[]).forEach(operaio=>{
+        const presenze=dati.presenze?.[operaio]||{};
+        Object.entries(presenze).forEach(([data,presenza])=>{
+            if(!String(data).startsWith(anno+'-'))return;
+            const causali=presenza.causali||{present:presenza.stato==='present'?Number(presenza.ore||0):0,holiday:presenza.stato==='holiday'?Number(presenza.ore||0):0,sick:presenza.stato==='sick'?Number(presenza.ore||0):0,extra:presenza.stato==='extra'?Number(presenza.ore||0):0};
+            ['present','holiday','sick','extra'].forEach(causale=>{
+                const ore=Number(causali[causale]||0);
+                if(ore>0){totali[causale].giorni++;totali[causale].ore+=ore;}
+            });
+            const straordinarioDaRapportino=Math.max(0,idrolistOreRapportini(operaio,data)-8);
+            totali.extra.ore+=Math.max(0,straordinarioDaRapportino-Number(causali.extra||0));
+        });
+    });
+    const numeroDipendenti=Math.max(1,(dati.operai||[]).length);
+    const media=valore=>Math.round((valore/numeroDipendenti)*10)/10;
+    contenitore.innerHTML=`
+        <div class="detail-box"><small>Media presenze ${anno}</small><strong>${media(totali.present.giorni)} giornate · ${media(totali.present.ore)} h</strong></div>
+        <div class="detail-box"><small>Media straordinari ${anno}</small><strong>${media(totali.extra.ore)} h</strong></div>
+        <div class="detail-box"><small>Media malattia ${anno}</small><strong>${media(totali.sick.ore)} h</strong></div>
+        <div class="detail-box"><small>Media ferie ${anno}</small><strong>${media(totali.holiday.ore)} h</strong></div>
+        <div class="muted" style="grid-column:1/-1">Media calcolata su ${numeroDipendenti} dipendenti.</div>`;
+}
+
+function apriCompilazionePresenzeOggi(){
+    calendarDate=new Date();
+    const voce=[...document.querySelectorAll('.nav')].find(elemento=>elemento.textContent.includes('Presenze'));
+    go('presenze',voce);
+    changeAttendance(new Date().toISOString().slice(0,10));
+}
+
 
 function renderCalendar(){
 
 var year=calendarDate.getFullYear();
 
 var month=calendarDate.getMonth();
+
+idrolistRenderStatisticheAnnuePresenze(window.idrolistCurrentOfficeWorker||'',year);
+idrolistRenderStatisticheAnnueGeneraliPresenze(year);
 
 var monthNames=[
 "Gennaio",
@@ -3279,7 +3741,16 @@ year+"-"+
 String(month+1).padStart(2,"0")+"-"+
 String(day).padStart(2,"0");
 
-var state=attendance[key] || "";
+var presenza=idrolistPresenza(window.idrolistCurrentOfficeWorker||"",key);
+var causali=presenza.causali||{};
+var haOreCausali=Object.values(causali).some(function(ore){return Number(ore||0)>0;});
+var state=haOreCausali?idrolistStatoPresenza(presenza):"";
+var oreRapportini=idrolistOreRapportini(window.idrolistCurrentOfficeWorker||"",key);
+var oreLavorateCalendario=Number(causali.present||0)+Number(causali.extra||0);
+var oreMancanti=Math.max(0,oreLavorateCalendario-oreRapportini);
+var straordinario=Math.max(0,oreRapportini-8);
+var clientiGiorno=idrolistClientiRapportini(window.idrolistCurrentOfficeWorker||"",key);
+var nomeFestivita=idrolistNomeFestivita(key);
 
 var stateText="";
 
@@ -3288,11 +3759,6 @@ var stateClass="";
 if(state==="present"){
 stateText="PRESENTE";
 stateClass="state-present";
-}
-
-if(state==="absent"){
-stateText="ASSENTE";
-stateClass="state-absent";
 }
 
 if(state==="sick"){
@@ -3314,14 +3780,24 @@ html+=`
 
 <td onclick="changeAttendance('${key}')">
 
-<div class="day-number">
+<div class="day-number ${idrolistSoloStraordinario(key)?'holiday-number':''}">
 ${day}
 </div>
+
+${nomeFestivita ? `<div class="muted holiday-number" style="font-size:11px;font-weight:700">${nomeFestivita}</div>` : ''}
 
 ${stateText ?
 `<span class="day-state ${stateClass}">
 ${stateText}
 </span>` : ""}
+
+${haOreCausali ? Object.entries(causali).filter(function(voce){return voce[0]!=='absent'&&Number(voce[1]||0)>0;}).map(function(voce){return `<div class="muted">${({present:'Pres.',holiday:'Ferie',sick:'Malattia',extra:'Straord.'}[voce[0]])}: ${voce[1]} h</div>`;}).join('') : ''}
+
+${haOreCausali&&straordinario>0 ? `<span class="day-state state-extra">+${straordinario} h straord.</span>` : ""}
+
+${haOreCausali&&oreMancanti>0 ? `<span class="day-state state-sick">Mancano ${oreMancanti} h</span>` : ""}
+
+${haOreCausali&&clientiGiorno.length ? `<div class="muted" style="margin-top:6px;font-weight:600">${clientiGiorno.map(escapeHtml).join('<br>')}</div>` : ""}
 
 </td>
 
@@ -3369,71 +3845,85 @@ renderCalendar();
 
 
 function changeAttendance(key){
+    const operai=idrolistGetData().operai||[];
+    const soloStraordinario=idrolistSoloStraordinario(key);
+    const causali=soloStraordinario?[['extra','🟣 Straordinario']]:[['present','🟢 Presente'],['holiday','🔵 Ferie'],['sick','🔴 Malattia'],['extra','🟣 Straordinario']];
+    const intestazioni='<strong>Dipendente</strong>'+causali.map(([,titolo])=>`<strong>${titolo}</strong>`).join('');
+    const righe=operai.map(nome=>{
+        const valori=idrolistPresenza(nome,key).causali||{};
+        const straordinario=Math.max(Number(valori.extra||0),Math.max(0,idrolistOreRapportini(nome,key)-8));
+        return `<strong>${escapeHtml(nome)}</strong>`+causali.map(([causale])=>idrolistMenuOreDipendente(nome,causale,causale==='extra'?straordinario:(valori[causale]||0))).join('');
+    }).join('');
+    openModal('📅 Presenze del '+formatDate(key),`<p>${soloStraordinario?'Giorno festivo: è disponibile solo lo straordinario.':'Inserisci le ore per tutti i dipendenti; lascia 0 h per chi non ha lavorato.'}</p><div class="presenze-giornaliere" style="display:grid;grid-template-columns:minmax(180px,1.6fr) repeat(${causali.length},minmax(105px,1fr));gap:10px;align-items:center;max-height:55vh;overflow:auto">${intestazioni}${righe}</div>`,`<button class="btn" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="salvaPresenzeGiornata('${key}')">Salva giornata</button>`);
+}
 
-openModal(
+function idrolistMenuOreDipendente(operaio,causale,selezionato){
+    var opzioni=[];
+    for(var minuti=0;minuti<=480;minuti+=30){
+        var ore=minuti/60;
+        opzioni.push('<option value="'+ore+'"'+(Number(selezionato)===ore?' selected':'')+'>'+String(ore).replace('.5',',5')+' h</option>');
+    }
+    return '<select data-presenza-ore data-operaio="'+escapeHtml(operaio)+'" data-causale="'+causale+'">'+opzioni.join('')+'</select>';
+}
 
-"📅 Stato della giornata",
-
-`
-
-<p>
-Seleziona lo stato per il giorno
-<strong>${formatDate(key)}</strong>
-</p>
-
-`,
-
-`
-
-<button
-class="btn"
-onclick="setAttendance('${key}','present')">
-🟢 Presente
-</button>
-
-<button
-class="btn"
-onclick="setAttendance('${key}','absent')">
-⚪ Assente
-</button>
-
-<button
-class="btn"
-onclick="setAttendance('${key}','sick')">
-🔴 Malattia
-</button>
-
-<button
-class="btn"
-onclick="setAttendance('${key}','holiday')">
-🔵 Ferie
-</button>
-
-<button
-class="btn"
-onclick="setAttendance('${key}','extra')">
-🟣 Straordinario
-</button>
-
-`
-
-);
-
+function salvaPresenzeGiornata(key){
+    const righe={};
+    document.querySelectorAll('[data-presenza-ore]').forEach(campo=>{
+        const nome=campo.dataset.operaio;
+        righe[nome]=righe[nome]||{present:0,holiday:0,sick:0,extra:0};
+        righe[nome][campo.dataset.causale]=Number(campo.value||0);
+    });
+    const giornoSoloStraordinario=idrolistSoloStraordinario(key);
+    const errori=Object.entries(righe).filter(([,causali])=>{const totale=Object.values(causali).reduce((somma,ore)=>somma+ore,0);return giornoSoloStraordinario?false:totale<8;});
+    if(errori.length){alert('Per '+errori.map(([nome])=>nome).join(', ')+' la somma delle ore deve essere almeno 8.');return;}
+    const dati=idrolistGetData();
+    dati.presenze=dati.presenze||{};
+    Object.entries(righe).forEach(([nome,causali])=>{
+        const totale=Object.values(causali).reduce((somma,ore)=>somma+ore,0);
+        dati.presenze[nome]=dati.presenze[nome]||{};
+        if(!totale)delete dati.presenze[nome][key];
+        else dati.presenze[nome][key]={causali:causali,ore:Number(causali.present||0)+Number(causali.extra||0)};
+    });
+    idrolistSaveData(dati);
+    closeModal();
+    renderCalendar();
+    idrolistRenderDashboard();
+    showNotification('Presenze della giornata aggiornate');
 }
 
 
-function setAttendance(key,state){
-
-attendance[key]=state;
+function salvaCausaliPresenza(key){
+var operaio=window.idrolistCurrentOfficeWorker;
+if(!operaio){showNotification('Apri prima la scheda di un operaio.');return;}
+var soloStraordinario=idrolistSoloStraordinario(key);
+var causali=soloStraordinario?{present:0,holiday:0,sick:0,extra:Number(document.getElementById('oreStraordinario').value||0)}:{present:Number(document.getElementById('orePresente').value||0),holiday:Number(document.getElementById('oreFerie').value||0),sick:Number(document.getElementById('oreMalattia').value||0),extra:Number(document.getElementById('oreStraordinario').value||0)};
+var totaleOre=Object.values(causali).reduce(function(totale,ore){return totale+ore;},0);
+if(totaleOre<8){alert('La somma delle ore della giornata deve essere almeno 8. Attualmente: '+String(totaleOre).replace('.5',',5')+' h.');return;}
+var dati=idrolistGetData();
+dati.presenze=dati.presenze||{};
+dati.presenze[operaio]=dati.presenze[operaio]||{};
+dati.presenze[operaio][key]={causali:causali,ore:causali.present+causali.extra};
+idrolistSaveData(dati);
 
 closeModal();
 
 renderCalendar();
 
+idrolistRenderDashboard();
+
 showNotification(
 "Presenza aggiornata"
 );
 
+}
+
+function creaMenuOre(id,selezionato){
+var opzioni=[];
+for(var minuti=0;minuti<=480;minuti+=30){
+    var ore=minuti/60;
+    opzioni.push('<option value="'+ore+'"'+(Number(selezionato)===ore?' selected':'')+'>'+String(ore).replace('.5',',5')+' h</option>');
+}
+return '<select id="'+id+'">'+opzioni.join('')+'</select>';
 }
 
 
@@ -3452,6 +3942,7 @@ return p[2]+"/"+p[1]+"/"+p[0];
 
 function openModal(title,content,footer){
 
+document.getElementById("modalBg").removeAttribute("data-blocca-chiusura");
 document.getElementById("modalTitle").innerText=title;
 
 document.getElementById("modalContent").innerHTML=content;
@@ -3465,9 +3956,14 @@ document.getElementById("modalBg").classList.add("show");
 
 function closeModal(event){
 
+if(event && event.target.id==="modalBg" && document.getElementById("modalBg").dataset.bloccaChiusura==="true"){
+return;
+}
+
 if(!event || event.target.id==="modalBg"){
 
 document.getElementById("modalBg").classList.remove("show");
+document.getElementById("modalBg").removeAttribute("data-blocca-chiusura");
 
 }
 
@@ -3581,66 +4077,310 @@ showNotification('Intervento assegnato all operaio');
    RAPPORTINO UFFICIO
 ===================================================== */
 
+function idrolistDataOggiLocale(){
+    const oggi=new Date();
+    oggi.setMinutes(oggi.getMinutes()-oggi.getTimezoneOffset());
+    return oggi.toISOString().slice(0,10);
+}
+
 function openNewRapportinoUfficio(){
+    const data=idrolistGetData();
+    const cantieriAperti=(data.cantieri||[]).filter(c=>idrolistStatoCantiere(c)==='aperti');
+    const clienti=[...new Set(cantieriAperti.map(c=>c.nome).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it'));
+    if(!clienti.length){alert('Non ci sono cantieri aperti disponibili.');return;}
+    openModal('📋 Nuovo rapportino',`
+        <div style="display:flex;gap:8px;margin:0 0 20px"><span id="nuovoRapportinoIndicatore" style="font-weight:700;color:#1769d1">Passaggio 1 di 7 — Cliente e cantiere</span></div>
+        <section data-step-rapportino="1">
+            <div class="form-group"><label>Cliente</label><div style="display:flex;gap:8px"><select id="nuovoRapportinoCliente" onchange="idrolistCaricaCantieriNuovoRapportino()"><option value="">-- Seleziona cliente --</option>${clienti.map(nome=>`<option value="${escapeHtml(nome)}">${escapeHtml(nome)}</option>`).join('')}</select><button class="btn" type="button" onclick="apriNuovoClienteDaRapportino()">＋ Nuovo</button></div></div>
+            <div class="form-group"><label>Cantiere</label><div style="display:flex;gap:8px"><select id="nuovoRapportinoCantiere" disabled><option value="">-- Seleziona prima il cliente --</option></select><button class="btn" type="button" onclick="apriNuovoCantiereDaRapportino()">＋ Nuovo</button></div></div>
+            <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" type="button" onclick="idrolistAvantiStepRapportino(2)">Avanti →</button></div>
+        </section>
+        <section data-step-rapportino="2" hidden>
+            <div class="detail-grid"><div class="form-group"><label>Tipo intervento</label><select id="nuovoRapportinoTipo" required><option value="" selected>-- Seleziona tipo intervento --</option><option value="Nuovo intervento">Nuovo intervento</option><option value="Proseguimento">Proseguimento</option></select></div><div class="form-group"><label>Referente cantiere</label><select id="nuovoRapportinoReferente" required><option value="" selected>-- Seleziona referente --</option>${['BRUNO NICOLA','CORIGLIONE ALESSANDRO','MARINONI ALESSANDRO'].map(nome=>`<option value="${escapeHtml(nome)}">${escapeHtml(nome)}</option>`).join('')}</select></div></div>
+            <div style="display:flex;justify-content:space-between"><button class="btn" type="button" onclick="idrolistMostraStepRapportino(1)">← Indietro</button><button class="btn btn-primary" type="button" onclick="idrolistAvantiStepRapportino(3)">Avanti →</button></div>
+        </section>
+        <section data-step-rapportino="3" hidden>
+            <div class="form-group"><label>Cantiere terminato?</label><select id="nuovoRapportinoCantiereTerminato" required><option value="" selected>-- Seleziona --</option><option value="no">No, prosegue</option><option value="si">Sì, terminato</option></select></div>
+            <div class="form-group"><label>Data</label><input id="nuovoRapportinoData" type="date" value="${idrolistDataOggiLocale()}"></div>
+            <div style="display:flex;justify-content:space-between"><button class="btn" type="button" onclick="idrolistMostraStepRapportino(2)">← Indietro</button><button class="btn btn-primary" type="button" onclick="idrolistAvantiStepRapportino(4)">Avanti →</button></div>
+        </section>
+        <section data-step-rapportino="4" hidden>
+            <div class="form-group"><label>Operai e ore</label><div id="nuoviRapportinoLavoratori"></div><button class="btn" type="button" onclick="aggiungiOperaioNuovoRapportino()">＋ Aggiungi operaio</button></div>
+            <div style="display:flex;justify-content:space-between"><button class="btn" type="button" onclick="idrolistMostraStepRapportino(3)">← Indietro</button><button class="btn btn-primary" type="button" onclick="idrolistAvantiStepRapportino(5)">Avanti →</button></div>
+        </section>
+        <section data-step-rapportino="5" hidden>
+            <div class="form-group"><label>Materiali</label><div id="nuoviRapportinoMateriali"></div><button class="btn" type="button" onclick="aggiungiMaterialeNuovoRapportino()">＋ Aggiungi materiale</button></div>
+            <div style="display:flex;justify-content:space-between"><button class="btn" type="button" onclick="idrolistMostraStepRapportino(4)">← Indietro</button><button class="btn btn-primary" type="button" onclick="idrolistAvantiStepRapportino(6)">Avanti →</button></div>
+        </section>
+        <section data-step-rapportino="6" hidden>
+            <div class="form-group"><label>Lavoro eseguito</label><textarea id="nuovoRapportinoDescrizione" rows="4"></textarea></div>
+            <div style="display:flex;justify-content:space-between"><button class="btn" type="button" onclick="idrolistMostraStepRapportino(5)">← Indietro</button><button class="btn btn-primary" type="button" onclick="idrolistAvantiStepRapportino(7)">Avanti →</button></div>
+        </section>
+        <section data-step-rapportino="7" hidden>
+            <div class="form-group"><label>Foto DDT cartacei</label><input id="nuovoRapportinoDdtFoto" type="file" accept="image/*" multiple><small class="muted">Puoi selezionare o fotografare uno o più DDT.</small></div>
+            <div class="form-group"><label>Firma cliente</label><canvas id="nuovoRapportinoFirma" class="signature-area" width="650" height="180"></canvas><button class="btn" type="button" style="margin-top:8px" onclick="cancellaFirmaNuovoRapportino()">Cancella firma</button></div>
+            <div style="display:flex;justify-content:space-between"><button class="btn" type="button" onclick="idrolistMostraStepRapportino(6)">← Indietro</button><button class="btn btn-primary" type="button" onclick="salvaNuovoRapportinoUfficio()">💾 Salva rapportino</button></div>
+        </section>
+    `,`<button class="btn" onclick="closeModal()">Annulla</button>`);
+    document.getElementById('modalBg').dataset.bloccaChiusura='true';
+    aggiungiOperaioNuovoRapportino();
+    idrolistPreparaFirmaNuovoRapportino();
+}
 
-openModal(
+function idrolistMostraStepRapportino(numero){
+    document.querySelectorAll('[data-step-rapportino]').forEach(sezione=>sezione.hidden=Number(sezione.dataset.stepRapportino)!==numero);
+    const titoli={1:'Passaggio 1 di 7 — Cliente e cantiere',2:'Passaggio 2 di 7 — Tipo e referente',3:'Passaggio 3 di 7 — Stato e data',4:'Passaggio 4 di 7 — Operai e ore',5:'Passaggio 5 di 7 — Materiali',6:'Passaggio 6 di 7 — Lavoro eseguito',7:'Passaggio 7 di 7 — DDT e firma'};
+    const indicatore=document.getElementById('nuovoRapportinoIndicatore');
+    if(indicatore) indicatore.textContent=titoli[numero];
+}
 
-"📋 Nuovo rapportino",
+function idrolistAvantiStepRapportino(numero){
+    if(numero===2){
+        const cliente=document.getElementById('nuovoRapportinoCliente')?.value;
+        const cantiere=document.getElementById('nuovoRapportinoCantiere')?.value;
+        if(!cliente||!cantiere){alert('Seleziona obbligatoriamente cliente e cantiere.');return;}
+    }
+    if(numero===3){
+        const tipo=document.getElementById('nuovoRapportinoTipo')?.value;
+        const referente=document.getElementById('nuovoRapportinoReferente')?.value;
+        if(!tipo||!referente){alert('Seleziona obbligatoriamente il tipo di intervento e il referente di cantiere.');return;}
+    }
+    if(numero===4&&!document.getElementById('nuovoRapportinoCantiereTerminato')?.value){
+        alert('Seleziona obbligatoriamente se il cantiere è terminato oppure no.');return;
+    }
+    if(numero===7&&!document.getElementById('nuovoRapportinoDescrizione')?.value.trim()){
+        alert('Inserisci il lavoro eseguito prima di proseguire.');return;
+    }
+    idrolistMostraStepRapportino(numero);
+}
 
-`
+function apriNuovoClienteDaRapportino(){
+    openModal('👤 Nuovo cliente',`<div class="form-group"><label>Nome cliente</label><input id="rapClienteNome" placeholder="Nome o ragione sociale"></div><div class="form-group"><label>Città</label><input id="rapClienteCitta"></div><div class="form-group"><label>Via / Piazza</label><input id="rapClienteVia"></div><div class="form-group"><label>Telefono</label><input id="rapClienteTelefono" type="tel"></div>`,`<button class="btn" onclick="openNewRapportinoUfficio()">Annulla</button><button class="btn btn-primary" onclick="salvaClienteDaRapportino()">Salva cliente</button>`);
+}
 
-<div class="form-group">
-<label>Cliente</label>
-<input value="Mario Rossi">
-</div>
+function salvaClienteDaRapportino(){
+    const nome=document.getElementById('rapClienteNome')?.value.trim();
+    const citta=document.getElementById('rapClienteCitta')?.value.trim();
+    const via=document.getElementById('rapClienteVia')?.value.trim();
+    const telefono=document.getElementById('rapClienteTelefono')?.value.trim();
+    if(!nome||!citta||!via||!telefono){alert('Completa nome, città, via/piazza e telefono.');return;}
+    const data=idrolistGetData();
+    data.clienti=data.clienti||[];
+    if([...(data.clienti||[]),...(data.cantieri||[])].some(c=>String(c.nome).toLocaleLowerCase('it')===nome.toLocaleLowerCase('it'))){alert('Questo cliente è già presente.');return;}
+    data.clienti.push({id:'CLI-'+Date.now(),nome,citta,via,telefono,creatoIl:new Date().toISOString()});
+    idrolistSaveData(data);
+    showNotification('Cliente creato. Ora crea il relativo cantiere.');
+    apriNuovoCantiereDaRapportino(nome);
+}
 
-<div class="form-group">
-<label>Operaio</label>
-<select>
-<option>Marco Bianchi</option>
-<option>Luca Verdi</option>
-<option>Andrea Rossi</option>
-</select>
-</div>
+function apriNuovoCantiereDaRapportino(clientePreselezionato=''){
+    const data=idrolistGetData();
+    const clienti=[...new Set([...(data.clienti||[]).map(c=>c.nome),...(data.cantieri||[]).map(c=>c.nome)].filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it'));
+    openModal('📍 Nuovo cantiere',`<div class="form-group"><label>Cliente</label><select id="rapCantiereCliente"><option value="">-- Seleziona cliente --</option>${clienti.map(nome=>`<option value="${escapeHtml(nome)}" ${nome===clientePreselezionato?'selected':''}>${escapeHtml(nome)}</option>`).join('')}</select></div><div class="form-group"><label>Città</label><input id="rapCantiereCitta"></div><div class="form-group"><label>Via / Piazza</label><input id="rapCantiereVia"></div>`,`<button class="btn" onclick="openNewRapportinoUfficio()">Annulla</button><button class="btn btn-primary" onclick="salvaCantiereDaRapportino()">Crea cantiere</button>`);
+}
 
-<div class="form-group">
-<label>Data</label>
-<input type="date" value="2026-08-21">
-</div>
+function salvaCantiereDaRapportino(){
+    const cliente=document.getElementById('rapCantiereCliente')?.value;
+    const citta=document.getElementById('rapCantiereCitta')?.value.trim();
+    const via=document.getElementById('rapCantiereVia')?.value.trim();
+    if(!cliente||!citta||!via){alert('Completa cliente, città e via/piazza.');return;}
+    const data=idrolistGetData();
+    const indirizzo=via+', '+citta;
+    const cantiere={id:'CAN-'+Date.now(),nome:cliente,indirizzo,citta,via,stato:'Attivo',statoContabile:'aperti',creatoIl:new Date().toISOString()};
+    data.cantieri.push(cantiere);
+    idrolistSaveData(data);
+    idrolistRenderCantieri();
+    idrolistRenderClienti();
+    openNewRapportinoUfficio();
+    const selectCliente=document.getElementById('nuovoRapportinoCliente');
+    if(selectCliente){selectCliente.value=cliente;idrolistCaricaCantieriNuovoRapportino();}
+    const selectCantiere=document.getElementById('nuovoRapportinoCantiere');
+    if(selectCantiere)selectCantiere.value=cantiere.id;
+    showNotification('Cantiere creato e selezionato nel rapportino.');
+}
 
-<div class="form-group">
-<label>Lavoro eseguito</label>
-<textarea rows="4"></textarea>
-</div>
+function idrolistPreparaFirmaNuovoRapportino(){
+    const canvas=document.getElementById('nuovoRapportinoFirma');
+    if(!canvas)return;
+    const ctx=canvas.getContext('2d');
+    ctx.lineWidth=2;
+    ctx.lineCap='round';
+    ctx.strokeStyle='#172033';
+    let disegnando=false;
+    let ultimoPunto=null;
+    window.idrolistFirmaNuovoRapportino=false;
+    const punto=evento=>{
+        const rettangolo=canvas.getBoundingClientRect();
+        return {x:(evento.clientX-rettangolo.left)*(canvas.width/rettangolo.width),y:(evento.clientY-rettangolo.top)*(canvas.height/rettangolo.height)};
+    };
+    canvas.addEventListener('pointerdown',evento=>{disegnando=true;ultimoPunto=punto(evento);canvas.setPointerCapture?.(evento.pointerId);evento.preventDefault();});
+    canvas.addEventListener('pointermove',evento=>{
+        if(!disegnando)return;
+        const nuovoPunto=punto(evento);
+        ctx.beginPath();ctx.moveTo(ultimoPunto.x,ultimoPunto.y);ctx.lineTo(nuovoPunto.x,nuovoPunto.y);ctx.stroke();
+        ultimoPunto=nuovoPunto;window.idrolistFirmaNuovoRapportino=true;evento.preventDefault();
+    });
+    const fine=()=>{disegnando=false;ultimoPunto=null;};
+    canvas.addEventListener('pointerup',fine);
+    canvas.addEventListener('pointercancel',fine);
+}
 
-<div class="form-group">
-<label>Ore</label>
-<input type="number" value="1" step="0.5">
-</div>
+function cancellaFirmaNuovoRapportino(){
+    const canvas=document.getElementById('nuovoRapportinoFirma');
+    if(!canvas)return;
+    canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+    window.idrolistFirmaNuovoRapportino=false;
+}
 
-`,
+function aggiungiOperaioNuovoRapportino(){
+    const contenitore=document.getElementById('nuoviRapportinoLavoratori');
+    if(!contenitore)return;
+    const dati=idrolistGetData();
+    const operai=(dati.operai||[]).filter(nome=>idrolistDipendenteAttivo(nome,dati));
+    const opzioniOre=Array.from({length:24},(_,indice)=>{
+        const ore=(indice+1)/2;
+        return `<option value="${ore}">${String(ore).replace('.',',')} h</option>`;
+    }).join('');
+    const riga=document.createElement('div');
+    riga.className='detail-grid';
+    riga.style.marginBottom='8px';
+    riga.innerHTML=`<select class="ufficio-lavoratore-nome"><option value="">-- Seleziona operaio --</option>${operai.map(nome=>`<option value="${escapeHtml(nome)}">${escapeHtml(nome)}</option>`).join('')}</select><div style="display:flex;gap:8px"><select class="ufficio-lavoratore-ore"><option value="">Ore</option>${opzioniOre}</select><button class="btn" type="button" onclick="this.closest('.detail-grid').remove()">✕</button></div>`;
+    contenitore.appendChild(riga);
+}
 
-`
+function aggiungiMaterialeNuovoRapportino(){
+    const contenitore=document.getElementById('nuoviRapportinoMateriali');
+    if(!contenitore)return;
+    const riga=document.createElement('div');
+    riga.className='detail-grid';
+    riga.style.marginBottom='8px';
+    riga.innerHTML='<input class="ufficio-materiale-nome" placeholder="Nome materiale"><div style="display:flex;gap:8px"><input class="ufficio-materiale-quantita" type="number" min="0.01" step="0.01" placeholder="Quantità"><button class="btn" type="button" onclick="this.closest(\'.detail-grid\').remove()">✕</button></div>';
+    contenitore.appendChild(riga);
+}
 
-<button
-class="btn"
-onclick="closeModal()">
-Annulla
-</button>
+function idrolistCaricaCantieriNuovoRapportino(){
+    const cliente=document.getElementById('nuovoRapportinoCliente')?.value;
+    const select=document.getElementById('nuovoRapportinoCantiere');
+    if(!select)return;
+    const cantieri=(idrolistGetData().cantieri||[]).filter(c=>c.nome===cliente&&idrolistStatoCantiere(c)==='aperti');
+    select.disabled=!cliente;
+    select.innerHTML=cliente?'<option value="">-- Seleziona cantiere --</option>'+cantieri.map(c=>`<option value="${escapeHtml(c.id)}">${escapeHtml(c.indirizzo||c.nome)}</option>`).join(''):'<option value="">-- Seleziona prima il cliente --</option>';
+}
 
-<button
-class="btn btn-primary"
-onclick="
-closeModal();
-showNotification('Rapportino creato');
-">
-💾 Salva rapportino
-</button>
+function idrolistLeggiImmagine(file){
+    return new Promise((resolve,reject)=>{
+        const immagine=new Image();
+        const url=URL.createObjectURL(file);
+        immagine.onload=()=>{
+            const latoMassimo=1100;
+            const scala=Math.min(1,latoMassimo/Math.max(immagine.naturalWidth,immagine.naturalHeight));
+            const canvas=document.createElement('canvas');
+            canvas.width=Math.max(1,Math.round(immagine.naturalWidth*scala));
+            canvas.height=Math.max(1,Math.round(immagine.naturalHeight*scala));
+            canvas.getContext('2d').drawImage(immagine,0,0,canvas.width,canvas.height);
+            URL.revokeObjectURL(url);
+            resolve({nome:file.name.replace(/\.[^.]+$/,'.jpg'),dataUrl:canvas.toDataURL('image/jpeg',0.65)});
+        };
+        immagine.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Immagine non leggibile.'));};
+        immagine.src=url;
+    });
+}
 
-`
+const IDROLIST_MEDIA_DB='idrolist_media_v1';
 
-);
+function idrolistApriArchivioDdt(){
+    return new Promise((resolve,reject)=>{
+        const richiesta=indexedDB.open(IDROLIST_MEDIA_DB,1);
+        richiesta.onupgradeneeded=()=>richiesta.result.createObjectStore('ddt',{keyPath:'chiave'});
+        richiesta.onsuccess=()=>resolve(richiesta.result);
+        richiesta.onerror=()=>reject(richiesta.error);
+    });
+}
 
+async function idrolistArchiviaFotoDdt(rapportinoId,foto){
+    if(!foto.length)return [];
+    const db=await idrolistApriArchivioDdt();
+    await new Promise((resolve,reject)=>{
+        const transazione=db.transaction('ddt','readwrite');
+        const archivio=transazione.objectStore('ddt');
+        foto.forEach((immagine,indice)=>archivio.put({chiave:`${rapportinoId}_${indice+1}`,dataUrl:immagine.dataUrl,nome:immagine.nome}));
+        transazione.oncomplete=resolve;
+        transazione.onerror=()=>reject(transazione.error);
+        transazione.onabort=()=>reject(transazione.error);
+    });
+    db.close();
+    return foto.map((immagine,indice)=>({nome:immagine.nome,archivioKey:`${rapportinoId}_${indice+1}`}));
+}
+
+async function idrolistCaricaFotoDdt(foto){
+    const elenco=foto||[];
+    if(!elenco.some(immagine=>immagine.archivioKey))return elenco;
+    const db=await idrolistApriArchivioDdt();
+    const risultato=await Promise.all(elenco.map(immagine=>{
+        if(!immagine.archivioKey)return Promise.resolve(immagine);
+        return new Promise(resolve=>{
+            const richiesta=db.transaction('ddt','readonly').objectStore('ddt').get(immagine.archivioKey);
+            richiesta.onsuccess=()=>resolve(richiesta.result?{nome:immagine.nome,dataUrl:richiesta.result.dataUrl}:immagine);
+            richiesta.onerror=()=>resolve(immagine);
+        });
+    }));
+    db.close();
+    return risultato;
+}
+
+async function salvaNuovoRapportinoUfficio(){
+    const data=idrolistGetData();
+    const cantiere=(data.cantieri||[]).find(c=>c.id===document.getElementById('nuovoRapportinoCantiere')?.value);
+    const descrizione=document.getElementById('nuovoRapportinoDescrizione')?.value.trim();
+    const tipoIntervento=document.getElementById('nuovoRapportinoTipo')?.value;
+    const referenteCantiere=document.getElementById('nuovoRapportinoReferente')?.value;
+    const cantiereTerminato=document.getElementById('nuovoRapportinoCantiereTerminato')?.value;
+    if(!cantiere||!descrizione){alert('Seleziona cliente e cantiere, poi inserisci il lavoro eseguito.');return;}
+    if(!tipoIntervento||!referenteCantiere){alert('Seleziona obbligatoriamente il tipo di intervento e il referente di cantiere.');return;}
+    if(!cantiereTerminato){alert('Seleziona obbligatoriamente se il cantiere è terminato oppure no.');return;}
+    const lavoratori=[];
+    let nonValido=false;
+    document.querySelectorAll('#nuoviRapportinoLavoratori .detail-grid').forEach(riga=>{
+        const nome=riga.querySelector('.ufficio-lavoratore-nome')?.value;
+        const ore=idrolistNumero(riga.querySelector('.ufficio-lavoratore-ore')?.value);
+        if(!nome&&!ore)return;
+        if(!nome||ore<=0){nonValido=true;return;}
+        lavoratori.push({nome,ore});
+    });
+    if(nonValido||!lavoratori.length){alert('Seleziona almeno un operaio e indica per ciascuno ore maggiori di zero.');return;}
+    const materiali=[];
+    let materialiNonValidi=false;
+    document.querySelectorAll('#nuoviRapportinoMateriali .detail-grid').forEach(riga=>{
+        const nome=riga.querySelector('.ufficio-materiale-nome')?.value.trim();
+        const quantita=idrolistNumero(riga.querySelector('.ufficio-materiale-quantita')?.value);
+        if(!nome&&!quantita)return;
+        if(!nome||quantita<=0){materialiNonValidi=true;return;}
+        materiali.push({nome,quantita});
+    });
+    if(materialiNonValidi){alert('Per ogni materiale inserisci nome e quantità maggiore di zero, oppure elimina la riga vuota.');return;}
+    const fileDdt=Array.from(document.getElementById('nuovoRapportinoDdtFoto')?.files||[]);
+    let ddtFoto=[];
+    try{ddtFoto=await Promise.all(fileDdt.map(idrolistLeggiImmagine));}catch(e){alert('Non è stato possibile leggere una foto DDT.');return;}
+    const rapportinoId='RAP-'+Date.now();
+    ddtFoto=ddtFoto.map((foto,indice)=>{
+        const estensione=(String(foto.nome||'').match(/(\.[a-z0-9]+)$/i)||['','.jpg'])[1];
+        return {...foto,nome:`${rapportinoId}_${indice+1}${estensione}`};
+    });
+    let ddtArchiviate=[];
+    try{ddtArchiviate=await idrolistArchiviaFotoDdt(rapportinoId,ddtFoto);}catch(e){alert('Impossibile archiviare le foto DDT. Il rapportino non è stato inviato.');return;}
+    const canvasFirma=document.getElementById('nuovoRapportinoFirma');
+    const firmaCliente=window.idrolistFirmaNuovoRapportino&&canvasFirma?canvasFirma.toDataURL('image/png'):'';
+    data.rapportini.push({id:rapportinoId,data:document.getElementById('nuovoRapportinoData')?.value||idrolistDataOggiLocale(),cantiereId:cantiere.id,cantiere:cantiere.nome,indirizzo:cantiere.indirizzo,tipoIntervento,referenteCantiere,cantiereTerminato:cantiereTerminato==='si',descrizione,lavoratori,materiali,ddtAllegati:ddtFoto.map(f=>f.nome),ddtFoto:ddtArchiviate,firmaCliente,compilatoDa:'Ufficio',stato:'Creato in ufficio',creatoIl:new Date().toISOString()});
+    try{
+        idrolistSaveData(data);
+    }catch(e){
+        alert('Invio non riuscito. Il rapportino e le notifiche sono rimasti invariati.');
+        return;
+    }
+    idrolistRenderRapportini();
+    idrolistRenderDashboard();
+    closeModal();
+    showNotification('Rapportino inviato con successo.');
 }
 
 
@@ -3998,23 +4738,29 @@ function newOperaio(){
 
 openModal(
 
-"👷 Nuovo operaio",
+"👷 Aggiungi dipendente",
 
 `
 
 <div class="form-group">
-<label>Nome e cognome</label>
-<input id="newWorkerName" placeholder="Nome operaio">
+<label>Cognome dipendente</label>
+<input id="newWorkerSurname" placeholder="Es. Rossi">
 </div>
 
 <div class="form-group">
-<label>Telefono</label>
-<input id="newWorkerPhone" placeholder="333 1234567">
+<label>Nome dipendente</label>
+<input id="newWorkerFirstName" placeholder="Es. Mario">
 </div>
 
 <div class="form-group">
 <label>Ruolo</label>
-<input id="newWorkerRole" placeholder="Tecnico / Idraulico / Climatizzazione">
+<select id="newWorkerRole">
+<option value="">-- Seleziona ruolo --</option>
+<option value="Impiegata">Impiegata</option>
+<option value="Magazziniere">Magazziniere</option>
+<option value="Responsabile">Responsabile</option>
+<option value="Operaio">Operaio</option>
+</select>
 </div>
 
 `,
@@ -4030,7 +4776,7 @@ Annulla
 <button
 class="btn btn-primary"
 onclick="saveOperaio()">
-💾 Salva operaio
+💾 Salva dipendente
 </button>
 
 `
@@ -4190,8 +4936,12 @@ const IDROLIST_WORKERS = [
 function idrolistDefaultData(){
     return {
         operai:IDROLIST_WORKERS.slice(),
+        ruoliOperai:Object.fromEntries(IDROLIST_WORKERS.map(nome=>[nome,'Operaio'])),
+        statoDipendenti:Object.fromEntries(IDROLIST_WORKERS.map(nome=>[nome,'Attivo'])),
         cantieri:[],
-        rapportini:[]
+        rapportini:[],
+        presenze:{},
+        costiManodopera:{}
     };
 }
 
@@ -4210,9 +4960,16 @@ function idrolistGetData(){
             return data;
         }
         const data=JSON.parse(raw);
-        data.operai=IDROLIST_WORKERS.slice();
+        data.operai=[...new Set([...IDROLIST_WORKERS,...(data.operai||[])])];
+        data.ruoliOperai=data.ruoliOperai||{};
+        data.statoDipendenti=data.statoDipendenti||{};
+        data.operai.forEach(nome=>{if(!data.ruoliOperai[nome])data.ruoliOperai[nome]='Operaio';});
+        data.operai.forEach(nome=>{if(!data.statoDipendenti[nome])data.statoDipendenti[nome]='Attivo';});
+        data.clienti=data.clienti||[];
         data.cantieri=data.cantieri||[];
         data.rapportini=data.rapportini||[];
+        data.presenze=data.presenze||{};
+        data.costiManodopera=data.costiManodopera||{};
         data.garanzie=data.garanzie||[];
         data.fotoLavori=data.fotoLavori||[];
         data.ddt=data.ddt||[];
@@ -4222,8 +4979,55 @@ function idrolistGetData(){
     }
 }
 
+function idrolistDipendenteAttivo(nome,dati){
+    return (dati?.statoDipendenti?.[nome]||'Attivo')==='Attivo';
+}
+
 function idrolistSaveData(data){
     localStorage.setItem(IDROLIST_SHARED_KEY,JSON.stringify(data));
+}
+
+function idrolistRenderCostiManodopera(){
+    const contenitore=document.getElementById('elencoCostiManodopera');
+    if(!contenitore)return;
+    const data=idrolistGetData();
+    contenitore.innerHTML='<div class="list-card"><strong>Dipendente</strong><strong>Costo €/h</strong><strong>Prezzo cliente €/h</strong></div>'+data.operai.map(nome=>{
+        const tariffa=idrolistTariffaManodopera(nome);
+        return `<div class="list-card"><strong>${escapeHtml(nome)}</strong><input class="costo-orario-operaio" data-operaio="${escapeHtml(nome)}" type="number" min="0" step="0.01" value="${tariffa.costo}"><input class="prezzo-orario-operaio" data-operaio="${escapeHtml(nome)}" type="number" min="0" step="0.01" value="${tariffa.prezzoCliente}"></div>`;
+    }).join('');
+}
+
+function salvaCostiManodopera(){
+    const data=idrolistGetData();
+    data.costiManodopera={};
+    document.querySelectorAll('.costo-orario-operaio').forEach(campo=>{
+        const prezzo=Array.from(document.querySelectorAll('.prezzo-orario-operaio')).find(x=>x.dataset.operaio===campo.dataset.operaio);
+        data.costiManodopera[campo.dataset.operaio]={costo:idrolistNumero(campo.value),prezzoCliente:idrolistNumero(prezzo?.value)};
+    });
+    idrolistSaveData(data);
+    showNotification('Costi e prezzi della manodopera salvati');
+}
+
+function idrolistTariffaManodopera(operaio){
+    const tariffa=idrolistGetData().costiManodopera?.[operaio];
+    if(typeof tariffa==='number')return {costo:idrolistNumero(tariffa),prezzoCliente:0};
+    return {costo:idrolistNumero(tariffa?.costo),prezzoCliente:idrolistNumero(tariffa?.prezzoCliente)};
+}
+
+function idrolistCostoOrario(operaio){
+    return idrolistTariffaManodopera(operaio).costo;
+}
+
+function idrolistPrezzoOrarioCliente(operaio){
+    return idrolistTariffaManodopera(operaio).prezzoCliente;
+}
+
+function idrolistCostoManodoperaRapportino(rapportino){
+    return (rapportino.lavoratori||[]).reduce((totale,voce)=>totale+Number(voce.ore||0)*idrolistCostoOrario(voce.nome),0);
+}
+
+function idrolistRicavoManodoperaRapportino(rapportino){
+    return (rapportino.lavoratori||[]).reduce((totale,voce)=>totale+Number(voce.ore||0)*idrolistPrezzoOrarioCliente(voce.nome),0);
 }
 
 function idrolistSyncWorkerSelect(){
@@ -4254,21 +5058,92 @@ function idrolistRenderDashboard(){
             ? ultime.map(r=>`<div class="list-card"><div><strong>${escapeHtml(r.cantiere||'-')}</strong><div class="muted">Rapportino ricevuto</div></div><span class="status wait">${escapeHtml(r.stato||'Da verificare')}</span></div>`).join('')
             : '<p class="muted">Nessuna attività registrata.</p>');
     }
+    idrolistRenderNotifiche(data);
+}
+
+function idrolistRenderNotifiche(data){
+    const box=document.getElementById('notificheDashboard');
+    if(!box)return;
+    const avvisi=[];
+    Object.entries(data.presenze||{}).forEach(([operaio,giorni])=>{
+        if(!idrolistDipendenteAttivo(operaio,data))return;
+        if((data.ruoliOperai?.[operaio]||'Operaio')!=='Operaio')return;
+        Object.entries(giorni||{}).forEach(([dataLavoro,presenza])=>{
+            const orePreviste=idrolistOrePresenza(presenza);
+            if(!orePreviste)return;
+            const oreRapportini=data.rapportini.filter(r=>r.data===dataLavoro).flatMap(r=>(r.lavoratori||[]).filter(x=>x.nome===operaio)).reduce((totale,x)=>totale+Number(x.ore||0),0);
+            if(oreRapportini!==orePreviste&&idrolistScadenzaRapportinoSuperata(dataLavoro))avvisi.push({operaio,data:dataLavoro,previste:orePreviste,rapportini:oreRapportini});
+        });
+    });
+    const contatore=document.getElementById('notificationCount');
+    if(contatore){contatore.textContent=avvisi.length;contatore.hidden=!avvisi.length;}
+    const gruppi=avvisi.reduce((risultato,avviso)=>{(risultato[avviso.operaio]??=[]).push(avviso);return risultato;},{});
+    box.innerHTML='<h2>🔔 Notifiche fogli di lavoro</h2><p class="muted">Confronto tra ore segnate nelle presenze e ore inserite nei fogli di lavoro.</p>'+(avvisi.length?Object.entries(gruppi).sort(([a],[b])=>a.localeCompare(b,'it')).map(([operaio,voci])=>`<div class="list-card"><div><strong>${escapeHtml(operaio)}</strong><div class="muted">${voci.sort((a,b)=>String(b.data).localeCompare(String(a.data))).map(a=>`${escapeHtml(a.data)} — ${a.rapportini<a.previste?'mancano '+(a.previste-a.rapportini)+' h':'ore da verificare'} (presenze ${a.previste} h / fogli ${a.rapportini} h)`).join('<br>')}</div></div><span class="status wait">${voci.length} segnalazion${voci.length===1?'e':'i'}</span></div>`).join(''):'<p class="muted">Nessun foglio di lavoro mancante rispetto alle presenze.</p>');
+}
+
+function idrolistScadenzaRapportinoSuperata(dataLavoro){
+    const scadenza=new Date(dataLavoro+'T16:00:00');
+    scadenza.setDate(scadenza.getDate()+1);
+    return new Date()>=scadenza;
+}
+
+function toggleNotifiche(){
+    document.getElementById('notificheDashboard')?.classList.toggle('open');
 }
 
 function idrolistRenderCantieri(){
     const tbody=document.querySelector('#cantieri tbody');
     if(!tbody)return;
     const data=idrolistGetData();
-    const cantieri=data.cantieri||[];
+    const filtro=document.getElementById('filtroStatoCantieri');
+    const statoSelezionato=filtro?.value||'aperti';
+    const cantieri=(data.cantieri||[]).filter(c=>idrolistStatoCantiere(c)===statoSelezionato);
     tbody.innerHTML=cantieri.length ? cantieri.map(c=>`<tr>
         <td><strong>${escapeHtml(c.nome||'-')}</strong></td>
         <td>${escapeHtml(c.indirizzo||'-')}</td>
         <td>${escapeHtml(c.operaio||'-')}</td>
-        <td class="${c.stato==='Chiuso'?'orange':'green'}">● ${escapeHtml(c.stato||'Attivo')}</td>
+        <td class="${idrolistStatoCantiere(c)==='aperti'?'green':'orange'}">● ${idrolistEtichettaStatoCantiere(c)}</td>
         <td><button class="btn" data-cantiere-id="${escapeHtml(c.id)}">Apri</button></td>
-    </tr>`).join('') : '<tr><td colspan="5" class="muted">Nessun cantiere inserito.</td></tr>';
+    </tr>`).join('') : '<tr><td colspan="5" class="muted">Nessun cantiere in questa selezione.</td></tr>';
     tbody.querySelectorAll('[data-cantiere-id]').forEach(button=>button.addEventListener('click',function(){apriCantiereShared(this.dataset.cantiereId);}));
+}
+
+function idrolistStatoCantiere(cantiere){
+    if(['aperti','da-fatturare','fatturati'].includes(cantiere.statoContabile))return cantiere.statoContabile;
+    return 'aperti';
+}
+
+function idrolistEtichettaStatoCantiere(cantiere){
+    return ({'aperti':'Aperto','da-fatturare':'Chiuso in attesa di fatturazione','fatturati':'Fatturato'})[idrolistStatoCantiere(cantiere)];
+}
+
+function aggiornaStatoCantiere(id,valore){
+    const data=idrolistGetData();
+    const cantiere=(data.cantieri||[]).find(c=>c.id===id);
+    if(!cantiere)return;
+    cantiere.statoContabile=valore;
+    idrolistSaveData(data);
+    idrolistRenderCantieri();
+    idrolistRenderRapportini();
+}
+
+function salvaStatoCantiere(id){
+    const stato=document.getElementById('stato-cantiere-'+id)?.value;
+    const numeroFattura=document.getElementById('fattura-cantiere-'+id)?.value.trim();
+    if(stato==='fatturati'&&!numeroFattura){
+        alert('Per segnare il cantiere come fatturato devi inserire il numero di fattura.');
+        return;
+    }
+    const data=idrolistGetData();
+    const cantiere=(data.cantieri||[]).find(c=>c.id===id);
+    if(!cantiere)return;
+    cantiere.statoContabile=stato;
+    cantiere.numeroFattura=numeroFattura;
+    idrolistSaveData(data);
+    idrolistRenderCantieri();
+    idrolistRenderRapportini();
+    closeModal();
+    showNotification('Stato del cantiere aggiornato');
 }
 
 function idrolistRenderClienti(){
@@ -4279,17 +5154,145 @@ function idrolistRenderClienti(){
     card.querySelectorAll('[data-cliente]').forEach(button=>button.addEventListener('click',function(){apriClienteShared(this.dataset.cliente);}));
 }
 
+function idrolistStatisticheOperaio(nome){
+    const presenze=idrolistGetData().presenze?.[nome]||{};
+    const statistiche={present:{giorni:0,ore:0},holiday:{giorni:0,ore:0},sick:{giorni:0,ore:0},extra:{giorni:0,ore:0}};
+    Object.values(presenze).forEach(presenza=>{
+        const causali=presenza.causali||{present:presenza.stato==='present'?Number(presenza.ore||0):0,holiday:presenza.stato==='holiday'?Number(presenza.ore||0):0,sick:presenza.stato==='sick'?Number(presenza.ore||0):0,extra:presenza.stato==='extra'?Number(presenza.ore||0):0};
+        Object.keys(statistiche).forEach(causale=>{
+            const ore=Number(causali[causale]||0);
+            if(ore>0){statistiche[causale].giorni++;statistiche[causale].ore+=ore;}
+        });
+    });
+    return statistiche;
+}
+
+function idrolistRiepilogoStatisticheOperaio(nome){
+    const s=idrolistStatisticheOperaio(nome);
+    return `Presenze: ${s.present.giorni} gg / ${s.present.ore} h · Ferie: ${s.holiday.giorni} gg / ${s.holiday.ore} h · Malattia: ${s.sick.giorni} gg / ${s.sick.ore} h · Straordinari: ${s.extra.giorni} gg / ${s.extra.ore} h`;
+}
+
 function idrolistRenderOperai(){
     const card=document.querySelector('#operai .card');
     if(!card)return;
     const data=idrolistGetData();
     const oggi=new Date().toISOString().slice(0,10);
-    card.innerHTML=IDROLIST_WORKERS.map(nome=>{
+    const dipendentiAttivi=data.operai.filter(nome=>idrolistDipendenteAttivo(nome,data));
+    const dipendentiCessati=data.operai.filter(nome=>!idrolistDipendenteAttivo(nome,data));
+    const scheda=nome=>{
         const interventi=data.rapportini.filter(r=>r.data===oggi&&(r.lavoratori||[]).some(x=>x.nome===nome)).length;
         const iniziali=nome.split(/\s+/).map(parte=>parte[0]).join('').slice(0,2);
-        return `<div class="list-card"><div class="person"><div class="avatar">${escapeHtml(iniziali)}</div><div><strong>${escapeHtml(nome)}</strong><div class="muted">${interventi?interventi+' interventi oggi':'Nessuna attività oggi'}</div></div></div><button class="btn" data-operaio="${escapeHtml(nome)}">Apri report</button></div>`;
-    }).join('');
+        return `<div class="list-card"><div class="person"><div class="avatar">${escapeHtml(iniziali)}</div><div><strong>${escapeHtml(nome)}</strong><div class="muted">${escapeHtml(data.ruoliOperai?.[nome]||'Operaio')} · ${interventi?interventi+' interventi oggi':'Nessuna attività oggi'}</div><div class="muted" style="margin-top:6px;max-width:760px">${idrolistRiepilogoStatisticheOperaio(nome)}</div></div></div><button class="btn" data-operaio="${escapeHtml(nome)}">Apri statistica</button></div>`;
+    };
+    card.innerHTML=(dipendentiAttivi.map(scheda).join('')||'<p class="muted">Nessun dipendente attivo.</p>')+(dipendentiCessati.length?`<h3 style="margin-top:24px">Dipendenti cessati</h3>${dipendentiCessati.map(nome=>`<div class="list-card"><div><strong>${escapeHtml(nome)}</strong><div class="muted">Storico conservato · ${escapeHtml(data.ruoliOperai?.[nome]||'Operaio')}</div></div><button class="btn" data-riattiva-dipendente="${escapeHtml(nome)}">Riattiva</button></div>`).join('')}`:'');
     card.querySelectorAll('[data-operaio]').forEach(button=>button.addEventListener('click',function(){apriOperaioShared(this.dataset.operaio);}));
+    card.querySelectorAll('[data-riattiva-dipendente]').forEach(button=>button.addEventListener('click',function(){riattivaDipendente(this.dataset.riattivaDipendente);}));
+}
+
+function idrolistRenderFotoImpianti(){
+    const contenitore=document.getElementById('archivioFotoImpianti');
+    if(!contenitore)return;
+    const foto=(idrolistGetData().fotoLavori||[]).slice().sort((a,b)=>String(b.data||'').localeCompare(String(a.data||'')));
+    if(!foto.length){
+        contenitore.innerHTML='<div class="card"><p class="muted">Non sono ancora state caricate foto lavori o impianti.</p></div>';
+        return;
+    }
+    const perCliente=foto.reduce((clienti,voce)=>{
+        const cliente=voce.cliente||'Cliente non specificato';
+        const cantiere=voce.cantiere||'Cantiere non specificato';
+        const data=voce.data||'Senza data';
+        (((clienti[cliente]??={})[cantiere]??={})[data]??=[]).push(voce);
+        return clienti;
+    },{});
+    contenitore.innerHTML=Object.entries(perCliente).sort(([a],[b])=>a.localeCompare(b,'it')).map(([cliente,cantieri])=>`<section class="card" style="margin-bottom:20px"><h2>👥 ${escapeHtml(cliente)}</h2>${Object.entries(cantieri).map(([cantiere,date])=>`<div class="detail-box" style="margin-top:14px"><small>Cantiere</small><strong>${escapeHtml(cantiere)}</strong>${Object.entries(date).sort(([a],[b])=>String(b).localeCompare(String(a))).map(([data,voci])=>`<div style="margin-top:16px"><strong>📅 ${escapeHtml(data)}</strong>${voci.map(voce=>{const immagini=voce.immagini||[];return `<div style="margin-top:10px"><div><strong>${escapeHtml(voce.descrizione||'Nessuna descrizione')}</strong></div><div class="muted">Caricata da ${escapeHtml(voce.compilatoDa||'Ufficio')}</div>${immagini.length?`<div class="impianti-gallery">${immagini.map(src=>`<a href="${escapeHtml(src)}" target="_blank" title="Apri foto"><img src="${escapeHtml(src)}" alt="Foto impianto"></a>`).join('')}</div>`:`<div class="muted" style="margin-top:6px">Nessuna immagine visualizzabile${voce.allegati?.length?': '+voce.allegati.map(escapeHtml).join(', '):'.'}</div>`}</div>`;}).join('')}</div>`).join('')}</div>`).join('')}</section>`).join('');
+}
+
+function apriCaricaFotoImpianto(){
+    const dati=idrolistGetData();
+    const clienti=[...new Set([...(dati.clienti||[]).map(c=>c.nome),...(dati.cantieri||[]).map(c=>c.nome)].filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it'));
+    openModal('📷 Carica foto impianto',`<div style="margin:0 0 20px;font-weight:700;color:#1769d1" id="fotoImpiantoIndicatore">Passaggio 1 di 4 — Cliente</div><section data-step-foto-impianto="1"><div class="form-group"><label>Cliente</label><div style="display:flex;gap:8px"><select id="fotoImpiantoCliente" onchange="idrolistCaricaCantieriFotoImpianti()"><option value="">-- Seleziona cliente --</option>${clienti.map(nome=>`<option value="${escapeHtml(nome)}">${escapeHtml(nome)}</option>`).join('')}</select><button class="btn" type="button" onclick="apriNuovoClienteDaFotoImpianto()">＋ Nuovo</button></div></div><div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" type="button" onclick="idrolistAvantiStepFotoImpianto(2)">Avanti →</button></div></section><section data-step-foto-impianto="2" hidden><div class="form-group"><label>Cantiere</label><div style="display:flex;gap:8px"><select id="fotoImpiantoCantiere" disabled><option value="">-- Seleziona prima il cliente --</option></select><button class="btn" type="button" onclick="apriNuovoCantiereDaFotoImpianto()">＋ Nuovo</button></div></div><div style="display:flex;justify-content:space-between"><button class="btn" type="button" onclick="idrolistMostraStepFotoImpianto(1)">← Indietro</button><button class="btn btn-primary" type="button" onclick="idrolistAvantiStepFotoImpianto(3)">Avanti →</button></div></section><section data-step-foto-impianto="3" hidden><div class="form-group"><label>Data</label><input id="fotoImpiantoData" type="date" value="${idrolistDataOggiLocale()}"></div><div class="form-group"><label>Breve descrizione</label><textarea id="fotoImpiantoDescrizione" rows="3" placeholder="Es. Unità esterna installata"></textarea></div><div style="display:flex;justify-content:space-between"><button class="btn" type="button" onclick="idrolistMostraStepFotoImpianto(2)">← Indietro</button><button class="btn btn-primary" type="button" onclick="idrolistAvantiStepFotoImpianto(4)">Avanti →</button></div></section><section data-step-foto-impianto="4" hidden><div class="form-group"><label>Foto</label><input id="fotoImpiantoFile" type="file" accept="image/*" multiple><small class="muted">Puoi selezionare una o più fotografie.</small></div><div style="display:flex;justify-content:space-between"><button class="btn" type="button" onclick="idrolistMostraStepFotoImpianto(3)">← Indietro</button><button class="btn btn-primary" type="button" onclick="salvaFotoImpiantoUfficio()">Carica foto</button></div></section>`,`<button class="btn" type="button" onclick="closeModal()">Annulla</button>`);
+}
+
+function idrolistMostraStepFotoImpianto(numero){
+    document.querySelectorAll('[data-step-foto-impianto]').forEach(sezione=>sezione.hidden=Number(sezione.dataset.stepFotoImpianto)!==numero);
+    const titoli={1:'Passaggio 1 di 4 — Cliente',2:'Passaggio 2 di 4 — Cantiere',3:'Passaggio 3 di 4 — Data e descrizione',4:'Passaggio 4 di 4 — Foto'};
+    const indicatore=document.getElementById('fotoImpiantoIndicatore');
+    if(indicatore)indicatore.textContent=titoli[numero];
+}
+
+function idrolistAvantiStepFotoImpianto(numero){
+    if(numero===2&&!document.getElementById('fotoImpiantoCliente')?.value){alert('Seleziona il cliente.');return;}
+    if(numero===3&&!document.getElementById('fotoImpiantoCantiere')?.value){alert('Seleziona il cantiere.');return;}
+    if(numero===4&&(!document.getElementById('fotoImpiantoData')?.value||!document.getElementById('fotoImpiantoDescrizione')?.value.trim())){alert('Inserisci data e breve descrizione.');return;}
+    idrolistMostraStepFotoImpianto(numero);
+}
+
+function idrolistCaricaCantieriFotoImpianti(){
+    const cliente=document.getElementById('fotoImpiantoCliente')?.value;
+    const select=document.getElementById('fotoImpiantoCantiere');
+    if(!select)return;
+    const cantieri=(idrolistGetData().cantieri||[]).filter(c=>c.nome===cliente);
+    select.disabled=!cliente;
+    select.innerHTML=cliente?'<option value="">-- Seleziona cantiere --</option>'+cantieri.map(c=>`<option value="${escapeHtml(c.id)}">${escapeHtml(c.indirizzo||c.nome)}</option>`).join(''):'<option value="">-- Seleziona prima il cliente --</option>';
+}
+
+function apriNuovoClienteDaFotoImpianto(){
+    openModal('👤 Nuovo cliente',`<div class="form-group"><label>Nome cliente</label><input id="fotoNuovoClienteNome"></div><div class="form-group"><label>Città</label><input id="fotoNuovoClienteCitta"></div><div class="form-group"><label>Via / Piazza</label><input id="fotoNuovoClienteVia"></div><div class="form-group"><label>Telefono</label><input id="fotoNuovoClienteTelefono" type="tel"></div>`,`<button class="btn" type="button" onclick="apriCaricaFotoImpianto()">Annulla</button><button class="btn btn-primary" type="button" onclick="salvaNuovoClienteDaFotoImpianto()">Salva cliente</button>`);
+}
+
+function salvaNuovoClienteDaFotoImpianto(){
+    const nome=document.getElementById('fotoNuovoClienteNome')?.value.trim();
+    const citta=document.getElementById('fotoNuovoClienteCitta')?.value.trim();
+    const via=document.getElementById('fotoNuovoClienteVia')?.value.trim();
+    const telefono=document.getElementById('fotoNuovoClienteTelefono')?.value.trim();
+    if(!nome||!citta||!via||!telefono){alert('Completa nome, città, via/piazza e telefono.');return;}
+    const dati=idrolistGetData();
+    dati.clienti=dati.clienti||[];
+    if([...(dati.clienti||[]),...(dati.cantieri||[])].some(x=>String(x.nome||'').toLocaleLowerCase('it')===nome.toLocaleLowerCase('it'))){alert('Questo cliente è già presente.');return;}
+    dati.clienti.push({id:'CLI-'+Date.now(),nome,citta,via,telefono,creatoIl:new Date().toISOString()});
+    idrolistSaveData(dati);
+    apriNuovoCantiereDaFotoImpianto(nome);
+}
+
+function apriNuovoCantiereDaFotoImpianto(clientePreselezionato=''){
+    const dati=idrolistGetData();
+    const clienti=[...new Set([...(dati.clienti||[]).map(c=>c.nome),...(dati.cantieri||[]).map(c=>c.nome)].filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it'));
+    const clienteCorrente=clientePreselezionato||document.getElementById('fotoImpiantoCliente')?.value||'';
+    openModal('📍 Nuovo cantiere',`<div class="form-group"><label>Cliente</label><select id="fotoNuovoCantiereCliente"><option value="">-- Seleziona cliente --</option>${clienti.map(nome=>`<option value="${escapeHtml(nome)}" ${nome===clienteCorrente?'selected':''}>${escapeHtml(nome)}</option>`).join('')}</select></div><div class="form-group"><label>Città</label><input id="fotoNuovoCantiereCitta"></div><div class="form-group"><label>Via / Piazza</label><input id="fotoNuovoCantiereVia"></div>`,`<button class="btn" type="button" onclick="apriCaricaFotoImpianto()">Annulla</button><button class="btn btn-primary" type="button" onclick="salvaNuovoCantiereDaFotoImpianto()">Crea cantiere</button>`);
+}
+
+function salvaNuovoCantiereDaFotoImpianto(){
+    const cliente=document.getElementById('fotoNuovoCantiereCliente')?.value;
+    const citta=document.getElementById('fotoNuovoCantiereCitta')?.value.trim();
+    const via=document.getElementById('fotoNuovoCantiereVia')?.value.trim();
+    if(!cliente||!citta||!via){alert('Completa cliente, città e via/piazza.');return;}
+    const dati=idrolistGetData();
+    const cantiere={id:'CAN-'+Date.now(),nome:cliente,indirizzo:via+', '+citta,citta,via,stato:'Attivo',statoContabile:'aperti',creatoIl:new Date().toISOString()};
+    dati.cantieri.push(cantiere);
+    idrolistSaveData(dati);
+    apriCaricaFotoImpianto();
+    const selectCliente=document.getElementById('fotoImpiantoCliente');
+    if(selectCliente){selectCliente.value=cliente;idrolistCaricaCantieriFotoImpianti();}
+    const selectCantiere=document.getElementById('fotoImpiantoCantiere');
+    if(selectCantiere)selectCantiere.value=cantiere.id;
+    idrolistMostraStepFotoImpianto(2);
+    showNotification('Cantiere creato e selezionato.');
+}
+
+async function salvaFotoImpiantoUfficio(){
+    const dati=idrolistGetData();
+    const cantiere=(dati.cantieri||[]).find(c=>c.id===document.getElementById('fotoImpiantoCantiere')?.value);
+    const descrizione=document.getElementById('fotoImpiantoDescrizione')?.value.trim();
+    const file=Array.from(document.getElementById('fotoImpiantoFile')?.files||[]);
+    if(!cantiere||!descrizione||!file.length){alert('Seleziona cliente, cantiere, almeno una foto e inserisci una breve descrizione.');return;}
+    let immagini=[];
+    try{immagini=await Promise.all(file.map(idrolistLeggiImmagine));}catch(e){alert('Non è stato possibile leggere una o più fotografie.');return;}
+    dati.fotoLavori=dati.fotoLavori||[];
+    dati.fotoLavori.push({id:'FOTO-'+Date.now(),tipoSezione:'fotoLavori',cantiereId:cantiere.id,cliente:cantiere.nome,cantiere:cantiere.indirizzo,descrizione,allegati:file.map(f=>f.name),immagini,compilatoDa:'Ufficio',data:document.getElementById('fotoImpiantoData')?.value||idrolistDataOggiLocale(),stato:'Caricato'});
+    try{idrolistSaveData(dati);}catch(e){alert('Le foto sono troppo grandi per essere salvate. Riduci il numero o la dimensione delle immagini.');return;}
+    closeModal();
+    idrolistRenderFotoImpianti();
+    showNotification('Foto impianto caricate con successo.');
 }
 
 function idrolistRenderGaranzie(){
@@ -4316,23 +5319,52 @@ function idrolistRenderRapportini(){
     const tbody=document.querySelector('#rapportini tbody');
     if(!tbody)return;
     const data=idrolistGetData();
-    const rows=data.rapportini||[];
-    const sharedRows=rows.map(r=>{
-        const worker=(r.lavoratori&&r.lavoratori.length)
-            ? r.lavoratori.map(x=>x.nome).join(', ')
-            : (r.operaio||'-');
-        const hours=(r.lavoratori||[]).reduce((sum,x)=>sum+Number(x.ore||0),0);
-        return `<tr data-idrolist-report="${escapeHtml(r.id)}">
-            <td>${escapeHtml(r.data||'-')}</td>
-            <td>${escapeHtml(r.cantiere||'-')}</td>
-            <td>${escapeHtml(worker)}</td>
-            <td>${escapeHtml(r.descrizione||'-')}</td>
-            <td>${hours||0}</td>
-            <td class="orange">${escapeHtml(r.stampatoIl?'Stampato':(r.stato||'Da verificare'))}</td>
-            <td><button class="btn" data-report-id="${escapeHtml(r.id)}">Apri</button> <button class="btn" data-print-id="${escapeHtml(r.id)}">Stampa</button></td>
-        </tr>`;
+    const filtroStato=document.getElementById('filtroStatoRapportini');
+    const filtroCliente=document.getElementById('filtroClienteRapportini');
+    const filtroCantiere=document.getElementById('filtroCantiereRapportini');
+    const statoSelezionato=filtroStato?.value||'aperti';
+    let clienteSelezionato=filtroCliente?.value||'tutti';
+    let cantiereSelezionato=filtroCantiere?.value||'tutti';
+    const clienteDi=r=>r.cliente||r.cantiere||'Senza cliente';
+    const cantiereDi=r=>{
+        const cantiere=(data.cantieri||[]).find(c=>c.id===r.cantiereId);
+        return cantiere?.indirizzo||r.indirizzo||'Cantiere non specificato';
+    };
+    const clienti=[...new Set((data.rapportini||[]).map(clienteDi))].sort((a,b)=>a.localeCompare(b,'it'));
+    if(filtroCliente){
+        filtroCliente.innerHTML='<option value="tutti">Tutti i clienti</option>'+clienti.map(cliente=>`<option value="${escapeHtml(cliente)}">${escapeHtml(cliente)}</option>`).join('');
+        filtroCliente.value=clienti.includes(clienteSelezionato)?clienteSelezionato:'tutti';
+        clienteSelezionato=filtroCliente.value;
+    }
+    const cantieriDisponibili=[];
+    (data.rapportini||[]).filter(r=>clienteSelezionato==='tutti'||clienteDi(r)===clienteSelezionato).forEach(r=>{
+        const idCantiere=r.cantiereId||r.indirizzo||r.id;
+        if(!cantieriDisponibili.some(c=>c.id===idCantiere))cantieriDisponibili.push({id:idCantiere,nome:cantiereDi(r)});
+    });
+    if(filtroCantiere){
+        filtroCantiere.innerHTML='<option value="tutti">Tutti i cantieri</option>'+cantieriDisponibili.map(c=>`<option value="${escapeHtml(c.id)}">${escapeHtml(c.nome)}</option>`).join('');
+        filtroCantiere.value=cantieriDisponibili.some(c=>c.id===cantiereSelezionato)?cantiereSelezionato:'tutti';
+        cantiereSelezionato=filtroCantiere.value;
+    }
+    const rows=(data.rapportini||[])
+        .filter(r=>idrolistStatoIntervento(r)===statoSelezionato)
+        .filter(r=>clienteSelezionato==='tutti'||clienteDi(r)===clienteSelezionato)
+        .filter(r=>cantiereSelezionato==='tutti'||(r.cantiereId||r.indirizzo||r.id)===cantiereSelezionato)
+        .sort((a,b)=>clienteDi(a).localeCompare(clienteDi(b),'it')||String(b.data||'').localeCompare(String(a.data||'')));
+    const gruppi=rows.reduce((acc,r)=>{
+        const cliente=clienteDi(r);
+        (acc[cliente]||=[]).push(r);
+        return acc;
+    },{});
+    const sharedRows=Object.entries(gruppi).map(([cliente,rapportiniCliente])=>{
+        const righeCliente=rapportiniCliente.map(r=>{
+            const worker=(r.lavoratori&&r.lavoratori.length)?r.lavoratori.map(x=>x.nome).join(', '):(r.operaio||'-');
+            const hours=(r.lavoratori||[]).reduce((sum,x)=>sum+Number(x.ore||0),0);
+            return `<tr data-idrolist-report="${escapeHtml(r.id)}"><td>${escapeHtml(r.data||'-')}</td><td>${escapeHtml(clienteDi(r))}</td><td>${escapeHtml(worker)}</td><td>${escapeHtml(r.descrizione||'-')}</td><td>${hours||0}</td><td class="orange">${idrolistEtichettaStatoIntervento(r)}</td><td><button class="btn" data-report-id="${escapeHtml(r.id)}">Apri</button> <button class="btn" data-print-id="${escapeHtml(r.id)}">Stampa</button></td></tr>`;
+        }).join('');
+        return `<tr class="report-client-group"><td colspan="7">👤 ${escapeHtml(cliente)}</td></tr>${righeCliente}`;
     }).join('');
-    tbody.innerHTML=sharedRows || '<tr><td colspan="7" class="muted">Nessun rapportino ricevuto.</td></tr>';
+    tbody.innerHTML=sharedRows || '<tr><td colspan="7" class="muted">Nessun rapportino in questa selezione.</td></tr>';
     if(sharedRows){
         tbody.querySelectorAll('[data-report-id]').forEach(function(button){
             button.addEventListener('click',function(){openSharedRapportino(this.dataset.reportId);});
@@ -4343,32 +5375,154 @@ function idrolistRenderRapportini(){
     }
 }
 
-function openSharedRapportino(id){
+function idrolistStatoIntervento(rapportino){
+    const cantiere=(idrolistGetData().cantieri||[]).find(c=>c.id===rapportino.cantiereId);
+    if(cantiere)return idrolistStatoCantiere(cantiere);
+    if(['aperti','da-fatturare','fatturati'].includes(rapportino.statoIntervento))return rapportino.statoIntervento;
+    if(rapportino.fatturato)return 'fatturati';
+    if(rapportino.chiusoDaFatturare)return 'da-fatturare';
+    return 'aperti';
+}
+
+function idrolistEtichettaStatoIntervento(rapportino){
+    return ({'aperti':'Aperto','da-fatturare':'Chiuso da fatturare','fatturati':'Fatturato'})[idrolistStatoIntervento(rapportino)];
+}
+
+function aggiornaStatoIntervento(id,valore){
+    const data=idrolistGetData();
+    const rapportino=(data.rapportini||[]).find(r=>r.id===id);
+    if(!rapportino)return;
+    rapportino.statoIntervento=valore;
+    idrolistSaveData(data);
+    idrolistRenderRapportini();
+}
+
+function idrolistFirmaClienteHtml(firma){
+    if(typeof firma==='string'&&firma.startsWith('data:image/')){
+        return `<img src="${firma}" alt="Firma del cliente" style="display:block;max-width:100%;height:auto;max-height:160px;background:white;border:1px solid #dce3eb;border-radius:8px">`;
+    }
+    return '<span class="muted">Nessuna firma disponibile.</span>';
+}
+
+async function openSharedRapportino(id){
     const data=idrolistGetData();
     const r=(data.rapportini||[]).find(x=>x.id===id);
     if(!r)return;
-    const workers=(r.lavoratori||[]).map(x=>`${escapeHtml(x.nome)}: ${escapeHtml(x.ore)} h`).join('<br>')||'-';
-    const materials=(r.materiali||[]).map(x=>`${escapeHtml(x.nome)} — ${escapeHtml(x.quantita)}`).join('<br>')||'-';
+    const immaginiDdt=await idrolistCaricaFotoDdt(r.ddtFoto||[]);
+    const costoManodopera=idrolistCostoManodoperaRapportino(r);
+    const ricavoManodopera=idrolistRicavoManodoperaRapportino(r);
+    const dettaglioManodopera=(r.lavoratori||[]).length?`<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left">Dipendente</th><th>Ore</th><th>Costo €/h</th><th>Prezzo cliente €/h</th><th>Costo</th><th>Ricavo</th></tr></thead><tbody>${r.lavoratori.map(x=>`<tr><td>${escapeHtml(x.nome)}</td><td style="text-align:center">${escapeHtml(x.ore)}</td><td style="text-align:right">${idrolistEuro(idrolistCostoOrario(x.nome))}</td><td style="text-align:right">${idrolistEuro(idrolistPrezzoOrarioCliente(x.nome))}</td><td style="text-align:right">${idrolistEuro(Number(x.ore||0)*idrolistCostoOrario(x.nome))}</td><td style="text-align:right">${idrolistEuro(Number(x.ore||0)*idrolistPrezzoOrarioCliente(x.nome))}</td></tr>`).join('')}</tbody><tfoot><tr><th colspan="4" style="text-align:right;padding-top:12px">Totale manodopera</th><th style="text-align:right;padding-top:12px">${idrolistEuro(costoManodopera)}</th><th style="text-align:right;padding-top:12px">${idrolistEuro(ricavoManodopera)}</th></tr></tfoot></table>`:'Nessuna ora inserita.';
+    const materiali=r.materiali||[];
+    const materials=materiali.length?`<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left">Materiale</th><th>Quantità</th><th>Prezzo acquisto</th><th>Ricarico %</th><th>Prezzo vendita</th><th>Totale</th></tr></thead><tbody>${materiali.map((x,index)=>`<tr><td>${escapeHtml(x.nome)}</td><td style="text-align:center">${escapeHtml(x.quantita)}</td><td><input type="number" min="0" step="0.01" value="${idrolistPrezzoAcquisto(x)}" oninput="aggiornaMaterialeRapportino('${escapeHtml(id)}',${index},'prezzoAcquisto',this.value)"></td><td><input style="width:64px" type="number" min="0" step="0.01" value="${idrolistRicarico(x)}" oninput="aggiornaMaterialeRapportino('${escapeHtml(id)}',${index},'ricaricoPercentuale',this.value)"></td><td id="vendita-materiale-${escapeHtml(id)}-${index}" style="text-align:right">${idrolistEuro(idrolistPrezzoVendita(x))}</td><td id="totale-materiale-${escapeHtml(id)}-${index}" style="text-align:right">${idrolistEuro(idrolistTotaleMateriale(x))}</td></tr>`).join('')}</tbody><tfoot><tr><th colspan="5" style="text-align:right;padding-top:8px">Totale acquisto materiali</th><th id="totale-acquisto-${escapeHtml(id)}" style="text-align:right;padding-top:8px">${idrolistEuro(idrolistTotaleAcquistoRapportino(r))}</th></tr><tr><th colspan="5" style="text-align:right;padding-top:12px">Totale materiali con ricarico</th><th id="totale-rapportino-${escapeHtml(id)}" style="text-align:right;padding-top:12px">${idrolistEuro(idrolistTotaleRapportino(r))}</th></tr></tfoot></table>`:'Nessun materiale inserito.';
     const ddt=(r.ddtAllegati||[]).map(nome=>escapeHtml(nome)).join('<br>')||'Nessun DDT allegato';
+    const fotoDdt=immaginiDdt.filter(f=>f.dataUrl).map(f=>`<a href="${f.dataUrl}" target="_blank" title="Apri ${escapeHtml(f.nome||'foto DDT')}"><img src="${f.dataUrl}" alt="${escapeHtml(f.nome||'Foto DDT')}" style="width:110px;height:85px;object-fit:cover;border-radius:8px;border:1px solid #dce3eb;margin:8px 8px 0 0"></a>`).join('');
+    const dettaglioDdt=`<div><strong>Allegati</strong> <button class="btn" type="button" onclick="stampaDdtAllegati('${escapeHtml(id)}')">🖨 Stampa DDT</button><br>${ddt}${fotoDdt?`<div>${fotoDdt}</div>`:''}</div><div class="detail-grid" style="margin-top:14px"><div class="form-group"><label>Costo totale DDT (€)</label><input type="number" min="0" step="0.01" value="${idrolistCostoDdtRapportino(r)}" oninput="aggiornaDdtRapportino('${escapeHtml(id)}','ddtCosto',this.value)"></div><div class="form-group"><label>Ricarico %</label><input style="width:76px" type="number" min="0" step="0.01" value="${idrolistRicaricoDdtRapportino(r)}" oninput="aggiornaDdtRapportino('${escapeHtml(id)}','ddtRicaricoPercentuale',this.value)"></div><div class="detail-box"><small>Ricavo DDT</small><strong id="ricavo-ddt-${escapeHtml(id)}">${idrolistEuro(idrolistRicavoDdtRapportino(r))}</strong></div></div>`;
     openModal('📋 Rapportino '+escapeHtml(id),`
         <div class="detail-grid">
             <div class="detail-box"><small>Data</small><strong>${escapeHtml(r.data||'-')}</strong></div>
-            <div class="detail-box"><small>Cantiere</small><strong>${escapeHtml(r.cantiere||'-')}</strong></div>
+            <div class="detail-box"><small>Cliente</small><strong>${escapeHtml(r.cantiere||'-')}</strong></div>
+            <div class="detail-box"><small>Cantiere</small><strong>${escapeHtml(r.indirizzo||'-')}</strong></div>
+        </div>
+        <br>
+        <div class="detail-grid">
+            <div class="detail-box"><small>Tipo intervento</small><strong>${escapeHtml(r.tipoIntervento||'Nuovo intervento')}</strong></div>
+            <div class="detail-box"><small>Referente cantiere</small><strong>${escapeHtml(r.referenteCantiere||'BRUNO NICOLA')}</strong></div>
+            <div class="detail-box"><small>Cantiere terminato</small><strong>${r.cantiereTerminato?'Sì':'No'}</strong></div>
         </div>
         <br>
         <div class="detail-box"><small>Descrizione</small><strong>${escapeHtml(r.descrizione||'-')}</strong></div>
         <br>
-        <div class="detail-box"><small>Operai e ore</small><strong>${workers}</strong></div>
+        <div class="detail-box"><small>Manodopera: costo e ricavo</small><div>${dettaglioManodopera}</div></div>
         <br>
-        <div class="detail-box"><small>Materiali</small><strong>${materials}</strong></div>
+        <div class="detail-box"><small>Materiali: costo e ricavo</small><div>${materials}</div></div>
         <br>
-        <div class="detail-box"><small>Foto lavori</small><strong>${escapeHtml(r.descrizioneFotoLavori||'-')}<br>${(r.fotoLavori||[]).map(escapeHtml).join('<br>')||'Nessuna foto allegata'}</strong></div>
+        <div class="detail-box"><small>DDT e bolle: costo e ricavo</small>${dettaglioDdt}</div>
         <br>
-        <div class="detail-box"><small>Garanzia</small><strong>${escapeHtml(r.garanzie||'Nessuna garanzia segnalata')}</strong></div>
+        <div class="detail-grid">
+            <div class="detail-box"><small>Costo complessivo</small><strong id="costo-completo-${escapeHtml(id)}">${idrolistEuro(costoManodopera+idrolistTotaleAcquistoRapportino(r)+idrolistCostoDdtRapportino(r))}</strong></div>
+            <div class="detail-box"><small>Ricavo complessivo</small><strong id="totale-completo-${escapeHtml(id)}">${idrolistEuro(ricavoManodopera+idrolistTotaleRapportino(r)+idrolistRicavoDdtRapportino(r))}</strong></div>
+        </div>
         <br>
-        <div class="detail-box"><small>DDT allegati</small><strong>${ddt}</strong></div>
-        <div class="detail-box"><small>Firma cliente</small><strong>${r.firmaCliente?'Acquisita':'Non presente'}</strong></div>
-    `,`<button class="btn" onclick="stampaRapportino('${escapeHtml(id)}')">🖨 Stampa</button><button class="btn btn-primary" onclick="closeModal()">Chiudi</button>`);
+        <div class="detail-box"><small>Firma cliente</small><div style="margin-top:8px">${idrolistFirmaClienteHtml(r.firmaCliente)}</div></div>
+    `,`<button class="btn" onclick="stampaRapportino('${escapeHtml(id)}')">🖨 Stampa rapportino</button><button class="btn btn-primary" onclick="closeModal()">Chiudi</button>`);
+}
+
+function idrolistNumero(valore){
+    return Number(String(valore??0).replace(',','.'))||0;
+}
+
+function idrolistPrezzoAcquisto(materiale){
+    return idrolistNumero(materiale.prezzoAcquisto??materiale.prezzoUnitario);
+}
+
+function idrolistRicarico(materiale){
+    return materiale.ricaricoPercentuale===undefined||materiale.ricaricoPercentuale===null?35:idrolistNumero(materiale.ricaricoPercentuale);
+}
+
+function idrolistPrezzoVendita(materiale){
+    return idrolistPrezzoAcquisto(materiale)*(1+idrolistRicarico(materiale)/100);
+}
+
+function idrolistTotaleMateriale(materiale){
+    return idrolistNumero(materiale.quantita)*idrolistPrezzoVendita(materiale);
+}
+
+function idrolistTotaleAcquistoRapportino(rapportino){
+    return (rapportino.materiali||[]).reduce((totale,materiale)=>totale+idrolistNumero(materiale.quantita)*idrolistPrezzoAcquisto(materiale),0);
+}
+
+function idrolistTotaleRapportino(rapportino){
+    return (rapportino.materiali||[]).reduce((totale,materiale)=>totale+idrolistTotaleMateriale(materiale),0);
+}
+
+function idrolistCostoDdtRapportino(rapportino){
+    return idrolistNumero(rapportino.ddtCosto);
+}
+
+function idrolistRicaricoDdtRapportino(rapportino){
+    return rapportino.ddtRicaricoPercentuale===undefined||rapportino.ddtRicaricoPercentuale===null?35:idrolistNumero(rapportino.ddtRicaricoPercentuale);
+}
+
+function idrolistRicavoDdtRapportino(rapportino){
+    return idrolistCostoDdtRapportino(rapportino)*(1+idrolistRicaricoDdtRapportino(rapportino)/100);
+}
+
+function idrolistEuro(importo){
+    return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(importo||0);
+}
+
+function aggiornaMaterialeRapportino(id,index,campo,valore){
+    const data=idrolistGetData();
+    const rapportino=(data.rapportini||[]).find(x=>x.id===id);
+    if(!rapportino||!rapportino.materiali?.[index])return;
+    rapportino.materiali[index][campo]=idrolistNumero(valore);
+    idrolistSaveData(data);
+    const totaleRiga=document.getElementById('totale-materiale-'+id+'-'+index);
+    const venditaRiga=document.getElementById('vendita-materiale-'+id+'-'+index);
+    const totaleRapportino=document.getElementById('totale-rapportino-'+id);
+    const totaleAcquisto=document.getElementById('totale-acquisto-'+id);
+    const costoCompleto=document.getElementById('costo-completo-'+id);
+    const totaleCompleto=document.getElementById('totale-completo-'+id);
+    if(totaleRiga)totaleRiga.textContent=idrolistEuro(idrolistTotaleMateriale(rapportino.materiali[index]));
+    if(venditaRiga)venditaRiga.textContent=idrolistEuro(idrolistPrezzoVendita(rapportino.materiali[index]));
+    if(totaleRapportino)totaleRapportino.textContent=idrolistEuro(idrolistTotaleRapportino(rapportino));
+    if(totaleAcquisto)totaleAcquisto.textContent=idrolistEuro(idrolistTotaleAcquistoRapportino(rapportino));
+    if(costoCompleto)costoCompleto.textContent=idrolistEuro(idrolistCostoManodoperaRapportino(rapportino)+idrolistTotaleAcquistoRapportino(rapportino)+idrolistCostoDdtRapportino(rapportino));
+    if(totaleCompleto)totaleCompleto.textContent=idrolistEuro(idrolistRicavoManodoperaRapportino(rapportino)+idrolistTotaleRapportino(rapportino)+idrolistRicavoDdtRapportino(rapportino));
+}
+
+function aggiornaDdtRapportino(id,campo,valore){
+    const data=idrolistGetData();
+    const rapportino=(data.rapportini||[]).find(r=>r.id===id);
+    if(!rapportino)return;
+    rapportino[campo]=idrolistNumero(valore);
+    idrolistSaveData(data);
+    const ricavo=document.getElementById('ricavo-ddt-'+id);
+    const costoCompleto=document.getElementById('costo-completo-'+id);
+    const totaleCompleto=document.getElementById('totale-completo-'+id);
+    if(ricavo)ricavo.textContent=idrolistEuro(idrolistRicavoDdtRapportino(rapportino));
+    if(costoCompleto)costoCompleto.textContent=idrolistEuro(idrolistCostoManodoperaRapportino(rapportino)+idrolistTotaleAcquistoRapportino(rapportino)+idrolistCostoDdtRapportino(rapportino));
+    if(totaleCompleto)totaleCompleto.textContent=idrolistEuro(idrolistRicavoManodoperaRapportino(rapportino)+idrolistTotaleRapportino(rapportino)+idrolistRicavoDdtRapportino(rapportino));
 }
 
 function apriCantiereShared(id){
@@ -4380,7 +5534,7 @@ function apriCantiereShared(id){
     const foto=(data.fotoLavori||[]).filter(x=>x.cantiereId===id);
     const ddt=(data.ddt||[]).filter(x=>x.cantiereId===id);
     const elenco=(voci,voto)=>voci.map(x=>`${escapeHtml(x.data||'-')} — ${escapeHtml(x.descrizione||'-')}${x.allegati?.length?'<br><small>Allegati: '+x.allegati.map(escapeHtml).join(', ')+'</small>':''}`).join('<hr>')||voto;
-    openModal('📍 '+escapeHtml(c.nome),`<div class="detail-grid"><div class="detail-box"><small>Indirizzo</small><strong>${escapeHtml(c.indirizzo||'-')}</strong></div><div class="detail-box"><small>Stato</small><strong>${escapeHtml(c.stato||'Attivo')}</strong></div></div><br><div class="detail-box"><small>Note</small><strong>${escapeHtml(c.note||'-')}</strong></div><br><div class="detail-grid"><div class="detail-box"><small>Rapportini</small><strong>${rapportini.length}</strong></div><div class="detail-box"><small>Garanzie</small><strong>${garanzie.length}</strong></div><div class="detail-box"><small>Foto lavori</small><strong>${foto.length}</strong></div><div class="detail-box"><small>DDT / bolle</small><strong>${ddt.length}</strong></div></div><br><div class="detail-box"><small>Garanzie caricate</small><strong>${elenco(garanzie,'Nessuna garanzia caricata')}</strong></div><br><div class="detail-box"><small>Foto lavori caricate</small><strong>${elenco(foto,'Nessuna foto caricata')}</strong></div><br><div class="detail-box"><small>DDT e bolle caricati</small><strong>${elenco(ddt,'Nessun DDT o bolla caricata')}</strong></div>`,'<button class="btn btn-primary" onclick="closeModal()">Chiudi</button>');
+    openModal('📍 '+escapeHtml(c.nome),`<div class="detail-grid"><div class="detail-box"><small>Indirizzo</small><strong>${escapeHtml(c.indirizzo||'-')}</strong></div><div class="detail-box"><small>Stato cantiere</small><select id="stato-cantiere-${escapeHtml(c.id)}"><option value="aperti" ${idrolistStatoCantiere(c)==='aperti'?'selected':''}>Aperto</option><option value="da-fatturare" ${idrolistStatoCantiere(c)==='da-fatturare'?'selected':''}>Chiuso in attesa di fatturazione</option><option value="fatturati" ${idrolistStatoCantiere(c)==='fatturati'?'selected':''}>Fatturato</option></select></div></div><div class="form-group" style="margin-top:14px"><label>Numero fattura <span class="muted">(obbligatorio per lo stato “Fatturato”)</span></label><input id="fattura-cantiere-${escapeHtml(c.id)}" value="${escapeHtml(c.numeroFattura||'')}" placeholder="Es. 123/2026"></div><div class="detail-box"><small>Note</small><strong>${escapeHtml(c.note||'-')}</strong></div><br><div class="detail-grid"><div class="detail-box"><small>Rapportini</small><strong>${rapportini.length}</strong></div><div class="detail-box"><small>Garanzie</small><strong>${garanzie.length}</strong></div><div class="detail-box"><small>Foto lavori</small><strong>${foto.length}</strong></div><div class="detail-box"><small>DDT / bolle</small><strong>${ddt.length}</strong></div></div><br><div class="detail-box"><small>Garanzie caricate</small><strong>${elenco(garanzie,'Nessuna garanzia caricata')}</strong></div><br><div class="detail-box"><small>Foto lavori caricate</small><strong>${elenco(foto,'Nessuna foto caricata')}</strong></div><br><div class="detail-box"><small>DDT e bolle caricati</small><strong>${elenco(ddt,'Nessun DDT o bolla caricata')}</strong></div>`,`<button class="btn" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="salvaStatoCantiere('${escapeHtml(c.id)}')">Salva stato</button>`);
 }
 
 function apriClienteShared(nome){
@@ -4395,25 +5549,47 @@ function apriClienteShared(nome){
 }
 
 function apriOperaioShared(nome){
-    const voci=idrolistGetData().rapportini.flatMap(r=>(r.lavoratori||[]).filter(x=>x.nome===nome).map(x=>({data:r.data,cantiere:r.cantiere,descrizione:r.descrizione,ore:Number(x.ore||0)}))).sort((a,b)=>String(b.data).localeCompare(String(a.data)));
+    openOperaio(nome,'');
+    const dati=idrolistGetData();
+    const voci=dati.rapportini.flatMap(r=>(r.lavoratori||[]).filter(x=>x.nome===nome).map(x=>({data:r.data,cantiere:r.cantiere,descrizione:r.descrizione,ore:Number(x.ore||0)}))).sort((a,b)=>String(b.data).localeCompare(String(a.data)));
     const totale=voci.reduce((somma,x)=>somma+x.ore,0);
+    const statistiche=idrolistStatisticheOperaio(nome);
+    const riepilogo=`<div class="detail-grid"><div class="detail-box"><small>Presenze</small><strong>${statistiche.present.giorni} gg · ${statistiche.present.ore} h</strong></div><div class="detail-box"><small>Ferie</small><strong>${statistiche.holiday.giorni} gg · ${statistiche.holiday.ore} h</strong></div><div class="detail-box"><small>Malattia</small><strong>${statistiche.sick.giorni} gg · ${statistiche.sick.ore} h</strong></div><div class="detail-box"><small>Straordinari</small><strong>${statistiche.extra.giorni} gg · ${statistiche.extra.ore} h</strong></div></div>`;
     const elenco=voci.map(x=>`<div class="list-card"><div><strong>${escapeHtml(x.data||'-')} — ${escapeHtml(x.cantiere||'-')}</strong><div class="muted">${escapeHtml(x.descrizione||'-')}</div></div><strong>${x.ore} h</strong></div>`).join('')||'<p class="muted">Nessuna ora registrata.</p>';
-    openModal('👷 '+escapeHtml(nome),`<div class="detail-box"><small>Totale ore registrate</small><strong>${totale} h</strong></div><br>${elenco}`,'<button class="btn btn-primary" onclick="closeModal()">Chiudi</button>');
+    const gestione=idrolistDipendenteAttivo(nome,dati)?`<button class="btn" type="button" onclick="cessaDipendente('${escapeHtml(nome)}')">Cessa attività</button>`:`<button class="btn btn-primary" type="button" onclick="riattivaDipendente('${escapeHtml(nome)}')">Riattiva dipendente</button>`;
+    const storico=document.getElementById('attivitaOperaio');
+    if(storico)storico.innerHTML='<div style="display:flex;justify-content:flex-end;margin-bottom:14px">'+gestione+'</div><h3>Statistiche presenze</h3>'+riepilogo+'<br><h3>Storico attività</h3><div class="detail-box"><small>Totale ore registrate nei rapportini</small><strong>'+totale+' h</strong></div><br>'+elenco;
+    renderCalendar();
 }
 
-function stampaRapportino(id){
+async function stampaDdtAllegati(id){
+    const rapportino=(idrolistGetData().rapportini||[]).find(r=>r.id===id);
+    const immagini=(await idrolistCaricaFotoDdt(rapportino?.ddtFoto||[])).filter(immagine=>immagine.dataUrl);
+    if(!immagini.length){alert('Non ci sono foto di DDT da stampare per questo rapportino.');return;}
+    const finestra=window.open('','_blank','width=900,height=700');
+    if(!finestra){alert('Consenti le finestre popup per stampare i DDT.');return;}
+    finestra.document.write(`<!doctype html><html><head><title>DDT - ${escapeHtml(id)}</title><style>body{font-family:Arial;padding:24px;color:#111}h1{margin-bottom:24px}.ddt{page-break-after:always;margin-bottom:24px}.ddt:last-child{page-break-after:auto}img{display:block;max-width:100%;max-height:85vh;margin-top:10px}</style></head><body><h1>DDT allegati — ${escapeHtml(id)}</h1>${immagini.map((foto,index)=>`<section class="ddt"><h2>DDT ${index+1}${foto.nome?' — '+escapeHtml(foto.nome):''}</h2><img src="${foto.dataUrl}" alt="${escapeHtml(foto.nome||'DDT')}"></section>`).join('')}</body></html>`);
+    finestra.document.close();
+    finestra.focus();
+    finestra.print();
+}
+
+async function stampaRapportino(id){
     const data=idrolistGetData();
     const r=data.rapportini.find(x=>x.id===id);
     if(!r)return;
     r.stampatoIl=new Date().toISOString();
     idrolistSaveData(data);
     idrolistRenderRapportini();
-    const righe=(r.lavoratori||[]).map(x=>`<li>${escapeHtml(x.nome)}: ${escapeHtml(x.ore)} h</li>`).join('')||'<li>Nessun operaio</li>';
-    const materiali=(r.materiali||[]).map(x=>`<li>${escapeHtml(x.nome)} — ${escapeHtml(x.quantita)}</li>`).join('')||'<li>Nessun materiale</li>';
+    const costoManodopera=idrolistCostoManodoperaRapportino(r);
+    const ricavoManodopera=idrolistRicavoManodoperaRapportino(r);
+    const materiali=(r.materiali||[]).map(x=>`<li>${escapeHtml(x.nome)} — acquisto ${idrolistEuro(idrolistPrezzoAcquisto(x))}, ricarico ${idrolistRicarico(x)}%, vendita ${idrolistEuro(idrolistPrezzoVendita(x))}, totale ${idrolistEuro(idrolistTotaleMateriale(x))}</li>`).join('')||'<li>Nessun materiale</li>';
     const ddt=(r.ddtAllegati||[]).map(x=>`<li>${escapeHtml(x)}</li>`).join('')||'<li>Nessun DDT allegato</li>';
+    const fotoDdt=(await idrolistCaricaFotoDdt(r.ddtFoto||[])).filter(f=>f.dataUrl).map(f=>`<img src="${f.dataUrl}" alt="${escapeHtml(f.nome||'Foto DDT')}" style="max-width:260px;max-height:190px;margin:0 12px 12px 0;border:1px solid #ddd">`).join('');
+    const firma=idrolistFirmaClienteHtml(r.firmaCliente);
     const finestra=window.open('','_blank','width=900,height=700');
     if(!finestra){alert('Consenti le finestre popup per stampare il rapportino.');return;}
-    finestra.document.write(`<!doctype html><html><head><title>Rapportino ${escapeHtml(id)}</title><style>body{font-family:Arial;padding:32px;color:#111}h1{border-bottom:2px solid #111;padding-bottom:12px}h2{margin-top:24px}li{margin:6px 0}</style></head><body><h1>Rapportino ${escapeHtml(id)}</h1><p><b>Data:</b> ${escapeHtml(r.data||'-')}<br><b>Cliente:</b> ${escapeHtml(r.cantiere||'-')}<br><b>Indirizzo:</b> ${escapeHtml(r.indirizzo||'-')}<br><b>Compilato da:</b> ${escapeHtml(r.compilatoDa||'-')}</p><h2>Lavoro eseguito</h2><p>${escapeHtml(r.descrizione||'-')}</p><h2>Operai e ore</h2><ul>${righe}</ul><h2>Materiali</h2><ul>${materiali}</ul><h2>Foto lavori</h2><p>${escapeHtml(r.descrizioneFotoLavori||'Nessuna descrizione')}</p><h2>Garanzia</h2><p>${escapeHtml(r.garanzie||'Nessuna garanzia segnalata')}</p><h2>DDT allegati</h2><ul>${ddt}</ul><h2>Firma cliente</h2><p>${r.firmaCliente?'Acquisita':'Non presente'}</p></body></html>`);
+    finestra.document.write(`<!doctype html><html><head><title>Rapportino ${escapeHtml(id)}</title><style>body{font-family:Arial;padding:32px;color:#111}h1{border-bottom:2px solid #111;padding-bottom:12px}h2{margin-top:24px}li{margin:6px 0}</style></head><body><h1>Rapportino ${escapeHtml(id)}</h1><p><b>Data:</b> ${escapeHtml(r.data||'-')}<br><b>Cliente:</b> ${escapeHtml(r.cantiere||'-')}<br><b>Cantiere:</b> ${escapeHtml(r.indirizzo||'-')}<br><b>Tipo intervento:</b> ${escapeHtml(r.tipoIntervento||'Nuovo intervento')}<br><b>Referente cantiere:</b> ${escapeHtml(r.referenteCantiere||'BRUNO NICOLA')}<br><b>Cantiere terminato:</b> ${r.cantiereTerminato?'Sì':'No'}<br><b>Compilato da:</b> ${escapeHtml(r.compilatoDa||'-')}</p><h2>Lavoro eseguito</h2><p>${escapeHtml(r.descrizione||'-')}</p><p><b>Costo manodopera:</b> ${idrolistEuro(costoManodopera)}</p><p><b>Ricavo manodopera:</b> ${idrolistEuro(ricavoManodopera)}</p><h2>Materiali</h2><ul>${materiali}</ul><p><b>Costo materiali:</b> ${idrolistEuro(idrolistTotaleAcquistoRapportino(r))}</p><p><b>Ricavo materiali:</b> ${idrolistEuro(idrolistTotaleRapportino(r))}</p><h2>DDT allegati</h2><ul>${ddt}</ul>${fotoDdt}<p><b>Costo DDT:</b> ${idrolistEuro(idrolistCostoDdtRapportino(r))}</p><p><b>Totale DDT allegati con ricarico:</b> ${idrolistEuro(idrolistRicavoDdtRapportino(r))}</p><p><b>Costo complessivo:</b> ${idrolistEuro(costoManodopera+idrolistTotaleAcquistoRapportino(r)+idrolistCostoDdtRapportino(r))}</p><p><b>Ricavo complessivo:</b> ${idrolistEuro(ricavoManodopera+idrolistTotaleRapportino(r)+idrolistRicavoDdtRapportino(r))}</p><h2>Firma cliente</h2>${firma}</body></html>`);
     finestra.document.close();
     finestra.focus();
     finestra.print();
@@ -4454,22 +5630,52 @@ function saveCantiere(){
     showNotification('Cantiere creato e sincronizzato con gli Operai');
 }
 
-function idrolistAddWorker(nome){
+function idrolistAddWorker(nome,ruolo='Operaio'){
     const clean=String(nome||'').trim();
     if(!clean)return;
     const data=idrolistGetData();
     if(!data.operai.includes(clean)){
         data.operai.push(clean);
-        idrolistSaveData(data);
     }
+    data.ruoliOperai=data.ruoliOperai||{};
+    data.statoDipendenti=data.statoDipendenti||{};
+    data.ruoliOperai[clean]=ruolo;
+    data.statoDipendenti[clean]='Attivo';
+    idrolistSaveData(data);
 }
 
 function saveOperaio(){
-    const nome=document.getElementById('newWorkerName').value.trim();
-    if(!nome){alert('Inserisci il nome dell\'operaio.');return;}
-    idrolistAddWorker(nome);
+    const cognome=document.getElementById('newWorkerSurname').value.trim();
+    const nomeProprio=document.getElementById('newWorkerFirstName').value.trim();
+    const nome=(cognome+' '+nomeProprio).trim().toUpperCase();
+    const ruolo=document.getElementById('newWorkerRole').value;
+    if(!cognome||!nomeProprio||!ruolo){alert('Inserisci cognome, nome dipendente e seleziona il ruolo.');return;}
+    idrolistAddWorker(nome,ruolo);
     closeModal();
-    showNotification('Operaio aggiunto e disponibile per i cantieri');
+    idrolistRenderOperai();
+    showNotification('Dipendente aggiunto e disponibile per i cantieri');
+}
+
+function cessaDipendente(nome){
+    if(!confirm('Cessare '+nome+'? Il dipendente non comparirà più nelle scelte operative, ma tutto lo storico resterà conservato.'))return;
+    const dati=idrolistGetData();
+    dati.statoDipendenti=dati.statoDipendenti||{};
+    dati.statoDipendenti[nome]='Cessato';
+    idrolistSaveData(dati);
+    idrolistRenderOperai();
+    idrolistRenderPresenze();
+    go('operai');
+    showNotification('Dipendente cessato: storico conservato.');
+}
+
+function riattivaDipendente(nome){
+    const dati=idrolistGetData();
+    dati.statoDipendenti=dati.statoDipendenti||{};
+    dati.statoDipendenti[nome]='Attivo';
+    idrolistSaveData(dati);
+    idrolistRenderOperai();
+    idrolistRenderPresenze();
+    showNotification('Dipendente riattivato.');
 }
 
 function resetDatiDiTest(){
@@ -4492,9 +5698,12 @@ if(typeof _idrolistOriginalGo==='function'){
         if(page==='dashboard')idrolistRenderDashboard();
         if(page==='cantieri')idrolistRenderCantieri();
         if(page==='clienti')idrolistRenderClienti();
+        if(page==='fotoImpianti')idrolistRenderFotoImpianti();
         if(page==='operai')idrolistRenderOperai();
+        if(page==='presenze')idrolistRenderPresenze();
         if(page==='garanzie')idrolistRenderGaranzie();
         if(page==='rapportini')idrolistRenderRapportini();
+        if(page==='impostazioni')idrolistRenderCostiManodopera();
     };
 }
 
@@ -4503,9 +5712,12 @@ document.addEventListener('DOMContentLoaded',function(){
     idrolistRenderDashboard();
     idrolistRenderCantieri();
     idrolistRenderClienti();
+    idrolistRenderFotoImpianti();
     idrolistRenderOperai();
+    idrolistRenderPresenze();
     idrolistRenderGaranzie();
     idrolistRenderRapportini();
+    idrolistRenderCostiManodopera();
 });
 </script>
 
