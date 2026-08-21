@@ -79,6 +79,10 @@ body {
 .section-card.ready { border: 2px solid #2563eb; }
 .section-check { display: none; color: #15803d; font-weight: bold; margin-top: 12px; }
 .section-check.visible { display: block; }
+.worker-notifications{margin:0 0 18px;padding:16px 18px;border:1px solid #fecaca;border-left:5px solid #dc2626;border-radius:12px;background:#fff1f2;color:#991b1b}
+.worker-notifications h3{margin:0 0 7px;font-size:17px}.worker-notifications ul{margin:8px 0 0;padding-left:20px}.worker-notifications[hidden]{display:none}
+.employee-nav{max-width:1000px;margin:18px auto 0;padding:0 20px;display:flex;flex-wrap:wrap;gap:8px}.employee-nav[hidden]{display:none}.employee-nav button{padding:10px 14px;background:#e5e7eb;color:#111827}.employee-nav button.active{background:#2563eb;color:#fff}.employee-page{max-width:1000px;margin:26px auto;padding:0 20px}.employee-page[hidden]{display:none}.employee-photo{display:block;width:100%;height:auto;margin:12px 0;border:1px solid #d1d5db;border-radius:10px}
+.employee-sidebar{display:none}.employee-session{background:#f3f6fa}.employee-session .employee-sidebar{display:block;position:fixed;left:0;top:0;width:235px;height:100vh;padding:22px 15px;background:#10243e;color:#fff;overflow-y:auto;z-index:5}.employee-sidebar .company-logos{display:grid;gap:10px;margin:0 0 18px}.employee-sidebar .company-logos img{display:block;width:100%;padding:5px;background:#fff;border-radius:8px;object-fit:contain}.employee-sidebar .idrotech-logo{height:102px}.employee-sidebar .daikin-logo{height:50px}.employee-sidebar .nav-title{color:#8ea4bc;font-size:11px;text-transform:uppercase;margin:22px 10px 7px}.employee-sidebar .nav{padding:12px;border-radius:9px;margin:3px 0;cursor:pointer;color:#dce8f5}.employee-sidebar .nav:hover,.employee-sidebar .nav.active{background:#1d426a}.employee-session .header{display:none}.employee-session .worker-home,.employee-session .employee-page,.employee-session .login-screen,.employee-session .container{max-width:none;margin:30px 0 0 235px;padding:0 30px}.employee-session .employee-nav{display:none!important}
 
 /* PROGRESS */
 
@@ -157,6 +161,43 @@ textarea {
 
     background: white;
 }
+
+.date-picker-left {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.date-picker-left button {
+    min-width: 52px;
+    border: 0;
+    border-radius: 9px;
+    background: #e8f0fd;
+    color: #1769d1;
+    font-size: 21px;
+    cursor: pointer;
+}
+
+.date-picker-left input {
+    margin-bottom: 0;
+}
+
+.date-picker-left input::-webkit-calendar-picker-indicator {
+    opacity: 0;
+}
+
+.employee-calendar-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 14px;}
+.employee-calendar-month{font-size:20px;font-weight:800;text-align:center;}
+.employee-calendar-wrap{overflow-x:auto;}
+.employee-calendar{width:100%;min-width:640px;border-collapse:separate;border-spacing:7px;}
+.employee-calendar th{color:#64748b;font-size:13px;padding:8px;text-align:center;}
+.employee-calendar td{height:116px;vertical-align:top;border:1px solid #e1e7ef;border-radius:10px;padding:9px;background:#fff;}
+.employee-calendar .day-number{font-weight:800;font-size:16px;}
+.employee-calendar .calendar-holiday{color:#c62828;}
+.employee-calendar .day-state{display:inline-block;margin-top:7px;padding:3px 7px;border-radius:999px;font-size:11px;font-weight:800;}
+.employee-calendar .state-present{color:#117a37;background:#dcfce7;}.employee-calendar .state-sick{color:#b42318;background:#fee4e2;}.employee-calendar .state-holiday{color:#175cd3;background:#dbeafe;}.employee-calendar .state-extra{color:#6d28d9;background:#ede9fe;}
+.employee-calendar .day-detail{font-size:12px;color:#526174;margin-top:5px;}
 
 textarea {
 
@@ -381,6 +422,8 @@ button:hover {
 
 @media(max-width:700px) {
 
+    .employee-session .employee-sidebar{display:none}.employee-session .header{display:none}.employee-session .worker-home,.employee-session .employee-page,.employee-session .login-screen,.employee-session .container{margin:24px 0 0;padding:0 16px}.employee-session .employee-nav{display:flex!important;margin:12px 0 0;padding:0 12px;overflow-x:auto;flex-wrap:nowrap}.employee-session .employee-nav button{white-space:nowrap;width:auto;font-size:13px;padding:9px 11px}
+
     .row {
 
         grid-template-columns: 1fr;
@@ -430,11 +473,33 @@ button:hover {
 
     <span>Area Operai</span>
 
-    <button id="homeButton" class="reset-test" type="button" onclick="apriSceltaCantiere()" hidden>⌂ Casetta</button>
-
-    <button class="reset-test" type="button" onclick="resetDatiDiTest()">Azzera dati test</button>
+    <button id="resetButton" class="reset-test" type="button" onclick="resetDatiDiTest()">Azzera dati test</button>
 
 </div>
+
+<aside class="employee-sidebar" id="employeeSidebar" hidden>
+    <div class="company-logos" aria-label="Loghi aziendali">
+        <img class="idrotech-logo" src="idrolist-assets/idrotech-varese.jpeg" alt="Idrotech Varese">
+        <img class="daikin-logo" src="idrolist-assets/daikin-aerotech.jpeg" alt="Daikin Aerotech">
+    </div>
+    <div class="nav-title">Area dipendenti</div>
+    <div class="nav active" data-employee-page="dashboard" onclick="apriDashboardOperaio()">📊 Dashboard</div>
+    <div class="nav" data-employee-page="rapportini" onclick="apriRapportiniOperaio()">📋 Rapportini</div>
+    <div class="nav" data-employee-page="garanzie" onclick="apriGaranzieOperaio()">🛡️ Garanzie</div>
+    <div class="nav" data-employee-page="foto" onclick="apriFotoImpiantiOperaio()">📷 Foto impianti</div>
+    <div class="nav" data-employee-page="presenze" onclick="apriPresenzeOperaio()">📅 Presenze</div>
+    <div class="nav-title">Sistema</div>
+    <div class="nav" data-employee-page="impostazioni" onclick="apriImpostazioniOperaio()">⚙️ Impostazioni</div>
+</aside>
+
+<nav class="employee-nav" id="employeeNav" hidden>
+    <button type="button" data-employee-page="dashboard" onclick="apriDashboardOperaio()">🔔 Dashboard</button>
+    <button type="button" data-employee-page="rapportini" onclick="apriRapportiniOperaio()">📋 Rapportini</button>
+    <button type="button" data-employee-page="garanzie" onclick="apriGaranzieOperaio()">🛡️ Garanzie</button>
+    <button type="button" data-employee-page="foto" onclick="apriFotoImpiantiOperaio()">📷 Foto impianti</button>
+    <button type="button" data-employee-page="presenze" onclick="apriPresenzeOperaio()">📅 Presenze</button>
+    <button type="button" data-employee-page="impostazioni" onclick="apriImpostazioniOperaio()">⚙️ Impostazioni</button>
+</nav>
 
 
 <main class="login-screen" id="loginScreen">
@@ -475,6 +540,26 @@ button:hover {
         <label for="cantiereSelezionato">Cantiere</label>
         <select id="cantiereSelezionato" disabled></select>
         <button class="btn-primary" type="button" onclick="confermaCantiereSelezionato()">Continua</button>
+        <div class="button-row"><button class="btn-secondary" type="button" onclick="apriAnagrafica('cliente')">+ Nuovo cliente</button><button class="btn-secondary" type="button" onclick="apriAnagrafica('cantiere')">+ Nuovo cantiere</button></div>
+    </div>
+</main>
+
+<main class="login-screen" id="anagraficaArea" hidden>
+    <div class="card">
+        <h2 id="anagraficaTitolo"></h2>
+        <p class="subtitle" id="anagraficaTesto"></p>
+        <div id="campiCliente">
+            <label for="nuovoClienteNome">Nome cliente</label><input id="nuovoClienteNome" type="text" placeholder="Nome o ragione sociale">
+            <label for="nuovoClienteCitta">Città</label><input id="nuovoClienteCitta" type="text" placeholder="Città" required>
+            <label for="nuovoClienteVia">Via / Piazza</label><input id="nuovoClienteVia" type="text" placeholder="Via o piazza, numero civico" required>
+            <label for="nuovoClienteTelefono">Telefono</label><input id="nuovoClienteTelefono" type="tel" placeholder="Numero di telefono" required>
+        </div>
+        <div id="campiCantiere" hidden>
+            <label for="cantiereCliente">Cliente</label><select id="cantiereCliente"></select>
+            <label for="nuovoCantiereCitta">Città</label><input id="nuovoCantiereCitta" type="text" placeholder="Città" required>
+            <label for="nuovoCantiereVia">Via / Piazza</label><input id="nuovoCantiereVia" type="text" placeholder="Via o piazza, numero civico" required>
+        </div>
+        <div class="button-row"><button class="btn-secondary" type="button" onclick="annullaAnagrafica()">← Indietro</button><button class="btn-success" type="button" onclick="salvaAnagrafica()">Salva</button></div>
     </div>
 </main>
 
@@ -483,14 +568,22 @@ button:hover {
         <div><h1>Area Operaio</h1><div class="muted" id="cantiereAttivo">Scegli l’attività da registrare.</div></div>
         <div><button class="btn-secondary" type="button" onclick="apriSceltaCantiere()">⌂ Cambia cantiere</button> <button class="btn-success" type="button" onclick="inviaInUfficio()">Invia in ufficio</button></div>
     </div>
+    <section class="worker-notifications" id="notificheOperaio" hidden></section>
     <div class="section-grid">
         <button class="card section-card ready" type="button" onclick="apriFoglioLavoro()"><h3>📋 Foglio di lavoro</h3><p>Registra attività, operai, ore, materiali e firma cliente.</p><span class="section-check" id="spuntaFoglio">✓ Compilato</span></button>
-        <button class="card section-card" type="button" onclick="apriModuloSezione('garanzie')"><h3>🛡️ Garanzie</h3><p>Carica e gestisci le garanzie per cliente.</p><span class="section-check" id="spuntaGaranzie">✓ Compilato</span></button>
+        <button class="card section-card" type="button" onclick="apriModuloSezione('garanzie')"><h3>🛡️ Garanzie</h3><p>Carica le foto delle etichette per l’attivazione Daikin.</p><span class="section-check" id="spuntaGaranzie">✓ Compilato</span></button>
         <button class="card section-card" type="button" onclick="apriModuloSezione('fotoLavori')"><h3>📷 Foto lavori</h3><p>Carica foto con descrizione del lavoro eseguito.</p><span class="section-check" id="spuntaFotoLavori">✓ Compilato</span></button>
         <button class="card section-card" type="button" onclick="apriModuloSezione('ddt')"><h3>📎 DDT e bolle</h3><p>Archivia gli allegati separatamente dal foglio.</p><span class="section-check" id="spuntaDdt">✓ Compilato</span></button>
     </div>
     <section class="card" id="fotoCondivise" hidden></section>
 </main>
+
+<main class="employee-page" id="employeeDashboard" hidden><section class="worker-notifications" id="notificheOperaioDashboard" hidden></section><div class="card" id="dashboardOperaioVuota"><h2>Dashboard dipendente</h2><p class="subtitle">Nessuna notifica relativa ai tuoi fogli di lavoro.</p></div></main>
+<main class="employee-page" id="employeeRapportini" hidden><div class="card"><h2>📋 Rapportini</h2><p class="subtitle">Da qui puoi creare un nuovo rapportino di intervento. I rapportini già inviati sono consultabili esclusivamente dall’ufficio.</p><button class="btn-primary" type="button" onclick="apriNuovoRapportinoOperaio()">＋ Crea rapportino</button></div></main>
+<main class="employee-page" id="employeeGaranzie" hidden><div class="card"><h2>🛡️ Garanzie</h2><p class="subtitle">Carica le foto delle etichette per l’attivazione della garanzia. La gestione resta riservata all’ufficio.</p><button class="btn-primary" type="button" onclick="apriSceltaCantiere('garanzie')">＋ Nuova garanzia</button></div></main>
+<main class="employee-page" id="employeeFotoImpianti" hidden><div class="card"><h2>📷 Foto impianti</h2><p class="subtitle">Seleziona cliente e cantiere per caricare o consultare le foto dell’impianto.</p><label>Cliente</label><select id="fotoOperaioCliente" onchange="caricaCantieriFotoOperaio()"></select><label>Cantiere</label><select id="fotoOperaioCantiere" onchange="renderFotoImpiantiOperaio()" disabled></select><div id="caricaFotoOperaio" hidden><h3>Carica foto</h3><label for="fotoOperaioData">Data</label><input id="fotoOperaioData" type="date"><label for="fotoOperaioDescrizione">Breve descrizione</label><textarea id="fotoOperaioDescrizione" rows="3" placeholder="Es. Unità esterna installata"></textarea><label for="fotoOperaioFile">Foto</label><input id="fotoOperaioFile" type="file" accept="image/*" multiple><button class="btn-primary" type="button" onclick="salvaFotoImpiantiOperaio()">Carica foto</button></div><div id="fotoOperaioArchivio"></div></div></main>
+<main class="employee-page" id="employeePresenze" hidden><div class="card"><h2>📅 Le mie presenze</h2><p class="subtitle">Calendario personale in sola consultazione.</p><div class="employee-calendar-controls"><button class="btn-secondary" type="button" onclick="idrolistMesePresenzeOperaio(-1)">←</button><div id="mesePresenzeOperaio" class="employee-calendar-month"></div><button class="btn-secondary" type="button" onclick="idrolistMesePresenzeOperaio(1)">→</button></div><p class="subtitle">🟢 Presente · 🟣 Straordinario · 🔵 Ferie · 🔴 Malattia</p><div class="employee-calendar-wrap"><table class="employee-calendar"><thead><tr><th>Lun</th><th>Mar</th><th>Mer</th><th>Gio</th><th>Ven</th><th>Sab</th><th>Dom</th></tr></thead><tbody id="calendarioPresenzeOperaio"></tbody></table></div></div></main>
+<main class="employee-page" id="employeeImpostazioni" hidden><div class="card"><h2>⚙️ Cambia password</h2><p class="subtitle">Se la dimentichi, l’amministratore potrà reimpostarla.</p><label>Password attuale</label><input id="passwordAttualeOperaio" type="password" autocomplete="current-password"><label>Nuova password</label><input id="passwordNuovaOperaio" type="password" autocomplete="new-password" placeholder="Almeno 8 caratteri"><label>Conferma nuova password</label><input id="passwordConfermaOperaio" type="password" autocomplete="new-password"><button class="btn-success" type="button" onclick="cambiaPasswordOperaio()">Salva nuova password</button></div></main>
 
 <main class="login-screen" id="sectionArea" hidden>
     <div class="card">
@@ -508,6 +601,8 @@ button:hover {
 
 
 <div class="container" id="workArea" hidden>
+
+<div class="card" style="margin-bottom:16px"><strong id="rapportinoGuidatoIndicatore">Passaggio 1 di 6 — Cliente e cantiere</strong></div>
 
 
 <!-- PROGRESS BAR -->
@@ -547,10 +642,10 @@ button:hover {
 
     <label>Data del lavoro</label>
 
-    <input
-        type="date"
-        id="dataLavoro"
-    >
+    <div class="date-picker-left">
+        <button type="button" aria-label="Apri calendario" onclick="idrolistApriCalendarioLavoro()">📅</button>
+        <input type="date" id="dataLavoro">
+    </div>
 
 
     <label for="cliente">Cliente</label>
@@ -565,6 +660,11 @@ button:hover {
     <select id="cantiere" disabled>
         <option value="">-- Seleziona prima il cliente --</option>
     </select>
+
+    <div class="button-row">
+        <button class="btn-secondary" type="button" onclick="apriAnagrafica('cliente')">＋ Nuovo cliente</button>
+        <button class="btn-secondary" type="button" onclick="apriAnagrafica('cantiere')">＋ Nuovo cantiere</button>
+    </div>
 
 
     <div class="button-row">
@@ -589,11 +689,33 @@ button:hover {
 
 <div class="step" id="step2">
 
-    <h2>2. Descrizione del lavoro</h2>
+    <h2>2. Dati dell’intervento</h2>
 
     <p class="subtitle">
-        Descrivi in modo chiaro il lavoro svolto durante la giornata.
+        Indica il tipo di intervento, il referente e se il cantiere è terminato.
     </p>
+
+    <label for="tipoIntervento">Tipo intervento</label>
+    <select id="tipoIntervento">
+        <option value="">-- Seleziona tipo intervento --</option>
+        <option value="Nuovo intervento">Nuovo intervento</option>
+        <option value="Proseguimento">Proseguimento</option>
+    </select>
+
+    <label for="referenteCantiere">Referente cantiere</label>
+    <select id="referenteCantiere">
+        <option value="">-- Seleziona referente --</option>
+        <option value="BRUNO NICOLA">BRUNO NICOLA</option>
+        <option value="CORIGLIONE ALESSANDRO">CORIGLIONE ALESSANDRO</option>
+        <option value="MARINONI ALESSANDRO">MARINONI ALESSANDRO</option>
+    </select>
+
+    <label for="cantiereTerminato">Cantiere terminato?</label>
+    <select id="cantiereTerminato">
+        <option value="">-- Seleziona --</option>
+        <option value="no">No, prosegue</option>
+        <option value="si">Sì, terminato</option>
+    </select>
 
 
     <label>
@@ -739,6 +861,10 @@ button:hover {
         Raccogli la firma del cliente a fine lavoro.
     </p>
 
+    <label for="fotoBolle">Foto bolle / DDT cartacei</label>
+    <input id="fotoBolle" type="file" accept="image/*" multiple>
+    <p class="subtitle">Puoi selezionare o fotografare una o più bolle o DDT.</p>
+
 
     <label>
         Firma del cliente
@@ -774,7 +900,7 @@ button:hover {
 
         <button
             class="btn-primary"
-            onclick="inviaFoglio()"
+            onclick="nextStep()"
         >
             Avanti →
         </button>
@@ -885,6 +1011,7 @@ const IDROLIST_WORKERS = [
 const IDROLIST_ACCOUNTS_KEY = 'idrolist_worker_accounts_v1';
 const IDROLIST_TEMPORARY_PASSWORD = 'Cantiere2026!';
 let idrolistCurrentWorker = '';
+let idrolistCalendarDateOperaio = new Date();
 
 
 /* ================================================= */
@@ -893,6 +1020,13 @@ let idrolistCurrentWorker = '';
 
 document.getElementById("dataLavoro").value =
     new Date().toISOString().split("T")[0];
+
+function idrolistApriCalendarioLavoro(){
+    const campo=document.getElementById('dataLavoro');
+    if(!campo.value)campo.value=dataOggi();
+    if(typeof campo.showPicker==='function')campo.showPicker();
+    else {campo.focus();campo.click();}
+}
 
 
 /* ================================================= */
@@ -923,6 +1057,13 @@ function nextStep() {
 
     if (currentStep === 2) {
 
+        if (!document.getElementById("tipoIntervento").value || !document.getElementById("referenteCantiere").value || !document.getElementById("cantiereTerminato").value) {
+
+            alert("Seleziona obbligatoriamente tipo intervento, referente e stato del cantiere.");
+
+            return;
+        }
+
         if (
             document.getElementById("descrizione").value.trim() === ""
         ) {
@@ -934,6 +1075,11 @@ function nextStep() {
 
     }
 
+
+    if (currentStep === 5) {
+        creaRiepilogo();
+        return;
+    }
 
     if (currentStep < 6) {
 
@@ -962,13 +1108,6 @@ function nextStep() {
 /* ================================================= */
 
 function prevStep() {
-
-    if (currentStep === 2) {
-        apriSceltaCantiere();
-        return;
-    }
-
-
     if (currentStep > 1) {
 
 
@@ -1011,6 +1150,17 @@ function aggiornaProgress() {
 
 
         });
+
+    const titoli={
+        1:'Passaggio 1 di 6 — Cliente e cantiere',
+        2:'Passaggio 2 di 6 — Dati dell’intervento',
+        3:'Passaggio 3 di 6 — Materiali',
+        4:'Passaggio 4 di 6 — Operai e ore',
+        5:'Passaggio 5 di 6 — Firma cliente',
+        6:'Passaggio 6 di 6 — Riepilogo e invio'
+    };
+    const indicatore=document.getElementById('rapportinoGuidatoIndicatore');
+    if(indicatore)indicatore.textContent=titoli[currentStep]||'';
 
 }
 
@@ -1499,10 +1649,7 @@ function creaRiepilogo() {
 /* ================= FOTO ================= */
 
 
-    const foto =
-        document.getElementById(
-            "fotoBolle"
-        ).files.length;
+    const foto = document.getElementById("fotoBolle")?.files.length || 0;
 
 
 /* ================= RIEPILOGO ================= */
@@ -1754,27 +1901,171 @@ function salvaNuovaPassword(){
 
 function apriAreaLavoro(nome){
     idrolistCurrentWorker=nome;
+    document.body.classList.add('employee-session');
     document.getElementById('loginScreen').hidden=true;
     document.getElementById('passwordScreen').hidden=true;
     document.querySelector('.header span').textContent=nome;
-    document.getElementById('homeButton').hidden=false;
-    apriSceltaCantiere();
+    document.getElementById('resetButton').hidden=true;
+    document.getElementById('employeeNav').hidden=false;
+    document.getElementById('employeeSidebar').hidden=false;
+    apriDashboardOperaio();
 }
 
-function apriSceltaCantiere(){
+function idrolistNascondiPagineDipendente(){
+    ['employeeDashboard','employeeRapportini','employeeGaranzie','employeeFotoImpianti','employeePresenze','employeeImpostazioni'].forEach(id=>{const pagina=document.getElementById(id);if(pagina)pagina.hidden=true;});
+    document.querySelectorAll('[data-employee-page]').forEach(button=>button.classList.remove('active'));
+}
+
+function idrolistAttivaNavDipendente(nome){
+    document.querySelectorAll('[data-employee-page]').forEach(button=>button.classList.toggle('active',button.dataset.employeePage===nome));
+}
+
+function apriDashboardOperaio(){
+    idrolistNascondiPagineDipendente();
+    document.getElementById('workerHome').hidden=true;
+    document.getElementById('cantiereSelection').hidden=true;
+    document.getElementById('employeeDashboard').hidden=false;
+    idrolistAttivaNavDipendente('dashboard');
+    renderNotificheOperaio();
+}
+
+function apriRapportiniOperaio(){
+    idrolistNascondiPagineDipendente();
+    document.getElementById('workerHome').hidden=true;
+    document.getElementById('cantiereSelection').hidden=true;
+    document.getElementById('employeeRapportini').hidden=false;
+    idrolistAttivaNavDipendente('rapportini');
+}
+
+function apriGaranzieOperaio(){
+    idrolistNascondiPagineDipendente();
+    document.getElementById('workerHome').hidden=true;
+    document.getElementById('cantiereSelection').hidden=true;
+    document.getElementById('employeeGaranzie').hidden=false;
+    idrolistAttivaNavDipendente('garanzie');
+}
+
+function apriNuovoRapportinoOperaio(){
+    idrolistNascondiPagineDipendente();
+    document.getElementById('workerHome').hidden=true;
+    document.getElementById('cantiereSelection').hidden=true;
+    document.getElementById('sectionArea').hidden=true;
+    document.getElementById('workArea').hidden=false;
+    caricaClientiOperai();
+    document.getElementById('dataLavoro').value=dataOggi();
+    document.getElementById('cliente').value='';
+    caricaCantieriOperai();
+    ['tipoIntervento','referenteCantiere','cantiereTerminato','descrizione','note'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('materiali').innerHTML='';
+    document.getElementById('lavoratori').innerHTML='';
+    document.getElementById('fotoBolle').value='';
+    document.querySelectorAll('#workArea .step').forEach(step=>step.classList.remove('active'));
+    document.getElementById('step1').classList.add('active');
+    currentStep=1;
+    aggiornaProgress();
+    idrolistAttivaNavDipendente('rapportini');
+}
+
+function apriSceltaCantiere(azione=''){
+    window.idrolistAzioneDopoCantiere=azione;
+    idrolistNascondiPagineDipendente();
     document.getElementById('workerHome').hidden=true;
     document.getElementById('workArea').hidden=true;
     document.getElementById('sectionArea').hidden=true;
+    document.getElementById('anagraficaArea').hidden=true;
     document.getElementById('cantiereSelection').hidden=false;
+    idrolistAttivaNavDipendente(azione==='garanzie'?'garanzie':'rapportini');
     document.getElementById('ricercaLavoro').value='';
     aggiornaRicercaLavori();
+}
+
+function nomiClienti(data){
+    return [...new Set([...(data.clienti||[]).map(c=>c.nome),...(data.cantieri||[]).map(c=>c.nome)].filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it'));
+}
+
+function idrolistCantiereAperto(cantiere){
+    return cantiere.stato!=='Chiuso'&&(cantiere.statoContabile===undefined||cantiere.statoContabile==='aperti');
+}
+
+function nomiClientiConCantieriAperti(data){
+    return [...new Set((data.cantieri||[]).filter(idrolistCantiereAperto).map(c=>c.nome).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it'));
+}
+
+function apriAnagrafica(tipo){
+    window.idrolistAnagraficaTipo=tipo;
+    window.idrolistAnagraficaDaRapportino=!document.getElementById('workArea').hidden;
+    document.getElementById('cantiereSelection').hidden=true;
+    document.getElementById('workArea').hidden=true;
+    document.getElementById('anagraficaArea').hidden=false;
+    const cliente=tipo==='cliente';
+    document.getElementById('anagraficaTitolo').textContent=cliente?'Nuovo cliente':'Nuovo cantiere';
+    document.getElementById('anagraficaTesto').textContent=cliente?'Inserisci i dati obbligatori del cliente.':'Collega il cantiere a un cliente e inserisci l’indirizzo completo.';
+    document.getElementById('campiCliente').hidden=!cliente;
+    document.getElementById('campiCantiere').hidden=cliente;
+    document.getElementById('nuovoClienteNome').value='';
+    document.getElementById('nuovoClienteCitta').value='';
+    document.getElementById('nuovoClienteVia').value='';
+    document.getElementById('nuovoClienteTelefono').value='';
+    document.getElementById('nuovoCantiereCitta').value='';
+    document.getElementById('nuovoCantiereVia').value='';
+    if(!cliente){
+        const select=document.getElementById('cantiereCliente');
+        select.innerHTML='<option value="">-- Seleziona cliente --</option>'+nomiClienti(idrolistGetData()).map(nome=>`<option value="${idrolistEscapeHtml(nome)}">${idrolistEscapeHtml(nome)}</option>`).join('');
+    }
+}
+
+function annullaAnagrafica(){
+    if(window.idrolistAnagraficaDaRapportino){window.idrolistAnagraficaDaRapportino=false;apriNuovoRapportinoOperaio();return;}
+    apriSceltaCantiere();
+}
+
+function idrolistRitornaDaAnagrafica(cliente='',cantiereId=''){
+    if(window.idrolistAnagraficaDaRapportino){
+        window.idrolistAnagraficaDaRapportino=false;
+        apriNuovoRapportinoOperaio();
+        if(cliente){document.getElementById('cliente').value=cliente;caricaCantieriOperai();}
+        if(cantiereId)document.getElementById('cantiere').value=cantiereId;
+        return;
+    }
+    apriSceltaCantiere();
+}
+
+function salvaAnagrafica(){
+    const tipo=window.idrolistAnagraficaTipo;
+    const data=idrolistGetData();
+    data.clienti=data.clienti||[];
+    if(tipo==='cliente'){
+        const nome=document.getElementById('nuovoClienteNome').value.trim();
+        const citta=document.getElementById('nuovoClienteCitta').value.trim();
+        const via=document.getElementById('nuovoClienteVia').value.trim();
+        const telefono=document.getElementById('nuovoClienteTelefono').value.trim();
+        if(!nome||!citta||!via||!telefono){alert('Completa nome cliente, città, via/piazza e telefono.');return;}
+        if(nomiClienti(data).some(x=>x.toLocaleLowerCase('it')===nome.toLocaleLowerCase('it'))){alert('Questo cliente è già presente.');return;}
+        data.clienti.push({id:'CLI-'+Date.now(),nome,citta,via,telefono,creatoDa:idrolistCurrentWorker});
+        idrolistSaveData(data);
+        alert('Cliente creato. Ora puoi creare il relativo cantiere.');
+        if(window.idrolistAnagraficaDaRapportino){idrolistRitornaDaAnagrafica(nome);}
+        else {apriSceltaCantiere();document.getElementById('clienteSelezionato').value=nome;caricaCantieriScelti();}
+        return;
+    }
+    const cliente=document.getElementById('cantiereCliente').value;
+    const citta=document.getElementById('nuovoCantiereCitta').value.trim();
+    const via=document.getElementById('nuovoCantiereVia').value.trim();
+    if(!cliente||!citta||!via){alert('Completa cliente, città e via/piazza del cantiere.');return;}
+    const indirizzo=via+', '+citta;
+    if(data.cantieri.some(c=>c.nome===cliente&&String(c.indirizzo).toLocaleLowerCase('it')===indirizzo.toLocaleLowerCase('it'))){alert('Questo cantiere è già presente.');return;}
+    data.cantieri.push({id:'CAN-'+Date.now(),nome:cliente,indirizzo,citta,via,stato:'Attivo',creatoDa:idrolistCurrentWorker,creatoIl:new Date().toISOString()});
+    idrolistSaveData(data);
+    alert('Cantiere creato.');
+    window.idrolistCurrentCantiereId=data.cantieri[data.cantieri.length-1].id;
+    idrolistRitornaDaAnagrafica(cliente,window.idrolistCurrentCantiereId);
 }
 
 function aggiornaRicercaLavori(){
     const data=idrolistGetData();
     const ricerca=document.getElementById('ricercaLavoro').value.trim().toLocaleLowerCase('it');
     const corrisponde=c=>!ricerca||(c.nome+' '+c.indirizzo).toLocaleLowerCase('it').includes(ricerca);
-    const clienti=[...new Set(data.cantieri.filter(c=>c.stato!=='Chiuso'&&corrisponde(c)).map(c=>c.nome).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it'));
+    const clienti=nomiClientiConCantieriAperti(data).filter(nome=>!ricerca||nome.toLocaleLowerCase('it').includes(ricerca)||data.cantieri.some(c=>idrolistCantiereAperto(c)&&c.nome===nome&&corrisponde(c)));
     const select=document.getElementById('clienteSelezionato');
     select.innerHTML='<option value="">-- Seleziona cliente --</option>'+clienti.map(nome=>`<option value="${idrolistEscapeHtml(nome)}">${idrolistEscapeHtml(nome)}</option>`).join('');
     const corrente=data.cantieri.find(c=>c.id===window.idrolistCurrentCantiereId);
@@ -1787,7 +2078,7 @@ function caricaCantieriScelti(){
     const data=idrolistGetData();
     const select=document.getElementById('cantiereSelezionato');
     const ricerca=document.getElementById('ricercaLavoro').value.trim().toLocaleLowerCase('it');
-    const cantieri=data.cantieri.filter(c=>c.nome===cliente&&c.stato!=='Chiuso'&&(!ricerca||(c.nome+' '+c.indirizzo).toLocaleLowerCase('it').includes(ricerca)));
+    const cantieri=data.cantieri.filter(c=>c.nome===cliente&&idrolistCantiereAperto(c)&&(!ricerca||(c.nome+' '+c.indirizzo).toLocaleLowerCase('it').includes(ricerca)));
     select.disabled=!cliente;
     select.innerHTML=cliente?'<option value="">-- Seleziona cantiere --</option>'+cantieri.map(c=>`<option value="${idrolistEscapeHtml(c.id)}">${idrolistEscapeHtml(c.indirizzo)}</option>`).join(''):'<option value="">-- Seleziona prima il cliente --</option>';
     if(cantieri.some(c=>c.id===window.idrolistCurrentCantiereId))select.value=window.idrolistCurrentCantiereId;
@@ -1805,10 +2096,13 @@ function confermaCantiereSelezionato(){
     if(!cantiere){alert('Seleziona un cliente e un cantiere.');return;}
     window.idrolistCurrentCantiereId=id;
     document.getElementById('cantiereSelection').hidden=true;
-    document.getElementById('workerHome').hidden=false;
+    document.getElementById('workerHome').hidden=true;
     document.getElementById('cantiereAttivo').textContent=cantiere.nome+' — '+cantiere.indirizzo;
-    aggiornaSpunteSezioni();
-    renderFotoCondivise();
+    const azione=window.idrolistAzioneDopoCantiere;
+    window.idrolistAzioneDopoCantiere='';
+    if(azione==='garanzie'){apriModuloSezione('garanzie');return;}
+    if(azione==='foglio'){apriFoglioLavoro();return;}
+    apriDashboardOperaio();
 }
 
 function renderFotoCondivise(){
@@ -1826,9 +2120,7 @@ function renderFotoCondivise(){
 function tornaHomeOperaio(){
     document.getElementById('sectionArea').hidden=true;
     document.getElementById('workArea').hidden=true;
-    document.getElementById('workerHome').hidden=false;
-    aggiornaSpunteSezioni();
-    renderFotoCondivise();
+    apriDashboardOperaio();
 }
 
 function dataOggi(){return new Date().toISOString().slice(0,10);}
@@ -1855,6 +2147,14 @@ function apriFoglioLavoro(){
     caricaCantieriOperai();
     document.getElementById('cantiere').value=cantiere.id;
     document.getElementById('dataLavoro').value=dataOggi();
+    document.getElementById('tipoIntervento').value='';
+    document.getElementById('referenteCantiere').value='';
+    document.getElementById('cantiereTerminato').value='';
+    document.getElementById('descrizione').value='';
+    document.getElementById('note').value='';
+    document.getElementById('materiali').innerHTML='';
+    document.getElementById('lavoratori').innerHTML='';
+    document.getElementById('fotoBolle').value='';
     document.getElementById('step1').classList.remove('active');
     document.getElementById('step2').classList.add('active');
     currentStep=2;
@@ -1917,18 +2217,188 @@ function idrolistEscapeHtml(value){
 function idrolistGetData(){
     try{
         const raw=localStorage.getItem(IDROLIST_SHARED_KEY);
-        if(!raw)return {operai:IDROLIST_WORKERS.slice(),cantieri:[],rapportini:[]};
+        if(!raw)return {operai:IDROLIST_WORKERS.slice(),clienti:[],cantieri:[],rapportini:[],presenze:{},garanzie:[],fotoLavori:[],ddt:[]};
         const data=JSON.parse(raw);
         data.operai=IDROLIST_WORKERS.slice();
+        data.clienti=data.clienti||[];
         data.cantieri=data.cantieri||[];
         data.rapportini=data.rapportini||[];
+        data.presenze=data.presenze||{};
         data.garanzie=data.garanzie||[];
         data.fotoLavori=data.fotoLavori||[];
         data.ddt=data.ddt||[];
         return data;
     }catch(e){
-        return {operai:[],cantieri:[],rapportini:[]};
+        return {operai:[],clienti:[],cantieri:[],rapportini:[],presenze:{},garanzie:[],fotoLavori:[],ddt:[]};
     }
+}
+
+function idrolistOrePresenzaOperaio(presenza){
+    const causali=presenza?.causali||{};
+    return Number(causali.present||0)+Number(causali.extra||0);
+}
+
+function idrolistScadenzaNotificaOperaio(dataLavoro){
+    const scadenza=new Date(dataLavoro+'T16:00:00');
+    scadenza.setDate(scadenza.getDate()+1);
+    return new Date()>=scadenza;
+}
+
+function idrolistAvvisiOreOperaio(){
+    const data=idrolistGetData();
+    const presenze=data.presenze?.[idrolistCurrentWorker]||{};
+    return Object.entries(presenze).reduce((avvisi,[dataLavoro,presenza])=>{
+        const orePreviste=idrolistOrePresenzaOperaio(presenza);
+        if(!orePreviste||!idrolistScadenzaNotificaOperaio(dataLavoro))return avvisi;
+        const oreRapportini=(data.rapportini||[]).filter(r=>r.data===dataLavoro).flatMap(r=>(r.lavoratori||[]).filter(x=>x.nome===idrolistCurrentWorker)).reduce((totale,x)=>totale+Number(x.ore||0),0);
+        const mancanti=Math.max(0,orePreviste-oreRapportini);
+        if(mancanti>0)avvisi.push({data:dataLavoro,mancanti});
+        return avvisi;
+    },[]);
+}
+
+function renderNotificheOperaio(){
+    const contenitori=[document.getElementById('notificheOperaio'),document.getElementById('notificheOperaioDashboard')].filter(Boolean);
+    if(!contenitori.length||!idrolistCurrentWorker)return;
+    const avvisi=idrolistAvvisiOreOperaio();
+    const vuota=document.getElementById('dashboardOperaioVuota');
+    if(vuota)vuota.hidden=avvisi.length>0;
+    contenitori.forEach(contenitore=>{
+        contenitore.hidden=!avvisi.length;
+        if(avvisi.length)contenitore.innerHTML=`<h3>🔔 Fogli di lavoro mancanti</h3><div>Le ore indicate nelle presenze non coincidono con i rapportini inviati.</div><ul>${avvisi.map(avviso=>`<li><strong>${avviso.data}</strong>: mancano ${String(avviso.mancanti).replace('.',',')} h di foglio di lavoro.</li>`).join('')}</ul>`;
+    });
+}
+
+function apriFotoImpiantiOperaio(){
+    idrolistNascondiPagineDipendente();
+    document.getElementById('workerHome').hidden=true;
+    document.getElementById('employeeFotoImpianti').hidden=false;
+    idrolistAttivaNavDipendente('foto');
+    const dati=idrolistGetData();
+    const clienti=[...new Set((dati.cantieri||[]).map(c=>c.nome).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it'));
+    const select=document.getElementById('fotoOperaioCliente');
+    select.innerHTML='<option value="">-- Seleziona cliente --</option>'+clienti.map(nome=>`<option value="${idrolistEscapeHtml(nome)}">${idrolistEscapeHtml(nome)}</option>`).join('');
+    document.getElementById('fotoOperaioCantiere').innerHTML='<option value="">-- Seleziona prima il cliente --</option>';
+    document.getElementById('fotoOperaioCantiere').disabled=true;
+    document.getElementById('caricaFotoOperaio').hidden=true;
+    document.getElementById('fotoOperaioData').value=dataOggi();
+    document.getElementById('fotoOperaioDescrizione').value='';
+    document.getElementById('fotoOperaioFile').value='';
+    document.getElementById('fotoOperaioArchivio').innerHTML='<p class="subtitle">Seleziona cliente e cantiere per visualizzare le foto.</p>';
+}
+
+function caricaCantieriFotoOperaio(){
+    const cliente=document.getElementById('fotoOperaioCliente').value;
+    const dati=idrolistGetData();
+    const cantieri=(dati.cantieri||[]).filter(c=>c.nome===cliente);
+    const select=document.getElementById('fotoOperaioCantiere');
+    select.disabled=!cliente;
+    select.innerHTML=cliente?'<option value="">-- Seleziona cantiere --</option>'+cantieri.map(c=>`<option value="${idrolistEscapeHtml(c.id)}">${idrolistEscapeHtml(c.indirizzo)}</option>`).join(''):'<option value="">-- Seleziona prima il cliente --</option>';
+    document.getElementById('caricaFotoOperaio').hidden=true;
+    document.getElementById('fotoOperaioArchivio').innerHTML='<p class="subtitle">Seleziona il cantiere per visualizzare le foto.</p>';
+}
+
+function renderFotoImpiantiOperaio(){
+    const cliente=document.getElementById('fotoOperaioCliente').value;
+    const cantiereId=document.getElementById('fotoOperaioCantiere').value;
+    const contenitore=document.getElementById('fotoOperaioArchivio');
+    const dati=idrolistGetData();
+    const cantiere=(dati.cantieri||[]).find(c=>c.id===cantiereId);
+    const foto=(dati.fotoLavori||[]).filter(f=>f.cantiereId===cantiereId||(f.cliente===cliente&&f.cantiere===cantiere?.indirizzo)).sort((a,b)=>String(b.data||'').localeCompare(String(a.data||'')));
+    document.getElementById('caricaFotoOperaio').hidden=!cantiere;
+    if(!cliente||!cantiere){contenitore.innerHTML='<p class="subtitle">Seleziona cliente e cantiere per visualizzare le foto.</p>';return;}
+    contenitore.innerHTML=foto.length?foto.map(voce=>`<section style="margin-top:24px"><h3>📅 ${idrolistEscapeHtml(voce.data||'-')}</h3><strong>${idrolistEscapeHtml(voce.descrizione||'Nessuna descrizione')}</strong><div class="subtitle">Caricata da ${idrolistEscapeHtml(voce.compilatoDa||'-')}</div>${(voce.immagini||[]).map(src=>`<img class="employee-photo" src="${src}" alt="Foto impianto">`).join('')}</section>`).join(''):'<p class="subtitle">Non sono presenti foto per questo cantiere.</p>';
+}
+
+async function salvaFotoImpiantiOperaio(){
+    const data=idrolistGetData();
+    const cantiereId=document.getElementById('fotoOperaioCantiere').value;
+    const cantiere=(data.cantieri||[]).find(c=>c.id===cantiereId);
+    const descrizione=document.getElementById('fotoOperaioDescrizione').value.trim();
+    const file=Array.from(document.getElementById('fotoOperaioFile').files||[]);
+    if(!cantiere){alert('Seleziona cliente e cantiere.');return;}
+    if(!descrizione){alert('Inserisci una breve descrizione.');return;}
+    if(!file.length){alert('Seleziona almeno una foto.');return;}
+    let immagini=[];
+    try{immagini=await Promise.all(file.map(leggiImmagine));}catch(e){alert('Non è stato possibile leggere una o più foto.');return;}
+    data.fotoLavori=data.fotoLavori||[];
+    data.fotoLavori.push({id:'FOTO-'+Date.now(),tipoSezione:'fotoLavori',cantiereId:cantiere.id,cliente:cantiere.nome,cantiere:cantiere.indirizzo,descrizione,allegati:file.map(f=>f.name),immagini,compilatoDa:idrolistCurrentWorker,data:document.getElementById('fotoOperaioData').value||dataOggi(),stato:'Caricato'});
+    try{idrolistSaveData(data);}catch(e){alert('Le foto sono troppo grandi per essere salvate nel browser. Riduci numero o dimensione delle immagini.');return;}
+    document.getElementById('fotoOperaioDescrizione').value='';
+    document.getElementById('fotoOperaioFile').value='';
+    renderFotoImpiantiOperaio();
+    alert('Foto caricate con successo.');
+}
+
+function apriPresenzeOperaio(){
+    idrolistNascondiPagineDipendente();
+    document.getElementById('workerHome').hidden=true;
+    document.getElementById('employeePresenze').hidden=false;
+    idrolistAttivaNavDipendente('presenze');
+    idrolistRenderCalendarioPresenzeOperaio();
+}
+
+function idrolistMesePresenzeOperaio(direzione){
+    idrolistCalendarDateOperaio.setMonth(idrolistCalendarDateOperaio.getMonth()+direzione);
+    idrolistRenderCalendarioPresenzeOperaio();
+}
+
+function idrolistFestivitaOperaio(chiave){
+    const data=new Date(chiave+'T00:00:00');
+    const fissi={'01-01':'Capodanno','01-06':'Epifania','04-25':'Liberazione','05-01':'Festa del Lavoro','05-08':'Festa patronale','06-02':'Festa della Repubblica','08-15':'Ferragosto','11-01':'Ognissanti','12-08':'Immacolata','12-25':'Natale','12-26':'Santo Stefano'};
+    return fissi[chiave.slice(5)]||((data.getDay()===0||data.getDay()===6)?'Fine settimana':'');
+}
+
+function idrolistRenderCalendarioPresenzeOperaio(){
+    const anno=idrolistCalendarDateOperaio.getFullYear();
+    const mese=idrolistCalendarDateOperaio.getMonth();
+    const nomiMesi=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+    document.getElementById('mesePresenzeOperaio').textContent=nomiMesi[mese]+' '+anno;
+    const presenze=idrolistGetData().presenze?.[idrolistCurrentWorker]||{};
+    const rapportini=idrolistGetData().rapportini||[];
+    let primo=new Date(anno,mese,1).getDay();
+    primo=primo===0?7:primo;
+    const giorni=new Date(anno,mese+1,0).getDate();
+    let giorno=1,html='';
+    for(let riga=0;riga<6&&giorno<=giorni;riga++){
+        html+='<tr>';
+        for(let colonna=1;colonna<=7;colonna++){
+            if((riga===0&&colonna<primo)||giorno>giorni){html+='<td></td>';continue;}
+            const chiave=`${anno}-${String(mese+1).padStart(2,'0')}-${String(giorno).padStart(2,'0')}`;
+            const voce=presenze[chiave]||{};
+            const causali=voce.causali||{present:voce.stato==='present'?Number(voce.ore||0):0,holiday:voce.stato==='holiday'?Number(voce.ore||0):0,sick:voce.stato==='sick'?Number(voce.ore||0):0,extra:voce.stato==='extra'?Number(voce.ore||0):0};
+            const righe=[['present','Presente','state-present'],['extra','Straord.','state-extra'],['holiday','Ferie','state-holiday'],['sick','Malattia','state-sick']].filter(([tipo])=>Number(causali[tipo]||0)>0).map(([tipo,etichetta,classe])=>`<span class="day-state ${classe}">${etichetta} ${String(causali[tipo]).replace('.',',')} h</span>`).join('');
+            const clienti=[...new Set(rapportini.filter(rapporto=>rapporto.data===chiave&&(rapporto.lavoratori||[]).some(lavoratore=>lavoratore.nome===idrolistCurrentWorker)).map(rapporto=>rapporto.cantiere).filter(Boolean))];
+            const festivita=idrolistFestivitaOperaio(chiave);
+            html+=`<td><div class="day-number ${festivita?'calendar-holiday':''}">${giorno}</div>${festivita&&festivita!=='Fine settimana'?`<div class="day-detail calendar-holiday">${festivita}</div>`:''}${righe}${clienti.length?`<div class="day-detail">${clienti.map(idrolistEscapeHtml).join('<br>')}</div>`:''}</td>`;
+            giorno++;
+        }
+        html+='</tr>';
+    }
+    document.getElementById('calendarioPresenzeOperaio').innerHTML=html;
+}
+
+function apriImpostazioniOperaio(){
+    idrolistNascondiPagineDipendente();
+    document.getElementById('workerHome').hidden=true;
+    document.getElementById('employeeImpostazioni').hidden=false;
+    idrolistAttivaNavDipendente('impostazioni');
+    ['passwordAttualeOperaio','passwordNuovaOperaio','passwordConfermaOperaio'].forEach(id=>document.getElementById(id).value='');
+}
+
+function cambiaPasswordOperaio(){
+    const attuale=document.getElementById('passwordAttualeOperaio').value;
+    const nuova=document.getElementById('passwordNuovaOperaio').value;
+    const conferma=document.getElementById('passwordConfermaOperaio').value;
+    const account=idrolistGetAccounts()[idrolistCurrentWorker];
+    if(!account||account.password!==attuale){alert('Password attuale non corretta.');return;}
+    if(nuova.length<8){alert('La nuova password deve avere almeno 8 caratteri.');return;}
+    if(nuova!==conferma){alert('Le due password non coincidono.');return;}
+    const accounts=idrolistGetAccounts();
+    accounts[idrolistCurrentWorker]={password:nuova,aggiornatoIl:new Date().toISOString()};
+    idrolistSetAccounts(accounts);
+    alert('Password modificata con successo.');
+    apriDashboardOperaio();
 }
 
 function idrolistSaveData(data){
@@ -1940,9 +2410,7 @@ function caricaClientiOperai(){
     if(!select)return;
     const data=idrolistGetData();
     const current=select.value;
-    const clienti=[...new Set(data.cantieri
-        .filter(c=>c.stato!=='Chiuso'&&String(c.nome||'').trim())
-        .map(c=>String(c.nome).trim()))].sort((a,b)=>a.localeCompare(b,'it'));
+    const clienti=nomiClienti(data);
     select.innerHTML='<option value="">-- Seleziona cliente --</option>';
     clienti.forEach(nome=>{
         const opt=document.createElement('option');
@@ -1982,6 +2450,15 @@ function creaSelectOperai(){
     return idrolistGetData().operai.map(n=>`<option value="${idrolistEscapeHtml(n)}">${idrolistEscapeHtml(n)}</option>`).join('');
 }
 
+function creaSelectOreRapportino(){
+    const opzioni=[];
+    for(let ore=0.5;ore<=12;ore+=0.5){
+        const valore=String(ore);
+        opzioni.push(`<option value="${valore}">${valore.replace('.',',')} h</option>`);
+    }
+    return '<option value="">-- Ore --</option>'+opzioni.join('');
+}
+
 function aggiungiLavoratore(){
     const div=document.createElement('div');
     div.className='worker-row';
@@ -1990,54 +2467,107 @@ function aggiungiLavoratore(){
             <option value="">-- Seleziona operaio --</option>
             ${creaSelectOperai()}
         </select>
-        <input type="number" placeholder="Ore totali" min="0" step="0.5" class="worker-ore">
+        <select class="worker-ore">${creaSelectOreRapportino()}</select>
         <button class="remove-btn" onclick="this.parentElement.remove()">✕</button>
     `;
     document.getElementById('lavoratori').appendChild(div);
 }
 
-function inviaFoglio(){
+const IDROLIST_MEDIA_DB='idrolist_media_v1';
+
+function idrolistApriArchivioDdtOperaio(){
+    return new Promise((resolve,reject)=>{
+        const richiesta=indexedDB.open(IDROLIST_MEDIA_DB,2);
+        richiesta.onupgradeneeded=()=>{
+            const db=richiesta.result;
+            if(!db.objectStoreNames.contains('ddt'))db.createObjectStore('ddt',{keyPath:'chiave'});
+            if(!db.objectStoreNames.contains('garanzie'))db.createObjectStore('garanzie',{keyPath:'chiave'});
+        };
+        richiesta.onsuccess=()=>resolve(richiesta.result);
+        richiesta.onerror=()=>reject(richiesta.error);
+    });
+}
+
+async function idrolistArchiviaDdtOperaio(rapportinoId,immagini){
+    if(!immagini.length)return [];
+    const db=await idrolistApriArchivioDdtOperaio();
+    await new Promise((resolve,reject)=>{
+        const transazione=db.transaction('ddt','readwrite');
+        const archivio=transazione.objectStore('ddt');
+        immagini.forEach((immagine,indice)=>archivio.put({chiave:`${rapportinoId}_${indice+1}`,nome:immagine.nome,dataUrl:immagine.dataUrl}));
+        transazione.oncomplete=resolve;
+        transazione.onerror=()=>reject(transazione.error);
+        transazione.onabort=()=>reject(transazione.error);
+    });
+    db.close();
+    return immagini.map((immagine,indice)=>({nome:immagine.nome,archivioKey:`${rapportinoId}_${indice+1}`}));
+}
+
+async function inviaFoglio(){
     const data=idrolistGetData();
     const select=document.getElementById('cantiere');
     const cantiere=data.cantieri.find(c=>c.id===select.value);
     if(!cantiere){alert('Seleziona un cantiere.');return;}
 
     const materiali=[];
+    let materialiNonValidi=false;
     document.querySelectorAll('.material-row').forEach(row=>{
         const nome=row.querySelector('.materiale-nome')?.value.trim();
         const quantita=row.querySelector('.materiale-quantita')?.value;
-        if(nome)materiali.push({nome,quantita:quantita||0});
+        if(!nome&&!quantita)return;
+        if(!nome||Number(quantita)<=0){materialiNonValidi=true;return;}
+        materiali.push({nome,quantita:Number(quantita)});
     });
+    if(materialiNonValidi){alert('Per ogni materiale inserisci nome e quantità maggiore di zero, oppure elimina la riga vuota.');return;}
 
     const lavoratori=[];
+    let lavoratoriNonValidi=false;
     document.querySelectorAll('.worker-row').forEach(row=>{
         const nome=row.querySelector('.worker-nome')?.value;
         const ore=row.querySelector('.worker-ore')?.value;
-        if(nome)lavoratori.push({nome,ore:Number(ore||0)});
+        if(!nome&&!ore)return;
+        if(!nome||Number(ore)<=0){lavoratoriNonValidi=true;return;}
+        lavoratori.push({nome,ore:Number(ore)});
     });
+    if(lavoratoriNonValidi){alert('Per ogni operaio selezionato inserisci ore maggiori di zero, oppure elimina la riga vuota.');return;}
 
+    const rapportinoId='RAP-'+Date.now();
+    const fileDdt=Array.from(document.getElementById('fotoBolle')?.files||[]);
+    let ddtFoto=[];
+    try{
+        const dataUrl=await Promise.all(fileDdt.map(leggiImmagine));
+        ddtFoto=await idrolistArchiviaDdtOperaio(rapportinoId,fileDdt.map((file,indice)=>({nome:file.name,dataUrl:dataUrl[indice]})));
+    }catch(e){alert('Non è stato possibile archiviare le foto DDT. Il rapportino non è stato inviato.');return;}
     const rapportino={
-        id:'RAP-'+Date.now(),
+        id:rapportinoId,
         data:document.getElementById('dataLavoro')?.value||new Date().toISOString().slice(0,10),
         cantiereId:cantiere.id,
         cantiere:cantiere.nome,
         indirizzo:cantiere.indirizzo,
         descrizione:document.getElementById('descrizione')?.value.trim()||'',
         note:document.getElementById('note')?.value.trim()||'',
+        tipoIntervento:document.getElementById('tipoIntervento')?.value||'',
+        referenteCantiere:document.getElementById('referenteCantiere')?.value||'',
+        cantiereTerminato:document.getElementById('cantiereTerminato')?.value||'',
         materiali,
+        ddtAllegati:fileDdt.map(file=>file.name),
+        ddtFoto,
         lavoratori,
         compilatoDa:idrolistCurrentWorker,
-        firmaCliente:firmaPresente,
-        stato:'Pronto per invio',
+        firmaCliente:firmaPresente?canvas.toDataURL('image/png'):'',
+        stato:'Da verificare',
+        inviatoIl:new Date().toISOString(),
         creatoIl:new Date().toISOString()
     };
 
     data.rapportini.push(rapportino);
-    idrolistSaveData(data);
+    try{idrolistSaveData(data);}catch(e){
+        alert('Invio non riuscito. Il rapportino e le notifiche sono rimasti invariati. Riduci il numero o la dimensione delle foto.');
+        return;
+    }
     document.getElementById('workArea').hidden=true;
-    document.getElementById('workerHome').hidden=false;
-    aggiornaSpunteSezioni();
-    alert('Foglio di lavoro completato. Puoi compilare un’altra sezione o inviare in ufficio.');
+    apriDashboardOperaio();
+    alert('Rapportino inviato con successo.');
 }
 
 function inviaInUfficio(){
@@ -2048,9 +2578,14 @@ function inviaInUfficio(){
     if(!pronti.length&&!sezioni.length){alert('Non ci sono sezioni completate da inviare.');return;}
     pronti.forEach(r=>{r.stato='Da verificare';r.inviatoIl=ora;});
     sezioni.forEach(voce=>{voce.stato='Inviato in ufficio';voce.inviatoIl=ora;});
-    idrolistSaveData(data);
+    try{
+        idrolistSaveData(data);
+    }catch(e){
+        alert('Invio non riuscito. Dati e notifiche sono rimasti invariati.');
+        return;
+    }
     window.idrolistCurrentCantiereId='';
-    alert('Dati inviati in ufficio.');
+    alert('Rapportino inviato con successo.');
     apriSceltaCantiere();
 }
 
