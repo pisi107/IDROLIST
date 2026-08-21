@@ -46,18 +46,16 @@ body{
 .company-logos .daikin-logo{height:50px}
 
 .impianti-gallery{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
-    gap:12px;
+    display:block;
     margin-top:12px;
 }
 
-.impianti-gallery a{display:block}
+.impianti-gallery a{display:block;margin:0 0 14px}
 .impianti-gallery img{
     display:block;
     width:100%;
-    height:135px;
-    object-fit:cover;
+    height:auto;
+    object-fit:contain;
     border-radius:8px;
     border:1px solid #dce3eb;
 }
@@ -376,6 +374,28 @@ tr.clickable:hover{
 
 .list-card:last-child{
     border-bottom:0;
+}
+
+.costi-manodopera-row{
+    display:grid;
+    grid-template-columns:minmax(220px,1fr) minmax(130px,170px) minmax(150px,190px);
+    gap:14px;
+    align-items:center;
+    padding:12px 0;
+    border-bottom:1px solid #e7ebf0;
+}
+
+.costi-manodopera-row.header{
+    padding-top:0;
+    color:#727d8e;
+    font-size:12px;
+    font-weight:700;
+    text-transform:uppercase;
+}
+
+.costi-manodopera-row input{
+    width:100%;
+    min-width:0;
 }
 
 .avatar{
@@ -887,6 +907,14 @@ tr.clickable:hover{
 
     .list-card strong:first-child{grid-column:1/-1}
     .list-card input{width:100%}
+
+    .costi-manodopera-row{
+        grid-template-columns:minmax(145px,1fr) minmax(90px,110px) minmax(90px,110px);
+        gap:8px;
+    }
+
+    .costi-manodopera-row.header{font-size:10px}
+    .costi-manodopera-row input{padding:10px 6px;font-size:14px}
 
     .modal-bg{padding:10px}
     .modal{padding:16px;border-radius:14px;max-height:94vh}
@@ -3026,6 +3054,11 @@ Legenda:
 <button class="btn btn-primary" type="button" onclick="apriCaricaFotoImpianto()">＋ Carica foto</button>
 </div>
 
+<div class="report-filters">
+<div><label for="filtroClienteFotoImpianti">Cliente</label><select id="filtroClienteFotoImpianti" onchange="idrolistRenderFotoImpianti()"><option value="">-- Seleziona cliente --</option></select></div>
+<div><label for="filtroCantiereFotoImpianti">Cantiere</label><select id="filtroCantiereFotoImpianti" onchange="idrolistRenderFotoImpianti()" disabled><option value="">-- Seleziona prima il cliente --</option></select></div>
+</div>
+
 <div id="archivioFotoImpianti"></div>
 
 </section>
@@ -3059,13 +3092,19 @@ onclick="newGaranzia()">
 
 </div>
 
+<div class="report-filters">
+<div><label for="filtroClienteGaranzie">Cliente</label><select id="filtroClienteGaranzie" onchange="idrolistRenderGaranzie()"><option value="tutti">Tutti i clienti</option></select></div>
+<div><label for="filtroCantiereGaranzie">Cantiere</label><select id="filtroCantiereGaranzie" onchange="idrolistRenderGaranzie()"><option value="tutti">Tutti i cantieri</option></select></div>
+<div><label for="filtroStatoGaranzie">Stato</label><select id="filtroStatoGaranzie" onchange="idrolistRenderGaranzie()"><option value="tutti">Tutte le garanzie</option><option value="Da gestire" selected>Da gestire</option><option value="Gestita">Gestite</option></select></div>
+</div>
+
 
 <div class="stats-grid">
 
 <div class="card">
 
 <div class="muted">
-Garanzie attive
+Garanzie totali
 </div>
 
 <div class="stat-number green">
@@ -3078,7 +3117,7 @@ Garanzie attive
 <div class="card">
 
 <div class="muted">
-In scadenza
+Da gestire
 </div>
 
 <div class="stat-number orange">
@@ -3091,7 +3130,7 @@ In scadenza
 <div class="card">
 
 <div class="muted">
-Scadute
+Gestite
 </div>
 
 <div class="stat-number red">
@@ -3106,7 +3145,7 @@ Scadute
 <div class="card">
 
 <h2>
-🛡️ Scadenziario
+🛡️ Garanzie Daikin
 </h2>
 
 <table>
@@ -3115,9 +3154,9 @@ Scadute
 
 <tr>
 <th>Cliente</th>
-<th>Impianto</th>
-<th>Matricola</th>
-<th>Scadenza</th>
+<th>Cantiere</th>
+<th>Etichette / descrizione</th>
+<th>Data attivazione</th>
 <th>Stato</th>
 </tr>
 
@@ -3283,6 +3322,15 @@ onclick="showNotification('Impostazioni salvate')">
 </div>
 
 
+<div class="card">
+<h3>✉️ Notifiche email</h3>
+<p class="muted">Indirizzo dell’amministrazione che riceverà le segnalazioni, ad esempio per presenze non compilate entro le ore 16:00.</p>
+<div class="form-group"><label>Email amministrazione</label><input id="emailAmministrazione" type="email" autocomplete="email" placeholder="amministrazione@azienda.it"></div>
+<div class="form-group"><label>Limite gestione garanzie (giorni)</label><input id="limiteGiorniGaranzie" type="number" min="1" max="365" step="1" value="7"><small class="muted">Dopo questo numero di giorni dal caricamento delle foto, la garanzia non gestita verrà sollecitata ogni giorno fino alla chiusura.</small></div>
+<button class="btn btn-primary" type="button" onclick="salvaEmailAmministrazione()">💾 Salva impostazioni notifiche</button>
+</div>
+
+
 <div class="card" id="costiManodopera">
 <h3>👷 Costi e prezzi della manodopera</h3>
 <p class="muted">Per ogni dipendente inserisci il costo orario interno e il prezzo orario esposto al cliente.</p>
@@ -3298,14 +3346,12 @@ onclick="showNotification('Impostazioni salvate')">
 </h3>
 
 <p class="muted">
-Le password e gli accessi verranno configurati nella fase successiva.
+Imposta la password dell’amministratore: sarà richiesta per eliminare definitivamente un rapportino di lavoro.
 </p>
 
-<button
-class="btn"
-onclick="showNotification('Sezione accessi pronta')">
-Gestisci accessi
-</button>
+<div class="form-group"><label>Password amministratore</label><input id="passwordAmministratore" type="password" autocomplete="new-password" placeholder="Inserisci una password"></div>
+<div class="form-group"><label>Conferma password</label><input id="confermaPasswordAmministratore" type="password" autocomplete="new-password" placeholder="Ripeti la password"></div>
+<button class="btn btn-primary" type="button" onclick="salvaPasswordAmministratore()">💾 Salva password amministratore</button>
 
 </div>
 
@@ -4294,14 +4340,14 @@ function idrolistLeggiImmagine(file){
         const immagine=new Image();
         const url=URL.createObjectURL(file);
         immagine.onload=()=>{
-            const latoMassimo=1100;
+            const latoMassimo=650;
             const scala=Math.min(1,latoMassimo/Math.max(immagine.naturalWidth,immagine.naturalHeight));
             const canvas=document.createElement('canvas');
             canvas.width=Math.max(1,Math.round(immagine.naturalWidth*scala));
             canvas.height=Math.max(1,Math.round(immagine.naturalHeight*scala));
             canvas.getContext('2d').drawImage(immagine,0,0,canvas.width,canvas.height);
             URL.revokeObjectURL(url);
-            resolve({nome:file.name.replace(/\.[^.]+$/,'.jpg'),dataUrl:canvas.toDataURL('image/jpeg',0.65)});
+            resolve({nome:file.name.replace(/\.[^.]+$/,'.jpg'),dataUrl:canvas.toDataURL('image/jpeg',0.5)});
         };
         immagine.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Immagine non leggibile.'));};
         immagine.src=url;
@@ -4312,8 +4358,12 @@ const IDROLIST_MEDIA_DB='idrolist_media_v1';
 
 function idrolistApriArchivioDdt(){
     return new Promise((resolve,reject)=>{
-        const richiesta=indexedDB.open(IDROLIST_MEDIA_DB,1);
-        richiesta.onupgradeneeded=()=>richiesta.result.createObjectStore('ddt',{keyPath:'chiave'});
+        const richiesta=indexedDB.open(IDROLIST_MEDIA_DB,2);
+        richiesta.onupgradeneeded=()=>{
+            const db=richiesta.result;
+            if(!db.objectStoreNames.contains('ddt'))db.createObjectStore('ddt',{keyPath:'chiave'});
+            if(!db.objectStoreNames.contains('garanzie'))db.createObjectStore('garanzie',{keyPath:'chiave'});
+        };
         richiesta.onsuccess=()=>resolve(richiesta.result);
         richiesta.onerror=()=>reject(richiesta.error);
     });
@@ -4348,6 +4398,52 @@ async function idrolistCaricaFotoDdt(foto){
     }));
     db.close();
     return risultato;
+}
+
+async function idrolistArchiviaFotoGaranzia(garanziaId,foto){
+    if(!foto.length)return [];
+    const db=await idrolistApriArchivioDdt();
+    await new Promise((resolve,reject)=>{
+        const transazione=db.transaction('garanzie','readwrite');
+        const archivio=transazione.objectStore('garanzie');
+        foto.forEach((immagine,indice)=>archivio.put({chiave:`${garanziaId}_${indice+1}`,dataUrl:immagine.dataUrl,nome:immagine.nome}));
+        transazione.oncomplete=resolve;
+        transazione.onerror=()=>reject(transazione.error);
+        transazione.onabort=()=>reject(transazione.error);
+    });
+    db.close();
+    return foto.map((immagine,indice)=>({nome:immagine.nome,archivioKey:`${garanziaId}_${indice+1}`}));
+}
+
+async function idrolistCaricaFotoGaranzia(foto){
+    const elenco=foto||[];
+    if(!elenco.some(immagine=>typeof immagine==='object'&&immagine.archivioKey))return elenco.map(immagine=>typeof immagine==='string'?{dataUrl:immagine}:immagine);
+    const db=await idrolistApriArchivioDdt();
+    const risultato=await Promise.all(elenco.map(immagine=>{
+        if(!immagine?.archivioKey)return Promise.resolve(typeof immagine==='string'?{dataUrl:immagine}:immagine);
+        return new Promise(resolve=>{
+            const richiesta=db.transaction('garanzie','readonly').objectStore('garanzie').get(immagine.archivioKey);
+            richiesta.onsuccess=()=>resolve(richiesta.result?{nome:immagine.nome,dataUrl:richiesta.result.dataUrl}:immagine);
+            richiesta.onerror=()=>resolve(immagine);
+        });
+    }));
+    db.close();
+    return risultato;
+}
+
+async function idrolistEliminaFotoDdt(foto){
+    const chiavi=(foto||[]).map(immagine=>immagine.archivioKey).filter(Boolean);
+    if(!chiavi.length)return;
+    const db=await idrolistApriArchivioDdt();
+    await new Promise((resolve,reject)=>{
+        const transazione=db.transaction('ddt','readwrite');
+        const archivio=transazione.objectStore('ddt');
+        chiavi.forEach(chiave=>archivio.delete(chiave));
+        transazione.oncomplete=resolve;
+        transazione.onerror=()=>reject(transazione.error);
+        transazione.onabort=()=>reject(transazione.error);
+    });
+    db.close();
 }
 
 async function salvaNuovoRapportinoUfficio(){
@@ -4831,56 +4927,116 @@ onclick="saveOperaio()">
 ===================================================== */
 
 function newGaranzia(){
+    const dati=idrolistGetData();
+    const clienti=[...new Set([...(dati.clienti||[]).map(c=>c.nome),...(dati.cantieri||[]).map(c=>c.nome)].filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it'));
+    openModal('🛡️ Nuova garanzia Daikin',`
+        <div id="nuovaGaranziaIndicatore" style="margin:0 0 20px;font-weight:700;color:#1769d1">Passaggio 1 di 4 — Cliente</div>
+        <section data-step-garanzia="1">
+            <p class="muted">Le etichette saranno utilizzate dall’ufficio per attivare la garanzia sul portale Daikin.</p>
+            <div class="form-group"><label>Cliente</label><div class="inline-selector-actions"><select id="nuovaGaranziaCliente" onchange="aggiornaCantieriNuovaGaranzia()"><option value="">-- Seleziona cliente --</option>${clienti.map(nome=>`<option value="${escapeHtml(nome)}">${escapeHtml(nome)}</option>`).join('')}</select><button class="btn" type="button" onclick="apriNuovoClienteDaGaranzia()">＋ Nuovo cliente</button></div></div>
+            <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" type="button" onclick="idrolistAvantiStepGaranzia(2)">Avanti →</button></div>
+        </section>
+        <section data-step-garanzia="2" hidden>
+            <div class="form-group"><label>Cantiere</label><div class="inline-selector-actions"><select id="nuovaGaranziaCantiere" disabled><option value="">-- Seleziona prima il cliente --</option></select><button class="btn" type="button" onclick="apriNuovoCantiereDaGaranzia()">＋ Nuovo cantiere</button></div></div>
+            <div style="display:flex;justify-content:space-between"><button class="btn" type="button" onclick="idrolistMostraStepGaranzia(1)">← Indietro</button><button class="btn btn-primary" type="button" onclick="idrolistAvantiStepGaranzia(3)">Avanti →</button></div>
+        </section>
+        <section data-step-garanzia="3" hidden>
+            <div class="form-group"><label>Descrizione <span class="muted">(facoltativa)</span></label><textarea id="nuovaGaranziaDescrizione" rows="3" placeholder="Es. Etichetta unità esterna e matricola"></textarea></div>
+            <div style="display:flex;justify-content:space-between"><button class="btn" type="button" onclick="idrolistMostraStepGaranzia(2)">← Indietro</button><button class="btn btn-primary" type="button" onclick="idrolistAvantiStepGaranzia(4)">Avanti →</button></div>
+        </section>
+        <section data-step-garanzia="4" hidden>
+            <div class="form-group"><label>Foto etichette <span class="red">*</span></label><input id="nuovaGaranziaFoto" type="file" accept="image/*" capture="environment" multiple><small class="muted">Puoi selezionare o fotografare una o più etichette.</small></div>
+            <div style="display:flex;justify-content:space-between"><button class="btn" type="button" onclick="idrolistMostraStepGaranzia(3)">← Indietro</button><button class="btn btn-primary" type="button" onclick="salvaNuovaGaranzia()">💾 Salva garanzia</button></div>
+        </section>
+    `,`<button class="btn" type="button" onclick="closeModal()">Annulla</button>`);
+    document.getElementById('modalBg').dataset.bloccaChiusura='true';
+}
 
-openModal(
+function idrolistMostraStepGaranzia(numero){
+    document.querySelectorAll('[data-step-garanzia]').forEach(sezione=>sezione.hidden=Number(sezione.dataset.stepGaranzia)!==numero);
+    const titoli={1:'Passaggio 1 di 4 — Cliente',2:'Passaggio 2 di 4 — Cantiere',3:'Passaggio 3 di 4 — Descrizione',4:'Passaggio 4 di 4 — Foto etichette'};
+    const indicatore=document.getElementById('nuovaGaranziaIndicatore');
+    if(indicatore)indicatore.textContent=titoli[numero];
+}
 
-"🛡️ Nuova garanzia",
+function idrolistAvantiStepGaranzia(numero){
+    if(numero===2&&!document.getElementById('nuovaGaranziaCliente')?.value){alert('Seleziona il cliente prima di proseguire.');return;}
+    if(numero===3&&!document.getElementById('nuovaGaranziaCantiere')?.value){alert('Seleziona il cantiere prima di proseguire.');return;}
+    idrolistMostraStepGaranzia(numero);
+}
 
-`
+function aggiornaCantieriNuovaGaranzia(){
+    const cliente=document.getElementById('nuovaGaranziaCliente')?.value||'';
+    const select=document.getElementById('nuovaGaranziaCantiere');
+    if(!select)return;
+    const cantieri=(idrolistGetData().cantieri||[]).filter(c=>c.nome===cliente);
+    select.disabled=!cliente;
+    select.innerHTML=cliente?'<option value="">-- Seleziona cantiere --</option>'+cantieri.map(c=>`<option value="${escapeHtml(c.id)}">${escapeHtml(c.indirizzo||c.nome)}</option>`).join(''):'<option value="">-- Seleziona prima il cliente --</option>';
+}
 
-<div class="form-group">
-<label>Cliente</label>
-<input placeholder="Nome cliente">
-</div>
+function apriNuovoClienteDaGaranzia(){
+    openModal('👤 Nuovo cliente',`<div class="form-group"><label>Nome cliente</label><input id="garanziaNuovoClienteNome"></div><div class="form-group"><label>Città</label><input id="garanziaNuovoClienteCitta"></div><div class="form-group"><label>Via / Piazza</label><input id="garanziaNuovoClienteVia"></div><div class="form-group"><label>Telefono</label><input id="garanziaNuovoClienteTelefono" type="tel"></div>`,`<button class="btn" type="button" onclick="newGaranzia()">Annulla</button><button class="btn btn-primary" type="button" onclick="salvaNuovoClienteDaGaranzia()">Salva cliente</button>`);
+}
 
-<div class="form-group">
-<label>Impianto</label>
-<input placeholder="Descrizione">
-</div>
+function salvaNuovoClienteDaGaranzia(){
+    const nome=document.getElementById('garanziaNuovoClienteNome')?.value.trim();
+    const citta=document.getElementById('garanziaNuovoClienteCitta')?.value.trim();
+    const via=document.getElementById('garanziaNuovoClienteVia')?.value.trim();
+    const telefono=document.getElementById('garanziaNuovoClienteTelefono')?.value.trim();
+    if(!nome||!citta||!via||!telefono){alert('Completa nome, città, via/piazza e telefono.');return;}
+    const dati=idrolistGetData();
+    dati.clienti=dati.clienti||[];
+    if([...(dati.clienti||[]),...(dati.cantieri||[])].some(x=>String(x.nome||'').toLocaleLowerCase('it')===nome.toLocaleLowerCase('it'))){alert('Questo cliente è già presente.');return;}
+    dati.clienti.push({id:'CLI-'+Date.now(),nome,citta,via,telefono,creatoIl:new Date().toISOString()});
+    idrolistSaveData(dati);
+    newGaranzia();
+    const select=document.getElementById('nuovaGaranziaCliente');
+    if(select)select.value=nome;
+    aggiornaCantieriNuovaGaranzia();
+    showNotification('Cliente creato. Ora crea o seleziona il cantiere.');
+}
 
-<div class="form-group">
-<label>Matricola</label>
-<input placeholder="Matricola">
-</div>
+function apriNuovoCantiereDaGaranzia(){
+    const cliente=document.getElementById('nuovaGaranziaCliente')?.value||'';
+    if(!cliente){alert('Seleziona prima il cliente.');return;}
+    openModal('📍 Nuovo cantiere',`<div class="form-group"><label>Cliente</label><input value="${escapeHtml(cliente)}" disabled></div><div class="form-group"><label>Città</label><input id="garanziaNuovoCantiereCitta"></div><div class="form-group"><label>Via / Piazza</label><input id="garanziaNuovoCantiereVia"></div>`,`<button class="btn" type="button" onclick="newGaranzia()">Annulla</button><button class="btn btn-primary" type="button" onclick="salvaNuovoCantiereDaGaranzia('${escapeHtml(cliente)}')">Crea cantiere</button>`);
+}
 
-<div class="form-group">
-<label>Data scadenza</label>
-<input type="date">
-</div>
+function salvaNuovoCantiereDaGaranzia(cliente){
+    const citta=document.getElementById('garanziaNuovoCantiereCitta')?.value.trim();
+    const via=document.getElementById('garanziaNuovoCantiereVia')?.value.trim();
+    if(!citta||!via){alert('Completa città e via/piazza.');return;}
+    const dati=idrolistGetData();
+    const cantiere={id:'CAN-'+Date.now(),nome:cliente,indirizzo:via+', '+citta,citta,via,stato:'Attivo',statoContabile:'aperti',creatoIl:new Date().toISOString()};
+    dati.cantieri.push(cantiere);
+    idrolistSaveData(dati);
+    newGaranzia();
+    const clienteSelect=document.getElementById('nuovaGaranziaCliente');
+    if(clienteSelect)clienteSelect.value=cliente;
+    aggiornaCantieriNuovaGaranzia();
+    const cantiereSelect=document.getElementById('nuovaGaranziaCantiere');
+    if(cantiereSelect)cantiereSelect.value=cantiere.id;
+    showNotification('Cantiere creato e selezionato.');
+}
 
-`,
-
-`
-
-<button
-class="btn"
-onclick="closeModal()">
-Annulla
-</button>
-
-<button
-class="btn btn-primary"
-onclick="
-closeModal();
-showNotification('Garanzia aggiunta');
-">
-💾 Salva garanzia
-</button>
-
-`
-
-);
-
+async function salvaNuovaGaranzia(){
+    const dati=idrolistGetData();
+    const cantiere=(dati.cantieri||[]).find(c=>c.id===document.getElementById('nuovaGaranziaCantiere')?.value);
+    const file=Array.from(document.getElementById('nuovaGaranziaFoto')?.files||[]);
+    const descrizione=document.getElementById('nuovaGaranziaDescrizione')?.value.trim()||'Etichette impianto per attivazione garanzia Daikin';
+    if(!cantiere){alert('Seleziona cliente e cantiere.');return;}
+    if(!file.length){alert('Carica almeno una foto delle etichette.');return;}
+    let immagini=[];
+    try{immagini=await Promise.all(file.map(idrolistLeggiImmagine));}catch(e){alert('Non è stato possibile leggere una o più foto delle etichette.');return;}
+    const garanziaId='GAR-'+Date.now();
+    let immaginiArchiviate=[];
+    try{immaginiArchiviate=await idrolistArchiviaFotoGaranzia(garanziaId,immagini);}catch(e){alert('Non è stato possibile archiviare le foto delle etichette. La garanzia non è stata salvata.');return;}
+    dati.garanzie=dati.garanzie||[];
+    dati.garanzie.push({id:garanziaId,cliente:cantiere.nome,cantiere:cantiere.indirizzo,cantiereId:cantiere.id,descrizione,allegati:file.map(f=>f.name),immagini:immaginiArchiviate,data:idrolistDataOggiLocale(),stato:'Da gestire',compilatoDa:'Ufficio',creatoIl:new Date().toISOString()});
+    try{idrolistSaveData(dati);}catch(e){alert('Lo spazio dati locale è esaurito. Elimina alcuni dati di test o foto archiviate non più necessarie, poi riprova.');return;}
+    closeModal();
+    idrolistRenderGaranzie();
+    showNotification('Foto etichette caricate: garanzia salvata da gestire.');
 }
 
 
@@ -5013,6 +5169,8 @@ function idrolistGetData(){
         data.garanzie=data.garanzie||[];
         data.fotoLavori=data.fotoLavori||[];
         data.ddt=data.ddt||[];
+        data.sicurezza=data.sicurezza||{};
+        data.impostazioni=data.impostazioni||{};
         return data;
     }catch(e){
         return idrolistDefaultData();
@@ -5027,13 +5185,47 @@ function idrolistSaveData(data){
     localStorage.setItem(IDROLIST_SHARED_KEY,JSON.stringify(data));
 }
 
+function salvaPasswordAmministratore(){
+    const password=document.getElementById('passwordAmministratore')?.value||'';
+    const conferma=document.getElementById('confermaPasswordAmministratore')?.value||'';
+    if(password.length<8){alert('La password amministratore deve contenere almeno 8 caratteri.');return;}
+    if(password!==conferma){alert('Le due password non coincidono.');return;}
+    const data=idrolistGetData();
+    data.sicurezza=data.sicurezza||{};
+    data.sicurezza.passwordAmministratore=password;
+    idrolistSaveData(data);
+    document.getElementById('passwordAmministratore').value='';
+    document.getElementById('confermaPasswordAmministratore').value='';
+    showNotification('Password amministratore salvata.');
+}
+
+function idrolistRenderImpostazioni(){
+    const campo=document.getElementById('emailAmministrazione');
+    if(campo)campo.value=idrolistGetData().impostazioni?.emailAmministrazione||'';
+    const limite=document.getElementById('limiteGiorniGaranzie');
+    if(limite)limite.value=idrolistGetData().impostazioni?.limiteGiorniGaranzie||7;
+}
+
+function salvaEmailAmministrazione(){
+    const email=document.getElementById('emailAmministrazione')?.value.trim()||'';
+    const limite=Number(document.getElementById('limiteGiorniGaranzie')?.value||0);
+    if(!email||!/^\S+@\S+\.\S+$/.test(email)){alert('Inserisci un indirizzo email valido per l’amministrazione.');return;}
+    if(!Number.isInteger(limite)||limite<1||limite>365){alert('Inserisci un limite per le garanzie compreso tra 1 e 365 giorni.');return;}
+    const dati=idrolistGetData();
+    dati.impostazioni=dati.impostazioni||{};
+    dati.impostazioni.emailAmministrazione=email;
+    dati.impostazioni.limiteGiorniGaranzie=limite;
+    idrolistSaveData(dati);
+    showNotification('Impostazioni notifiche salvate.');
+}
+
 function idrolistRenderCostiManodopera(){
     const contenitore=document.getElementById('elencoCostiManodopera');
     if(!contenitore)return;
     const data=idrolistGetData();
-    contenitore.innerHTML='<div class="list-card"><strong>Dipendente</strong><strong>Costo €/h</strong><strong>Prezzo cliente €/h</strong></div>'+data.operai.map(nome=>{
+    contenitore.innerHTML='<div class="costi-manodopera-row header"><span>Dipendente</span><span>Costo €/h</span><span>Prezzo cliente €/h</span></div>'+data.operai.map(nome=>{
         const tariffa=idrolistTariffaManodopera(nome);
-        return `<div class="list-card"><strong>${escapeHtml(nome)}</strong><input class="costo-orario-operaio" data-operaio="${escapeHtml(nome)}" type="number" min="0" step="0.01" value="${tariffa.costo}"><input class="prezzo-orario-operaio" data-operaio="${escapeHtml(nome)}" type="number" min="0" step="0.01" value="${tariffa.prezzoCliente}"></div>`;
+        return `<div class="costi-manodopera-row"><strong>${escapeHtml(String(nome).toUpperCase())}</strong><input class="costo-orario-operaio" data-operaio="${escapeHtml(nome)}" type="number" min="0" step="0.01" value="${tariffa.costo}"><input class="prezzo-orario-operaio" data-operaio="${escapeHtml(nome)}" type="number" min="0" step="0.01" value="${tariffa.prezzoCliente}"></div>`;
     }).join('');
 }
 
@@ -5105,6 +5297,21 @@ function idrolistRenderNotifiche(data){
     const box=document.getElementById('notificheDashboard');
     if(!box)return;
     const avvisi=[];
+    const limiteGaranzie=Number(data.impostazioni?.limiteGiorniGaranzie||7);
+    const avvisiGaranzie=(data.garanzie||[]).filter(garanzia=>{
+        if((garanzia.stato||garanzia.garanziaStato)==='Gestita')return false;
+        const caricataIl=garanzia.creatoIl||garanzia.data;
+        if(!caricataIl)return false;
+        return idrolistGiorniTrascorsi(caricataIl)>=limiteGaranzie;
+    });
+    const avvisiCantieriTerminati=[...new Map((data.rapportini||[])
+        .filter(rapportino=>rapportino.cantiereTerminato===true||rapportino.cantiereTerminato==='si')
+        .map(rapportino=>[rapportino.cantiereId,rapportino])
+        .filter(([cantiereId])=>{
+            const cantiere=(data.cantieri||[]).find(c=>c.id===cantiereId);
+            return cantiere&&idrolistStatoCantiere(cantiere)==='aperti';
+        })
+    ).values()];
     Object.entries(data.presenze||{}).forEach(([operaio,giorni])=>{
         if(!idrolistDipendenteAttivo(operaio,data))return;
         if((data.ruoliOperai?.[operaio]||'Operaio')!=='Operaio')return;
@@ -5116,9 +5323,32 @@ function idrolistRenderNotifiche(data){
         });
     });
     const contatore=document.getElementById('notificationCount');
-    if(contatore){contatore.textContent=avvisi.length;contatore.hidden=!avvisi.length;}
+    if(contatore){const totale=avvisi.length+avvisiGaranzie.length+avvisiCantieriTerminati.length;contatore.textContent=totale;contatore.hidden=!totale;}
     const gruppi=avvisi.reduce((risultato,avviso)=>{(risultato[avviso.operaio]??=[]).push(avviso);return risultato;},{});
-    box.innerHTML='<h2>🔔 Notifiche fogli di lavoro</h2><p class="muted">Confronto tra ore segnate nelle presenze e ore inserite nei fogli di lavoro.</p>'+(avvisi.length?Object.entries(gruppi).sort(([a],[b])=>a.localeCompare(b,'it')).map(([operaio,voci])=>`<div class="list-card"><div><strong>${escapeHtml(operaio)}</strong><div class="muted">${voci.sort((a,b)=>String(b.data).localeCompare(String(a.data))).map(a=>`${escapeHtml(a.data)} — ${a.rapportini<a.previste?'mancano '+(a.previste-a.rapportini)+' h':'ore da verificare'} (presenze ${a.previste} h / fogli ${a.rapportini} h)`).join('<br>')}</div></div><span class="status wait">${voci.length} segnalazion${voci.length===1?'e':'i'}</span></div>`).join(''):'<p class="muted">Nessun foglio di lavoro mancante rispetto alle presenze.</p>');
+    const notificheRapportini=avvisi.length?Object.entries(gruppi).sort(([a],[b])=>a.localeCompare(b,'it')).map(([operaio,voci])=>`<div class="list-card"><div><strong>${escapeHtml(operaio)}</strong><div class="muted">${voci.sort((a,b)=>String(b.data).localeCompare(String(a.data))).map(a=>`${escapeHtml(a.data)} — ${a.rapportini<a.previste?'mancano '+(a.previste-a.rapportini)+' h':'ore da verificare'} (presenze ${a.previste} h / fogli ${a.rapportini} h)`).join('<br>')}</div></div><span class="status wait">${voci.length} segnalazion${voci.length===1?'e':'i'}</span></div>`).join(''):'<p class="muted">Nessun foglio di lavoro mancante rispetto alle presenze.</p>';
+    const notificheGaranzie=avvisiGaranzie.length?avvisiGaranzie.map(garanzia=>`<div class="list-card"><div><strong>${escapeHtml(garanzia.cliente||'-')} — ${escapeHtml(garanzia.cantiere||'-')}</strong><div class="muted">Caricata il ${escapeHtml(String(garanzia.data||garanzia.creatoIl).slice(0,10))}: da gestire da ${idrolistGiorniTrascorsi(garanzia.creatoIl||garanzia.data)} giorni.</div></div><span class="status wait">Sollecito</span></div>`).join(''):`<p class="muted">Nessuna garanzia oltre il limite di ${limiteGaranzie} giorni.</p>`;
+    const notificheCantieri=avvisiCantieriTerminati.length?avvisiCantieriTerminati.map(rapportino=>`<div class="list-card"><div><strong>${escapeHtml(rapportino.cantiere||'-')} — ${escapeHtml(rapportino.indirizzo||'-')}</strong><div class="muted">${escapeHtml(rapportino.compilatoDa||'Dipendente')} ha indicato il cantiere come terminato nel rapportino del ${escapeHtml(rapportino.data||'-')}.</div></div><button class="btn btn-primary" type="button" data-cantiere-id="${escapeHtml(rapportino.cantiereId)}" onclick="idrolistConfermaCantiereDaFatturare(this.dataset.cantiereId)">Termina e attesa fatturazione</button></div>`).join(''):'<p class="muted">Nessun cantiere da confermare.</p>';
+    box.innerHTML='<h2>🔔 Notifiche</h2><h3>Fogli di lavoro</h3><p class="muted">Confronto tra ore segnate nelle presenze e ore inserite nei fogli di lavoro.</p>'+notificheRapportini+'<h3 style="margin-top:24px">Cantieri terminati</h3><p class="muted">Conferma i cantieri dichiarati terminati dai dipendenti.</p>'+notificheCantieri+'<h3 style="margin-top:24px">Garanzie Daikin</h3><p class="muted">Sollecito giornaliero previsto dopo '+limiteGaranzie+' giorni dal caricamento delle etichette.</p>'+notificheGaranzie;
+}
+
+function idrolistConfermaCantiereDaFatturare(cantiereId){
+    const data=idrolistGetData();
+    const cantiere=(data.cantieri||[]).find(c=>c.id===cantiereId);
+    if(!cantiere)return;
+    cantiere.statoContabile='da-fatturare';
+    cantiere.terminatoIl=new Date().toISOString();
+    idrolistSaveData(data);
+    idrolistRenderDashboard();
+    idrolistRenderCantieri();
+    idrolistRenderRapportini();
+    showNotification('Cantiere dichiarato terminato e posto in attesa di fatturazione.');
+}
+
+function idrolistGiorniTrascorsi(data){
+    const inizio=new Date(String(data).slice(0,10)+'T00:00:00');
+    const oggi=new Date();
+    oggi.setHours(0,0,0,0);
+    return Math.max(0,Math.floor((oggi-inizio)/86400000));
 }
 
 function idrolistScadenzaRapportinoSuperata(dataLavoro){
@@ -5232,9 +5462,30 @@ function idrolistRenderOperai(){
 function idrolistRenderFotoImpianti(){
     const contenitore=document.getElementById('archivioFotoImpianti');
     if(!contenitore)return;
-    const foto=(idrolistGetData().fotoLavori||[]).slice().sort((a,b)=>String(b.data||'').localeCompare(String(a.data||'')));
+    const dati=idrolistGetData();
+    const clienteSelect=document.getElementById('filtroClienteFotoImpianti');
+    const cantiereSelect=document.getElementById('filtroCantiereFotoImpianti');
+    let cliente=clienteSelect?.value||'';
+    let cantiere=cantiereSelect?.value||'';
+    const clienti=[...new Set([...(dati.clienti||[]).map(c=>c.nome),...(dati.cantieri||[]).map(c=>c.nome),...(dati.fotoLavori||[]).map(f=>f.cliente)].filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it'));
+    if(clienteSelect){
+        clienteSelect.innerHTML='<option value="">-- Seleziona cliente --</option>'+clienti.map(nome=>`<option value="${escapeHtml(nome)}">${escapeHtml(nome)}</option>`).join('');
+        clienteSelect.value=clienti.includes(cliente)?cliente:'';
+        cliente=clienteSelect.value;
+    }
+    const cantieri=(dati.cantieri||[]).filter(c=>c.nome===cliente);
+    if(cantiereSelect){
+        cantiereSelect.disabled=!cliente;
+        cantiereSelect.innerHTML=cliente?'<option value="">-- Seleziona cantiere --</option>'+cantieri.map(c=>`<option value="${escapeHtml(c.id)}">${escapeHtml(c.indirizzo||c.nome)}</option>`).join(''):'<option value="">-- Seleziona prima il cliente --</option>';
+        cantiereSelect.value=cantieri.some(c=>c.id===cantiere)?cantiere:'';
+        cantiere=cantiereSelect.value;
+    }
+    const foto=(cliente&&cantiere?(dati.fotoLavori||[]).filter(f=>f.cliente===cliente).filter(f=>{
+        const voce=(dati.cantieri||[]).find(c=>c.id===cantiere);
+        return f.cantiereId===cantiere||f.cantiere===voce?.indirizzo;
+    }):[]).slice().sort((a,b)=>String(b.data||'').localeCompare(String(a.data||'')));
     if(!foto.length){
-        contenitore.innerHTML='<div class="card"><p class="muted">Non sono ancora state caricate foto lavori o impianti.</p></div>';
+        contenitore.innerHTML='<div class="card"><p class="muted">'+(!cliente?'Seleziona prima il cliente e poi il cantiere per visualizzare le foto.':!cantiere?'Seleziona il cantiere per visualizzare le foto.':'Non sono ancora state caricate foto per questo cantiere.')+'</p></div>';
         return;
     }
     const perCliente=foto.reduce((clienti,voce)=>{
@@ -5337,22 +5588,57 @@ async function salvaFotoImpiantoUfficio(){
 
 function idrolistRenderGaranzie(){
     const dati=idrolistGetData();
-    const garanzie=[...(dati.garanzie||[]),...dati.rapportini.filter(r=>String(r.garanzie||'').trim()).map(r=>({id:r.id,cliente:r.cantiere,descrizione:r.garanzie,data:r.data,stato:r.garanziaStato||'Da gestire'}))];
-    document.querySelectorAll('#garanzie .stat-number').forEach(function(numero,index){numero.textContent=index===0?garanzie.length:'0';});
+    const garanzie=[...(dati.garanzie||[]),...dati.rapportini.filter(r=>String(r.garanzie||'').trim()).map(r=>({id:r.id,cliente:r.cantiere,cantiere:r.indirizzo,descrizione:r.garanzie,data:r.data,stato:r.garanziaStato||'Da gestire'}))];
+    const clienteSelect=document.getElementById('filtroClienteGaranzie');
+    const cantiereSelect=document.getElementById('filtroCantiereGaranzie');
+    const statoSelect=document.getElementById('filtroStatoGaranzie');
+    let cliente=clienteSelect?.value||'tutti';
+    let cantiere=cantiereSelect?.value||'tutti';
+    const stato=statoSelect?.value||'Da gestire';
+    const clienti=[...new Set(garanzie.map(g=>g.cliente||g.cantiere).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it'));
+    if(clienteSelect){clienteSelect.innerHTML='<option value="tutti">Tutti i clienti</option>'+clienti.map(nome=>`<option value="${escapeHtml(nome)}">${escapeHtml(nome)}</option>`).join('');clienteSelect.value=clienti.includes(cliente)?cliente:'tutti';cliente=clienteSelect.value;}
+    const cantieri=[...new Set(garanzie.filter(g=>cliente==='tutti'||(g.cliente||g.cantiere)===cliente).map(g=>g.cantiere||'Cantiere non specificato'))].sort((a,b)=>a.localeCompare(b,'it'));
+    if(cantiereSelect){cantiereSelect.innerHTML='<option value="tutti">Tutti i cantieri</option>'+cantieri.map(nome=>`<option value="${escapeHtml(nome)}">${escapeHtml(nome)}</option>`).join('');cantiereSelect.value=cantieri.includes(cantiere)?cantiere:'tutti';cantiere=cantiereSelect.value;}
+    const filtrate=garanzie.filter(g=>cliente==='tutti'||(g.cliente||g.cantiere)===cliente).filter(g=>cantiere==='tutti'||(g.cantiere||'Cantiere non specificato')===cantiere).filter(g=>stato==='tutti'||(g.stato||g.garanziaStato||'Da gestire')===stato);
+    const gestite=garanzie.filter(g=>(g.stato||g.garanziaStato)==='Gestita').length;
+    document.querySelectorAll('#garanzie .stat-number').forEach(function(numero,index){numero.textContent=index===0?garanzie.length:index===1?garanzie.length-gestite:gestite;});
     const tbody=document.querySelector('#garanzie tbody');
     if(!tbody)return;
-    tbody.innerHTML=garanzie.length ? garanzie.map(r=>`<tr><td>${escapeHtml(r.cliente||r.cantiere||'-')}</td><td>${escapeHtml(r.descrizione||r.garanzie||'-')}</td><td>-</td><td>${escapeHtml(r.data||'-')}</td><td><button class="btn" data-garanzia-id="${escapeHtml(r.id)}">${r.stato==='Gestita'||r.garanziaStato==='Gestita'?'Gestita':'Da gestire'}</button></td></tr>`).join('') : '<tr><td colspan="5" class="muted">Nessuna garanzia inserita.</td></tr>';
+    tbody.innerHTML=filtrate.length ? filtrate.map(r=>`<tr><td>${escapeHtml(r.cliente||r.cantiere||'-')}</td><td>${escapeHtml(r.cantiere||'-')}</td><td>${escapeHtml(r.descrizione||r.garanzie||'Etichette caricate')}</td><td>${escapeHtml(r.dataAttivazione||r.data||'-')}</td><td><button class="btn" data-garanzia-id="${escapeHtml(r.id)}">${r.stato==='Gestita'||r.garanziaStato==='Gestita'?'Gestita':'Da gestire'}</button></td></tr>`).join('') : '<tr><td colspan="5" class="muted">Nessuna garanzia per i filtri selezionati.</td></tr>';
     tbody.querySelectorAll('[data-garanzia-id]').forEach(button=>button.addEventListener('click',function(){gestisciGaranzia(this.dataset.garanziaId);}));
 }
 
-function gestisciGaranzia(id){
+async function gestisciGaranzia(id){
     const data=idrolistGetData();
     const garanzia=data.garanzie.find(r=>r.id===id)||data.rapportini.find(r=>r.id===id);
     if(!garanzia)return;
-    garanzia.stato=garanzia.stato==='Gestita'?'Da gestire':'Gestita';
-    garanzia.garanziaStato=garanzia.stato;
+    let foto=[];
+    try{foto=await idrolistCaricaFotoGaranzia(garanzia.immagini||[]);}catch(e){foto=[];}
+    const immagini=foto.filter(f=>f?.dataUrl).map(f=>`<a href="${escapeHtml(f.dataUrl)}" target="_blank"><img src="${escapeHtml(f.dataUrl)}" alt="Etichetta garanzia" style="width:140px;height:105px;object-fit:cover;border-radius:8px;margin:8px 8px 0 0"></a>`).join('')||'<p class="muted">Nessuna foto visualizzabile. Allegati: '+(garanzia.allegati||[]).map(escapeHtml).join(', ')+'</p>';
+    const giaGestita=(garanzia.stato||garanzia.garanziaStato)==='Gestita';
+    openModal('🛡️ Garanzia Daikin',`<div class="detail-grid"><div class="detail-box"><small>Cliente</small><strong>${escapeHtml(garanzia.cliente||garanzia.cantiere||'-')}</strong></div><div class="detail-box"><small>Cantiere</small><strong>${escapeHtml(garanzia.cantiere||'-')}</strong></div></div><br><div class="detail-box"><small>Descrizione</small><strong>${escapeHtml(garanzia.descrizione||garanzia.garanzie||'Etichette per attivazione garanzia')}</strong></div><br><div class="detail-box"><small>Foto etichette / impianto</small><div>${immagini}</div></div><br><div class="form-group"><label>Data attivazione garanzia</label><input id="dataAttivazioneGaranzia" type="date" value="${escapeHtml(garanzia.dataAttivazione||'')}" ${giaGestita?'disabled':''}></div><div class="form-group"><label style="display:flex;gap:8px;align-items:center"><input id="mailDaikinAccettata" type="checkbox" style="width:auto" onchange="confermaMailAttivazioneDaikin(this)" ${garanzia.mailDaikinAccettata?'checked':''} ${giaGestita?'disabled':''}> Il cliente finale ha accettato la mail di attivazione inviata da Daikin</label></div>${giaGestita?'<p class="green"><strong>✓ Garanzia gestita e archiviata.</strong></p>':''}`,`<button class="btn" onclick="closeModal()">Chiudi</button>${giaGestita?'':`<button class="btn btn-primary" onclick="salvaGestioneGaranzia('${escapeHtml(id)}')">Conferma garanzia gestita</button>`}`);
+}
+
+function confermaMailAttivazioneDaikin(casella){
+    if(!casella.checked)return;
+    if(!confirm('Confermi che il cliente finale ha accettato la mail di attivazione della garanzia inviata da Daikin?'))casella.checked=false;
+}
+
+function salvaGestioneGaranzia(id){
+    const data=idrolistGetData();
+    const garanzia=data.garanzie.find(r=>r.id===id)||data.rapportini.find(r=>r.id===id);
+    const dataAttivazione=document.getElementById('dataAttivazioneGaranzia')?.value;
+    const mailAccettata=document.getElementById('mailDaikinAccettata')?.checked;
+    if(!garanzia||!dataAttivazione||!mailAccettata){alert('Per confermare la garanzia gestita inserisci la data di attivazione e conferma l’accettazione della mail Daikin da parte del cliente.');return;}
+    garanzia.stato='Gestita';
+    garanzia.garanziaStato='Gestita';
+    garanzia.dataAttivazione=dataAttivazione;
+    garanzia.mailDaikinAccettata=true;
+    garanzia.gestitaIl=new Date().toISOString();
     idrolistSaveData(data);
+    closeModal();
     idrolistRenderGaranzie();
+    showNotification('Garanzia Daikin confermata e archiviata come gestita.');
 }
 
 function idrolistRenderRapportini(){
@@ -5484,7 +5770,38 @@ async function openSharedRapportino(id){
         </div>
         <br>
         <div class="detail-box"><small>Firma cliente</small><div style="margin-top:8px">${idrolistFirmaClienteHtml(r.firmaCliente)}</div></div>
-    `,`<button class="btn" onclick="stampaRapportino('${escapeHtml(id)}')">🖨 Stampa rapportino</button><button class="btn btn-primary" onclick="closeModal()">Chiudi</button>`);
+    `,`<button class="btn" onclick="stampaRapportino('${escapeHtml(id)}')">🖨 Stampa rapportino</button><button class="btn" style="color:#b42318;border-color:#fecdca" onclick="richiediEliminazioneRapportino('${escapeHtml(id)}')">🗑 Elimina rapportino</button><button class="btn btn-primary" onclick="closeModal()">Chiudi</button>`);
+}
+
+function richiediEliminazioneRapportino(id){
+    const rapportino=(idrolistGetData().rapportini||[]).find(r=>r.id===id);
+    if(!rapportino)return;
+    if(!idrolistGetData().sicurezza?.passwordAmministratore){
+        alert('Prima imposta la password amministratore in Impostazioni → Sicurezza.');
+        return;
+    }
+    openModal('🗑 Elimina rapportino',`<p>Stai per eliminare definitivamente il rapportino <strong>${escapeHtml(id)}</strong> e gli eventuali DDT allegati.</p><p class="muted">Per confermare inserisci la password amministratore.</p><div class="form-group"><label>Password amministratore</label><input id="passwordEliminazioneRapportino" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')confermaEliminazioneRapportino('${escapeHtml(id)}')"></div>`,`<button class="btn" type="button" onclick="openSharedRapportino('${escapeHtml(id)}')">Annulla</button><button class="btn btn-primary" style="background:#b42318" type="button" onclick="confermaEliminazioneRapportino('${escapeHtml(id)}')">Elimina definitivamente</button>`);
+}
+
+async function confermaEliminazioneRapportino(id){
+    const data=idrolistGetData();
+    const rapportino=(data.rapportini||[]).find(r=>r.id===id);
+    const password=document.getElementById('passwordEliminazioneRapportino')?.value||'';
+    if(!rapportino)return;
+    if(password!==data.sicurezza?.passwordAmministratore){
+        alert('Password amministratore non corretta. Il rapportino non è stato eliminato.');
+        return;
+    }
+    try{await idrolistEliminaFotoDdt(rapportino.ddtFoto||[]);}catch(e){alert('Non è stato possibile eliminare gli allegati DDT. Il rapportino è rimasto invariato.');return;}
+    data.rapportini=data.rapportini.filter(r=>r.id!==id);
+    idrolistSaveData(data);
+    closeModal();
+    idrolistRenderRapportini();
+    idrolistRenderDashboard();
+    idrolistRenderCantieri();
+    idrolistRenderClienti();
+    idrolistRenderPresenze();
+    showNotification('Rapportino eliminato definitivamente.');
 }
 
 function idrolistNumero(valore){
@@ -5750,7 +6067,7 @@ if(typeof _idrolistOriginalGo==='function'){
         if(page==='presenze')idrolistRenderPresenze();
         if(page==='garanzie')idrolistRenderGaranzie();
         if(page==='rapportini')idrolistRenderRapportini();
-        if(page==='impostazioni')idrolistRenderCostiManodopera();
+        if(page==='impostazioni'){idrolistRenderCostiManodopera();idrolistRenderImpostazioni();}
     };
 }
 
@@ -5765,6 +6082,7 @@ document.addEventListener('DOMContentLoaded',function(){
     idrolistRenderGaranzie();
     idrolistRenderRapportini();
     idrolistRenderCostiManodopera();
+    idrolistRenderImpostazioni();
 });
 </script>
 
