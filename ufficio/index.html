@@ -893,6 +893,18 @@ tr.clickable:hover{
     .detail-grid{grid-template-columns:1fr}
     .notification{right:12px;left:12px;bottom:12px}
 
+    /* Mantiene visibili i pulsanti “Nuovo” accanto ai menu su smartphone */
+    .form-group > div[style*="display:flex"]{
+        flex-wrap:wrap;
+    }
+    .form-group > div[style*="display:flex"] select{
+        flex:1 1 210px;
+        min-width:0;
+    }
+    .form-group > div[style*="display:flex"] .btn{
+        flex:0 0 auto;
+    }
+
     .info-grid,
     .stats-grid,
     .dashboard-grid,
