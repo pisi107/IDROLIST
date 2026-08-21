@@ -41,6 +41,13 @@ body {
     opacity: .8;
 }
 
+.reset-test {
+    background: #991b1b;
+    color: white;
+    padding: 8px 12px;
+    font-size: 12px;
+}
+
 /* CONTAINER */
 
 .container {
@@ -62,6 +69,16 @@ body {
 
 .login-error { display: none; margin: 0 0 16px; color: #b91c1c; font-weight: bold; }
 .login-error.visible { display: block; }
+
+.worker-home { max-width: 1000px; margin: 32px auto; padding: 0 20px; }
+.worker-home[hidden] { display: none; }
+.section-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px; }
+.section-card { text-align: left; min-height: 150px; }
+.section-card h3 { margin: 0 0 8px; font-size: 19px; }
+.section-card p { margin: 0; color: #6b7280; line-height: 1.45; }
+.section-card.ready { border: 2px solid #2563eb; }
+.section-check { display: none; color: #15803d; font-weight: bold; margin-top: 12px; }
+.section-check.visible { display: block; }
 
 /* PROGRESS */
 
@@ -413,6 +430,10 @@ button:hover {
 
     <span>Area Operai</span>
 
+    <button id="homeButton" class="reset-test" type="button" onclick="apriSceltaCantiere()" hidden>⌂ Casetta</button>
+
+    <button class="reset-test" type="button" onclick="resetDatiDiTest()">Azzera dati test</button>
+
 </div>
 
 
@@ -440,6 +461,48 @@ button:hover {
         <label for="confirmAccountPassword">Conferma nuova password</label>
         <input id="confirmAccountPassword" type="password" autocomplete="new-password" placeholder="Ripeti la password">
         <button class="btn-primary" type="button" onclick="salvaNuovaPassword()">Salva e continua</button>
+    </div>
+</main>
+
+<main class="login-screen" id="cantiereSelection" hidden>
+    <div class="card">
+        <h2>Seleziona il lavoro</h2>
+        <p class="subtitle">Scegli il cliente e il cantiere: le sezioni che compili saranno collegate a questa scelta.</p>
+        <label for="ricercaLavoro">Ricerca rapida</label>
+        <input id="ricercaLavoro" type="search" placeholder="Cerca cliente, indirizzo o cantiere" oninput="aggiornaRicercaLavori()">
+        <label for="clienteSelezionato">Cliente</label>
+        <select id="clienteSelezionato" onchange="caricaCantieriScelti()"></select>
+        <label for="cantiereSelezionato">Cantiere</label>
+        <select id="cantiereSelezionato" disabled></select>
+        <button class="btn-primary" type="button" onclick="confermaCantiereSelezionato()">Continua</button>
+    </div>
+</main>
+
+<main class="worker-home" id="workerHome" hidden>
+    <div class="topbar">
+        <div><h1>Area Operaio</h1><div class="muted" id="cantiereAttivo">Scegli l’attività da registrare.</div></div>
+        <div><button class="btn-secondary" type="button" onclick="apriSceltaCantiere()">⌂ Cambia cantiere</button> <button class="btn-success" type="button" onclick="inviaInUfficio()">Invia in ufficio</button></div>
+    </div>
+    <div class="section-grid">
+        <button class="card section-card ready" type="button" onclick="apriFoglioLavoro()"><h3>📋 Foglio di lavoro</h3><p>Registra attività, operai, ore, materiali e firma cliente.</p><span class="section-check" id="spuntaFoglio">✓ Compilato</span></button>
+        <button class="card section-card" type="button" onclick="apriModuloSezione('garanzie')"><h3>🛡️ Garanzie</h3><p>Carica e gestisci le garanzie per cliente.</p><span class="section-check" id="spuntaGaranzie">✓ Compilato</span></button>
+        <button class="card section-card" type="button" onclick="apriModuloSezione('fotoLavori')"><h3>📷 Foto lavori</h3><p>Carica foto con descrizione del lavoro eseguito.</p><span class="section-check" id="spuntaFotoLavori">✓ Compilato</span></button>
+        <button class="card section-card" type="button" onclick="apriModuloSezione('ddt')"><h3>📎 DDT e bolle</h3><p>Archivia gli allegati separatamente dal foglio.</p><span class="section-check" id="spuntaDdt">✓ Compilato</span></button>
+    </div>
+    <section class="card" id="fotoCondivise" hidden></section>
+</main>
+
+<main class="login-screen" id="sectionArea" hidden>
+    <div class="card">
+        <h2 id="sectionTitle"></h2>
+        <p class="subtitle" id="sectionSubtitle"></p>
+        <label for="sectionDescription" id="sectionDescriptionLabel">Descrizione</label>
+        <textarea id="sectionDescription" rows="4"></textarea>
+        <div id="sectionUploadWrap">
+            <label for="sectionFiles" id="sectionFilesLabel">Allegati</label>
+            <input id="sectionFiles" type="file" multiple>
+        </div>
+        <div class="button-row"><button class="btn-secondary" type="button" onclick="tornaHomeOperaio()">← Indietro</button><button class="btn-success" type="button" onclick="salvaSezioneOperaio()">Salva sezione</button></div>
     </div>
 </main>
 
@@ -670,42 +733,11 @@ button:hover {
 
 <div class="step" id="step5">
 
-    <h2>5. Bolle e firma cliente</h2>
+    <h2>5. Firma cliente</h2>
 
     <p class="subtitle">
-        Carica le foto delle bolle dei fornitori e raccogli la firma del cliente.
+        Raccogli la firma del cliente a fine lavoro.
     </p>
-
-
-    <label>
-        Foto bolle fornitori
-    </label>
-
-
-    <div class="upload-box">
-
-        <input
-            type="file"
-            id="fotoBolle"
-            accept="image/*"
-            multiple
-            onchange="mostraFoto(event)"
-        >
-
-        <p>
-            📷 Seleziona una o più foto delle bolle
-        </p>
-
-    </div>
-
-
-    <div
-        class="preview-container"
-        id="anteprimaFoto"
-    ></div>
-
-
-    <br>
 
 
     <label>
@@ -742,7 +774,7 @@ button:hover {
 
         <button
             class="btn-primary"
-            onclick="creaRiepilogo()"
+            onclick="inviaFoglio()"
         >
             Avanti →
         </button>
@@ -930,6 +962,11 @@ function nextStep() {
 /* ================================================= */
 
 function prevStep() {
+
+    if (currentStep === 2) {
+        apriSceltaCantiere();
+        return;
+    }
 
 
     if (currentStep > 1) {
@@ -1339,13 +1376,6 @@ function cancellaFirma() {
 /* ================================================= */
 
 function creaRiepilogo() {
-
-    if (!firmaPresente) {
-        alert("Acquisisci la firma del cliente prima di continuare.");
-        return;
-    }
-
-
     const cantiere =
         document.getElementById("cantiere").value;
 
@@ -1726,9 +1756,156 @@ function apriAreaLavoro(nome){
     idrolistCurrentWorker=nome;
     document.getElementById('loginScreen').hidden=true;
     document.getElementById('passwordScreen').hidden=true;
-    document.getElementById('workArea').hidden=false;
     document.querySelector('.header span').textContent=nome;
+    document.getElementById('homeButton').hidden=false;
+    apriSceltaCantiere();
+}
+
+function apriSceltaCantiere(){
+    document.getElementById('workerHome').hidden=true;
+    document.getElementById('workArea').hidden=true;
+    document.getElementById('sectionArea').hidden=true;
+    document.getElementById('cantiereSelection').hidden=false;
+    document.getElementById('ricercaLavoro').value='';
+    aggiornaRicercaLavori();
+}
+
+function aggiornaRicercaLavori(){
+    const data=idrolistGetData();
+    const ricerca=document.getElementById('ricercaLavoro').value.trim().toLocaleLowerCase('it');
+    const corrisponde=c=>!ricerca||(c.nome+' '+c.indirizzo).toLocaleLowerCase('it').includes(ricerca);
+    const clienti=[...new Set(data.cantieri.filter(c=>c.stato!=='Chiuso'&&corrisponde(c)).map(c=>c.nome).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it'));
+    const select=document.getElementById('clienteSelezionato');
+    select.innerHTML='<option value="">-- Seleziona cliente --</option>'+clienti.map(nome=>`<option value="${idrolistEscapeHtml(nome)}">${idrolistEscapeHtml(nome)}</option>`).join('');
+    const corrente=data.cantieri.find(c=>c.id===window.idrolistCurrentCantiereId);
+    if(corrente&&clienti.includes(corrente.nome))select.value=corrente.nome;
+    caricaCantieriScelti();
+}
+
+function caricaCantieriScelti(){
+    const cliente=document.getElementById('clienteSelezionato').value;
+    const data=idrolistGetData();
+    const select=document.getElementById('cantiereSelezionato');
+    const ricerca=document.getElementById('ricercaLavoro').value.trim().toLocaleLowerCase('it');
+    const cantieri=data.cantieri.filter(c=>c.nome===cliente&&c.stato!=='Chiuso'&&(!ricerca||(c.nome+' '+c.indirizzo).toLocaleLowerCase('it').includes(ricerca)));
+    select.disabled=!cliente;
+    select.innerHTML=cliente?'<option value="">-- Seleziona cantiere --</option>'+cantieri.map(c=>`<option value="${idrolistEscapeHtml(c.id)}">${idrolistEscapeHtml(c.indirizzo)}</option>`).join(''):'<option value="">-- Seleziona prima il cliente --</option>';
+    if(cantieri.some(c=>c.id===window.idrolistCurrentCantiereId))select.value=window.idrolistCurrentCantiereId;
+}
+
+function cantiereGiaInviatoOggi(cantiereId){
+    const data=idrolistGetData();
+    const inviato=voce=>voce.cantiereId===cantiereId&&voce.compilatoDa===idrolistCurrentWorker&&String(voce.inviatoIl||'').slice(0,10)===dataOggi();
+    return data.rapportini.some(inviato)||['garanzie','fotoLavori','ddt'].some(tipo=>(data[tipo]||[]).some(inviato));
+}
+
+function confermaCantiereSelezionato(){
+    const id=document.getElementById('cantiereSelezionato').value;
+    const cantiere=idrolistGetData().cantieri.find(c=>c.id===id);
+    if(!cantiere){alert('Seleziona un cliente e un cantiere.');return;}
+    window.idrolistCurrentCantiereId=id;
+    document.getElementById('cantiereSelection').hidden=true;
+    document.getElementById('workerHome').hidden=false;
+    document.getElementById('cantiereAttivo').textContent=cantiere.nome+' — '+cantiere.indirizzo;
+    aggiornaSpunteSezioni();
+    renderFotoCondivise();
+}
+
+function renderFotoCondivise(){
+    const contenitore=document.getElementById('fotoCondivise');
+    const foto=(idrolistGetData().fotoLavori||[]).filter(voce=>voce.cantiereId===window.idrolistCurrentCantiereId).sort((a,b)=>String(b.data||'').localeCompare(String(a.data||'')));
+    contenitore.hidden=false;
+    if(!foto.length){
+        contenitore.innerHTML='<h2>📷 Foto del cantiere</h2><p class="muted">Non sono ancora state caricate foto per questo cantiere.</p>';
+        return;
+    }
+    const perData=foto.reduce((gruppi,voce)=>{(gruppi[voce.data||'Senza data']??=[]).push(voce);return gruppi;},{});
+    contenitore.innerHTML='<h2>📷 Foto del cantiere</h2>'+Object.entries(perData).map(([data,voci])=>`<h3>${idrolistEscapeHtml(data)}</h3>${voci.map(voce=>`<div class="detail-box"><strong>${idrolistEscapeHtml(voce.descrizione||'Nessuna descrizione')}</strong><br><small>Caricato da ${idrolistEscapeHtml(voce.compilatoDa||'-')}</small><br>${(voce.immagini||[]).map(src=>`<img src="${src}" alt="Foto lavoro" style="max-width:220px;max-height:160px;object-fit:cover;margin:10px 8px 4px 0;border-radius:8px;">`).join('')}<br><small>${(voce.allegati||[]).map(idrolistEscapeHtml).join(', ')||'Nessun nome file disponibile'}</small></div>`).join('')}`).join('');
+}
+
+function tornaHomeOperaio(){
+    document.getElementById('sectionArea').hidden=true;
+    document.getElementById('workArea').hidden=true;
+    document.getElementById('workerHome').hidden=false;
+    aggiornaSpunteSezioni();
+    renderFotoCondivise();
+}
+
+function dataOggi(){return new Date().toISOString().slice(0,10);}
+
+function sezioneCompletata(tipo){
+    const data=idrolistGetData();
+    const lista=tipo==='foglio'?data.rapportini:(data[tipo]||[]);
+    return lista.some(voce=>voce.cantiereId===window.idrolistCurrentCantiereId&&voce.compilatoDa===idrolistCurrentWorker&&voce.data===dataOggi());
+}
+
+function aggiornaSpunteSezioni(){
+    const mappa={foglio:'spuntaFoglio',garanzie:'spuntaGaranzie',fotoLavori:'spuntaFotoLavori',ddt:'spuntaDdt'};
+    Object.entries(mappa).forEach(([tipo,id])=>document.getElementById(id).classList.toggle('visible',sezioneCompletata(tipo)));
+}
+
+function apriFoglioLavoro(){
+    if(sezioneCompletata('foglio')){alert('Il foglio di lavoro per questo cantiere è già stato compilato oggi.');return;}
+    const cantiere=idrolistGetData().cantieri.find(c=>c.id===window.idrolistCurrentCantiereId);
+    if(!cantiere){apriSceltaCantiere();return;}
+    document.getElementById('workerHome').hidden=true;
+    document.getElementById('workArea').hidden=false;
     caricaClientiOperai();
+    document.getElementById('cliente').value=cantiere.nome;
+    caricaCantieriOperai();
+    document.getElementById('cantiere').value=cantiere.id;
+    document.getElementById('dataLavoro').value=dataOggi();
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('step2').classList.add('active');
+    currentStep=2;
+    aggiornaProgress();
+}
+
+function apriModuloSezione(tipo){
+    if(sezioneCompletata(tipo)){alert('Questa sezione per il cantiere selezionato è già stata compilata oggi.');return;}
+    const cantiere=idrolistGetData().cantieri.find(c=>c.id===window.idrolistCurrentCantiereId);
+    if(!cantiere){apriSceltaCantiere();return;}
+    const config={
+        garanzie:{titolo:'🛡️ Garanzie',testo:'Registra una garanzia per il cantiere selezionato e allega la relativa foto.',campo:'Descrizione della garanzia (facoltativa)',file:true,etichettaFile:'Foto della garanzia'},
+        fotoLavori:{titolo:'📷 Foto lavori',testo:'Carica le foto del lavoro e descrivi ciò che mostrano.',campo:'Descrizione delle foto',file:true},
+        ddt:{titolo:'📎 DDT e bolle',testo:'Allega DDT o bolle riferiti al cantiere.',campo:'Note sugli allegati (facoltative)',file:true}
+    }[tipo];
+    window.idrolistSectionType=tipo;
+    document.getElementById('sectionTitle').textContent=config.titolo;
+    document.getElementById('sectionSubtitle').textContent=config.testo+' Cantiere selezionato: '+cantiere.nome+' — '+cantiere.indirizzo+'.';
+    document.getElementById('sectionDescriptionLabel').textContent=config.campo;
+    document.getElementById('sectionFilesLabel').textContent=config.etichettaFile||'Allegati';
+    document.getElementById('sectionDescription').value='';
+    document.getElementById('sectionFiles').value='';
+    document.getElementById('sectionUploadWrap').hidden=!config.file;
+    document.getElementById('workerHome').hidden=true;
+    document.getElementById('sectionArea').hidden=false;
+}
+
+async function salvaSezioneOperaio(){
+    const tipo=window.idrolistSectionType;
+    const data=idrolistGetData();
+    const cantiere=data.cantieri.find(c=>c.id===window.idrolistCurrentCantiereId);
+    const descrizione=document.getElementById('sectionDescription').value.trim();
+    if(!cantiere){alert('Seleziona prima un cantiere.');apriSceltaCantiere();return;}
+    if(tipo==='fotoLavori'&&!descrizione){alert('Inserisci una descrizione.');return;}
+    const fileSelezionati=Array.from(document.getElementById('sectionFiles').files);
+    const files=fileSelezionati.map(file=>file.name);
+    const immagini=(tipo==='fotoLavori'||tipo==='garanzie')?await Promise.all(fileSelezionati.filter(file=>file.type.startsWith('image/')).map(leggiImmagine)):[];
+    data[tipo]=data[tipo]||[];
+    data[tipo].push({id:tipo+'-'+Date.now(),tipoSezione:tipo,cantiereId:cantiere.id,cliente:cantiere.nome,cantiere:cantiere.indirizzo,descrizione,allegati:files,immagini,compilatoDa:idrolistCurrentWorker,data:new Date().toISOString().slice(0,10),stato:tipo==='garanzie'?'Da gestire':'Caricato'});
+    try{idrolistSaveData(data);}catch(e){alert('Le foto sono troppo grandi per essere salvate nel browser. Riduci dimensione o numero delle foto.');return;}
+    alert('Sezione salvata.');
+    tornaHomeOperaio();
+}
+
+function leggiImmagine(file){
+    return new Promise((resolve,reject)=>{
+        const lettore=new FileReader();
+        lettore.onload=()=>resolve(lettore.result);
+        lettore.onerror=()=>reject(new Error('Impossibile leggere la foto.'));
+        lettore.readAsDataURL(file);
+    });
 }
 
 function idrolistEscapeHtml(value){
@@ -1745,6 +1922,9 @@ function idrolistGetData(){
         data.operai=IDROLIST_WORKERS.slice();
         data.cantieri=data.cantieri||[];
         data.rapportini=data.rapportini||[];
+        data.garanzie=data.garanzie||[];
+        data.fotoLavori=data.fotoLavori||[];
+        data.ddt=data.ddt||[];
         return data;
     }catch(e){
         return {operai:[],cantieri:[],rapportini:[]};
@@ -1836,9 +2016,6 @@ function inviaFoglio(){
         if(nome)lavoratori.push({nome,ore:Number(ore||0)});
     });
 
-    if(!lavoratori.length){alert('Inserisci almeno un lavoratore.');return;}
-
-    const fotoInput=document.getElementById('fotoBolle');
     const rapportino={
         id:'RAP-'+Date.now(),
         data:document.getElementById('dataLavoro')?.value||new Date().toISOString().slice(0,10),
@@ -1850,18 +2027,38 @@ function inviaFoglio(){
         materiali,
         lavoratori,
         compilatoDa:idrolistCurrentWorker,
-        numeroFotoBolle:fotoInput?fotoInput.files.length:0,
         firmaCliente:firmaPresente,
-        stato:'Da verificare',
+        stato:'Pronto per invio',
         creatoIl:new Date().toISOString()
     };
 
     data.rapportini.push(rapportino);
     idrolistSaveData(data);
+    document.getElementById('workArea').hidden=true;
+    document.getElementById('workerHome').hidden=false;
+    aggiornaSpunteSezioni();
+    alert('Foglio di lavoro completato. Puoi compilare un’altra sezione o inviare in ufficio.');
+}
 
-    document.getElementById('step6')?.classList.remove('active');
-    document.getElementById('success')?.classList.add('active');
-    document.querySelector('.progress')?.style.setProperty('display','none');
+function inviaInUfficio(){
+    const data=idrolistGetData();
+    const ora=new Date().toISOString();
+    const pronti=data.rapportini.filter(r=>r.compilatoDa===idrolistCurrentWorker&&r.stato==='Pronto per invio');
+    const sezioni=['garanzie','fotoLavori','ddt'].flatMap(tipo=>(data[tipo]||[]).filter(voce=>voce.compilatoDa===idrolistCurrentWorker&&voce.stato!=='Inviato in ufficio'));
+    if(!pronti.length&&!sezioni.length){alert('Non ci sono sezioni completate da inviare.');return;}
+    pronti.forEach(r=>{r.stato='Da verificare';r.inviatoIl=ora;});
+    sezioni.forEach(voce=>{voce.stato='Inviato in ufficio';voce.inviatoIl=ora;});
+    idrolistSaveData(data);
+    window.idrolistCurrentCantiereId='';
+    alert('Dati inviati in ufficio.');
+    apriSceltaCantiere();
+}
+
+function resetDatiDiTest(){
+    if(!confirm('Eliminare tutti i dati di test salvati su questo dispositivo? Cantieri, rapportini e password personali verranno cancellati.'))return;
+    Object.keys(localStorage).filter(function(key){return key.startsWith('idrolist_');}).forEach(function(key){localStorage.removeItem(key);});
+    alert('Dati di test eliminati.');
+    location.reload();
 }
 
 window.addEventListener('storage',function(e){
