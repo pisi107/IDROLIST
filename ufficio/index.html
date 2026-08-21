@@ -741,6 +741,10 @@ IDRO<span>LIST</span>
 ⚙️ Impostazioni
 </div>
 
+<div class="nav" onclick="resetDatiDiTest()">
+🗑 Azzera dati test
+</div>
+
 </aside>
 
 
@@ -4209,6 +4213,9 @@ function idrolistGetData(){
         data.operai=IDROLIST_WORKERS.slice();
         data.cantieri=data.cantieri||[];
         data.rapportini=data.rapportini||[];
+        data.garanzie=data.garanzie||[];
+        data.fotoLavori=data.fotoLavori||[];
+        data.ddt=data.ddt||[];
         return data;
     }catch(e){
         return idrolistDefaultData();
@@ -4229,10 +4236,85 @@ function idrolistSyncWorkerSelect(){
     if(data.operai.includes(current))select.value=current;
 }
 
+function idrolistRenderDashboard(){
+    const data=idrolistGetData();
+    const numeri=document.querySelectorAll('#dashboard .dashboard-number');
+    const oggi=new Date().toISOString().slice(0,10);
+    const attivi=data.cantieri.filter(c=>c.stato!=='Chiuso').length;
+    const rapportiniOggi=data.rapportini.filter(r=>r.data===oggi).length;
+    const operaiAttivi=new Set(data.rapportini.filter(r=>r.data===oggi).flatMap(r=>(r.lavoratori||[]).map(x=>x.nome))).size;
+    const daVerificare=data.rapportini.filter(r=>r.stato==='Da verificare').length;
+    [attivi,rapportiniOggi,operaiAttivi,daVerificare].forEach((numero,index)=>{
+        if(numeri[index])numeri[index].textContent=numero;
+    });
+    const attivita=document.querySelector('#dashboard .dashboard-grid + .card');
+    if(attivita){
+        const ultime=data.rapportini.slice(-5).reverse();
+        attivita.innerHTML='<h2>Attività recenti</h2>'+(ultime.length
+            ? ultime.map(r=>`<div class="list-card"><div><strong>${escapeHtml(r.cantiere||'-')}</strong><div class="muted">Rapportino ricevuto</div></div><span class="status wait">${escapeHtml(r.stato||'Da verificare')}</span></div>`).join('')
+            : '<p class="muted">Nessuna attività registrata.</p>');
+    }
+}
+
+function idrolistRenderCantieri(){
+    const tbody=document.querySelector('#cantieri tbody');
+    if(!tbody)return;
+    const data=idrolistGetData();
+    const cantieri=data.cantieri||[];
+    tbody.innerHTML=cantieri.length ? cantieri.map(c=>`<tr>
+        <td><strong>${escapeHtml(c.nome||'-')}</strong></td>
+        <td>${escapeHtml(c.indirizzo||'-')}</td>
+        <td>${escapeHtml(c.operaio||'-')}</td>
+        <td class="${c.stato==='Chiuso'?'orange':'green'}">● ${escapeHtml(c.stato||'Attivo')}</td>
+        <td><button class="btn" data-cantiere-id="${escapeHtml(c.id)}">Apri</button></td>
+    </tr>`).join('') : '<tr><td colspan="5" class="muted">Nessun cantiere inserito.</td></tr>';
+    tbody.querySelectorAll('[data-cantiere-id]').forEach(button=>button.addEventListener('click',function(){apriCantiereShared(this.dataset.cantiereId);}));
+}
+
+function idrolistRenderClienti(){
+    const card=document.querySelector('#clienti .card');
+    if(!card)return;
+    const clienti=[...new Set(idrolistGetData().cantieri.map(c=>String(c.nome||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it'));
+    card.innerHTML=clienti.length ? clienti.map(nome=>`<div class="list-card"><div class="person"><div class="avatar">${escapeHtml(nome.slice(0,2).toUpperCase())}</div><div><strong>${escapeHtml(nome)}</strong><div class="muted">Cliente registrato</div></div></div><button class="btn" data-cliente="${escapeHtml(nome)}">Apri cliente</button></div>`).join('') : '<p class="muted">Nessun cliente inserito.</p>';
+    card.querySelectorAll('[data-cliente]').forEach(button=>button.addEventListener('click',function(){apriClienteShared(this.dataset.cliente);}));
+}
+
+function idrolistRenderOperai(){
+    const card=document.querySelector('#operai .card');
+    if(!card)return;
+    const data=idrolistGetData();
+    const oggi=new Date().toISOString().slice(0,10);
+    card.innerHTML=IDROLIST_WORKERS.map(nome=>{
+        const interventi=data.rapportini.filter(r=>r.data===oggi&&(r.lavoratori||[]).some(x=>x.nome===nome)).length;
+        const iniziali=nome.split(/\s+/).map(parte=>parte[0]).join('').slice(0,2);
+        return `<div class="list-card"><div class="person"><div class="avatar">${escapeHtml(iniziali)}</div><div><strong>${escapeHtml(nome)}</strong><div class="muted">${interventi?interventi+' interventi oggi':'Nessuna attività oggi'}</div></div></div><button class="btn" data-operaio="${escapeHtml(nome)}">Apri report</button></div>`;
+    }).join('');
+    card.querySelectorAll('[data-operaio]').forEach(button=>button.addEventListener('click',function(){apriOperaioShared(this.dataset.operaio);}));
+}
+
+function idrolistRenderGaranzie(){
+    const dati=idrolistGetData();
+    const garanzie=[...(dati.garanzie||[]),...dati.rapportini.filter(r=>String(r.garanzie||'').trim()).map(r=>({id:r.id,cliente:r.cantiere,descrizione:r.garanzie,data:r.data,stato:r.garanziaStato||'Da gestire'}))];
+    document.querySelectorAll('#garanzie .stat-number').forEach(function(numero,index){numero.textContent=index===0?garanzie.length:'0';});
+    const tbody=document.querySelector('#garanzie tbody');
+    if(!tbody)return;
+    tbody.innerHTML=garanzie.length ? garanzie.map(r=>`<tr><td>${escapeHtml(r.cliente||r.cantiere||'-')}</td><td>${escapeHtml(r.descrizione||r.garanzie||'-')}</td><td>-</td><td>${escapeHtml(r.data||'-')}</td><td><button class="btn" data-garanzia-id="${escapeHtml(r.id)}">${r.stato==='Gestita'||r.garanziaStato==='Gestita'?'Gestita':'Da gestire'}</button></td></tr>`).join('') : '<tr><td colspan="5" class="muted">Nessuna garanzia inserita.</td></tr>';
+    tbody.querySelectorAll('[data-garanzia-id]').forEach(button=>button.addEventListener('click',function(){gestisciGaranzia(this.dataset.garanziaId);}));
+}
+
+function gestisciGaranzia(id){
+    const data=idrolistGetData();
+    const garanzia=data.garanzie.find(r=>r.id===id)||data.rapportini.find(r=>r.id===id);
+    if(!garanzia)return;
+    garanzia.stato=garanzia.stato==='Gestita'?'Da gestire':'Gestita';
+    garanzia.garanziaStato=garanzia.stato;
+    idrolistSaveData(data);
+    idrolistRenderGaranzie();
+}
+
 function idrolistRenderRapportini(){
     const tbody=document.querySelector('#rapportini tbody');
     if(!tbody)return;
-    tbody.querySelectorAll('[data-idrolist-report]').forEach(function(row){row.remove();});
     const data=idrolistGetData();
     const rows=data.rapportini||[];
     const sharedRows=rows.map(r=>{
@@ -4246,14 +4328,17 @@ function idrolistRenderRapportini(){
             <td>${escapeHtml(worker)}</td>
             <td>${escapeHtml(r.descrizione||'-')}</td>
             <td>${hours||0}</td>
-            <td class="orange">${escapeHtml(r.stato||'Da verificare')}</td>
-            <td><button class="btn" data-report-id="${escapeHtml(r.id)}">Apri</button></td>
+            <td class="orange">${escapeHtml(r.stampatoIl?'Stampato':(r.stato||'Da verificare'))}</td>
+            <td><button class="btn" data-report-id="${escapeHtml(r.id)}">Apri</button> <button class="btn" data-print-id="${escapeHtml(r.id)}">Stampa</button></td>
         </tr>`;
     }).join('');
+    tbody.innerHTML=sharedRows || '<tr><td colspan="7" class="muted">Nessun rapportino ricevuto.</td></tr>';
     if(sharedRows){
-        tbody.insertAdjacentHTML('afterbegin',sharedRows);
         tbody.querySelectorAll('[data-report-id]').forEach(function(button){
             button.addEventListener('click',function(){openSharedRapportino(this.dataset.reportId);});
+        });
+        tbody.querySelectorAll('[data-print-id]').forEach(function(button){
+            button.addEventListener('click',function(){stampaRapportino(this.dataset.printId);});
         });
     }
 }
@@ -4264,6 +4349,7 @@ function openSharedRapportino(id){
     if(!r)return;
     const workers=(r.lavoratori||[]).map(x=>`${escapeHtml(x.nome)}: ${escapeHtml(x.ore)} h`).join('<br>')||'-';
     const materials=(r.materiali||[]).map(x=>`${escapeHtml(x.nome)} — ${escapeHtml(x.quantita)}`).join('<br>')||'-';
+    const ddt=(r.ddtAllegati||[]).map(nome=>escapeHtml(nome)).join('<br>')||'Nessun DDT allegato';
     openModal('📋 Rapportino '+escapeHtml(id),`
         <div class="detail-grid">
             <div class="detail-box"><small>Data</small><strong>${escapeHtml(r.data||'-')}</strong></div>
@@ -4276,26 +4362,75 @@ function openSharedRapportino(id){
         <br>
         <div class="detail-box"><small>Materiali</small><strong>${materials}</strong></div>
         <br>
-        <div class="detail-box"><small>Bolle</small><strong>${r.numeroFotoBolle||0} foto</strong></div>
+        <div class="detail-box"><small>Foto lavori</small><strong>${escapeHtml(r.descrizioneFotoLavori||'-')}<br>${(r.fotoLavori||[]).map(escapeHtml).join('<br>')||'Nessuna foto allegata'}</strong></div>
+        <br>
+        <div class="detail-box"><small>Garanzia</small><strong>${escapeHtml(r.garanzie||'Nessuna garanzia segnalata')}</strong></div>
+        <br>
+        <div class="detail-box"><small>DDT allegati</small><strong>${ddt}</strong></div>
         <div class="detail-box"><small>Firma cliente</small><strong>${r.firmaCliente?'Acquisita':'Non presente'}</strong></div>
-    `,'<button class="btn btn-primary" onclick="closeModal()">Chiudi</button>');
+    `,`<button class="btn" onclick="stampaRapportino('${escapeHtml(id)}')">🖨 Stampa</button><button class="btn btn-primary" onclick="closeModal()">Chiudi</button>`);
+}
+
+function apriCantiereShared(id){
+    const data=idrolistGetData();
+    const c=data.cantieri.find(x=>x.id===id);
+    if(!c)return;
+    const rapportini=data.rapportini.filter(r=>r.cantiereId===id);
+    const garanzie=(data.garanzie||[]).filter(x=>x.cantiereId===id);
+    const foto=(data.fotoLavori||[]).filter(x=>x.cantiereId===id);
+    const ddt=(data.ddt||[]).filter(x=>x.cantiereId===id);
+    const elenco=(voci,voto)=>voci.map(x=>`${escapeHtml(x.data||'-')} — ${escapeHtml(x.descrizione||'-')}${x.allegati?.length?'<br><small>Allegati: '+x.allegati.map(escapeHtml).join(', ')+'</small>':''}`).join('<hr>')||voto;
+    openModal('📍 '+escapeHtml(c.nome),`<div class="detail-grid"><div class="detail-box"><small>Indirizzo</small><strong>${escapeHtml(c.indirizzo||'-')}</strong></div><div class="detail-box"><small>Stato</small><strong>${escapeHtml(c.stato||'Attivo')}</strong></div></div><br><div class="detail-box"><small>Note</small><strong>${escapeHtml(c.note||'-')}</strong></div><br><div class="detail-grid"><div class="detail-box"><small>Rapportini</small><strong>${rapportini.length}</strong></div><div class="detail-box"><small>Garanzie</small><strong>${garanzie.length}</strong></div><div class="detail-box"><small>Foto lavori</small><strong>${foto.length}</strong></div><div class="detail-box"><small>DDT / bolle</small><strong>${ddt.length}</strong></div></div><br><div class="detail-box"><small>Garanzie caricate</small><strong>${elenco(garanzie,'Nessuna garanzia caricata')}</strong></div><br><div class="detail-box"><small>Foto lavori caricate</small><strong>${elenco(foto,'Nessuna foto caricata')}</strong></div><br><div class="detail-box"><small>DDT e bolle caricati</small><strong>${elenco(ddt,'Nessun DDT o bolla caricata')}</strong></div>`,'<button class="btn btn-primary" onclick="closeModal()">Chiudi</button>');
+}
+
+function apriClienteShared(nome){
+    const data=idrolistGetData();
+    const cantieri=data.cantieri.filter(c=>c.nome===nome);
+    const rapportini=data.rapportini.filter(r=>r.cantiere===nome);
+    const appartieneAlCliente=x=>x.cliente===nome||x.cantiere===nome;
+    const garanzie=(data.garanzie||[]).filter(appartieneAlCliente);
+    const foto=(data.fotoLavori||[]).filter(appartieneAlCliente);
+    const ddt=(data.ddt||[]).filter(appartieneAlCliente);
+    openModal('👤 '+escapeHtml(nome),`<div class="detail-grid"><div class="detail-box"><small>Cantieri</small><strong>${cantieri.length}</strong></div><div class="detail-box"><small>Rapportini</small><strong>${rapportini.length}</strong></div><div class="detail-box"><small>Garanzie</small><strong>${garanzie.length}</strong></div><div class="detail-box"><small>Foto</small><strong>${foto.length}</strong></div><div class="detail-box"><small>DDT</small><strong>${ddt.length}</strong></div></div><br><div class="detail-box"><small>Sedi / cantieri</small><strong>${cantieri.map(c=>escapeHtml(c.indirizzo)).join('<br>')||'-'}</strong></div>`,'<button class="btn btn-primary" onclick="closeModal()">Chiudi</button>');
+}
+
+function apriOperaioShared(nome){
+    const voci=idrolistGetData().rapportini.flatMap(r=>(r.lavoratori||[]).filter(x=>x.nome===nome).map(x=>({data:r.data,cantiere:r.cantiere,descrizione:r.descrizione,ore:Number(x.ore||0)}))).sort((a,b)=>String(b.data).localeCompare(String(a.data)));
+    const totale=voci.reduce((somma,x)=>somma+x.ore,0);
+    const elenco=voci.map(x=>`<div class="list-card"><div><strong>${escapeHtml(x.data||'-')} — ${escapeHtml(x.cantiere||'-')}</strong><div class="muted">${escapeHtml(x.descrizione||'-')}</div></div><strong>${x.ore} h</strong></div>`).join('')||'<p class="muted">Nessuna ora registrata.</p>';
+    openModal('👷 '+escapeHtml(nome),`<div class="detail-box"><small>Totale ore registrate</small><strong>${totale} h</strong></div><br>${elenco}`,'<button class="btn btn-primary" onclick="closeModal()">Chiudi</button>');
+}
+
+function stampaRapportino(id){
+    const data=idrolistGetData();
+    const r=data.rapportini.find(x=>x.id===id);
+    if(!r)return;
+    r.stampatoIl=new Date().toISOString();
+    idrolistSaveData(data);
+    idrolistRenderRapportini();
+    const righe=(r.lavoratori||[]).map(x=>`<li>${escapeHtml(x.nome)}: ${escapeHtml(x.ore)} h</li>`).join('')||'<li>Nessun operaio</li>';
+    const materiali=(r.materiali||[]).map(x=>`<li>${escapeHtml(x.nome)} — ${escapeHtml(x.quantita)}</li>`).join('')||'<li>Nessun materiale</li>';
+    const ddt=(r.ddtAllegati||[]).map(x=>`<li>${escapeHtml(x)}</li>`).join('')||'<li>Nessun DDT allegato</li>';
+    const finestra=window.open('','_blank','width=900,height=700');
+    if(!finestra){alert('Consenti le finestre popup per stampare il rapportino.');return;}
+    finestra.document.write(`<!doctype html><html><head><title>Rapportino ${escapeHtml(id)}</title><style>body{font-family:Arial;padding:32px;color:#111}h1{border-bottom:2px solid #111;padding-bottom:12px}h2{margin-top:24px}li{margin:6px 0}</style></head><body><h1>Rapportino ${escapeHtml(id)}</h1><p><b>Data:</b> ${escapeHtml(r.data||'-')}<br><b>Cliente:</b> ${escapeHtml(r.cantiere||'-')}<br><b>Indirizzo:</b> ${escapeHtml(r.indirizzo||'-')}<br><b>Compilato da:</b> ${escapeHtml(r.compilatoDa||'-')}</p><h2>Lavoro eseguito</h2><p>${escapeHtml(r.descrizione||'-')}</p><h2>Operai e ore</h2><ul>${righe}</ul><h2>Materiali</h2><ul>${materiali}</ul><h2>Foto lavori</h2><p>${escapeHtml(r.descrizioneFotoLavori||'Nessuna descrizione')}</p><h2>Garanzia</h2><p>${escapeHtml(r.garanzie||'Nessuna garanzia segnalata')}</p><h2>DDT allegati</h2><ul>${ddt}</ul><h2>Firma cliente</h2><p>${r.firmaCliente?'Acquisita':'Non presente'}</p></body></html>`);
+    finestra.document.close();
+    finestra.focus();
+    finestra.print();
 }
 
 function newCantiere(){
     openModal('📍 Nuovo cantiere',`
         <div class="form-group"><label>Cliente</label><input id="newClient" placeholder="Nome cliente"></div>
         <div class="form-group"><label>Indirizzo</label><input id="newAddress" placeholder="Indirizzo cantiere"></div>
-        <div class="form-group"><label>Operaio assegnato</label><select id="newWorker"><option value="">-- Nessun operaio --</option></select></div>
         <div class="form-group"><label>Data primo intervento</label><input id="newDate" type="date"></div>
         <div class="form-group"><label>Note</label><textarea id="newNotes" rows="4"></textarea></div>
     `,`<button class="btn" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="saveCantiere()">💾 Crea cantiere</button>`);
-    idrolistSyncWorkerSelect();
 }
 
 function saveCantiere(){
     const client=document.getElementById('newClient').value.trim();
     const address=document.getElementById('newAddress').value.trim();
-    const worker=document.getElementById('newWorker').value;
     const date=document.getElementById('newDate').value;
     const notes=document.getElementById('newNotes').value.trim();
     if(!client||!address){alert('Inserisci almeno cliente e indirizzo.');return;}
@@ -4304,7 +4439,6 @@ function saveCantiere(){
         id:'CAN-'+Date.now(),
         nome:client,
         indirizzo:address,
-        operaio:worker,
         data:date,
         note:notes,
         stato:'Attivo',
@@ -4312,6 +4446,10 @@ function saveCantiere(){
     };
     data.cantieri.push(cantiere);
     idrolistSaveData(data);
+    idrolistRenderDashboard();
+    idrolistRenderCantieri();
+    idrolistRenderClienti();
+    idrolistRenderOperai();
     closeModal();
     showNotification('Cantiere creato e sincronizzato con gli Operai');
 }
@@ -4334,6 +4472,13 @@ function saveOperaio(){
     showNotification('Operaio aggiunto e disponibile per i cantieri');
 }
 
+function resetDatiDiTest(){
+    if(!confirm('Eliminare tutti i dati di test salvati su questo dispositivo? Cantieri, rapportini e password personali verranno cancellati.'))return;
+    Object.keys(localStorage).filter(function(key){return key.startsWith('idrolist_');}).forEach(function(key){localStorage.removeItem(key);});
+    alert('Dati di test eliminati.');
+    location.reload();
+}
+
 window.addEventListener('storage',function(e){
     if(e.key===IDROLIST_SHARED_KEY){
         idrolistRenderRapportini();
@@ -4344,12 +4489,22 @@ const _idrolistOriginalGo=window.go;
 if(typeof _idrolistOriginalGo==='function'){
     window.go=function(page,element){
         _idrolistOriginalGo(page,element);
+        if(page==='dashboard')idrolistRenderDashboard();
+        if(page==='cantieri')idrolistRenderCantieri();
+        if(page==='clienti')idrolistRenderClienti();
+        if(page==='operai')idrolistRenderOperai();
+        if(page==='garanzie')idrolistRenderGaranzie();
         if(page==='rapportini')idrolistRenderRapportini();
     };
 }
 
 document.addEventListener('DOMContentLoaded',function(){
     idrolistGetData();
+    idrolistRenderDashboard();
+    idrolistRenderCantieri();
+    idrolistRenderClienti();
+    idrolistRenderOperai();
+    idrolistRenderGaranzie();
     idrolistRenderRapportini();
 });
 </script>
