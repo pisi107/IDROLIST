@@ -62,6 +62,8 @@ body{
     border:1px solid #dce3eb;
 }
 
+.inline-selector-actions{display:flex;gap:8px}
+
 .logo{
     font-size:28px;
     font-weight:800;
@@ -870,6 +872,8 @@ tr.clickable:hover{
     .mobile-bar{padding:10px 12px}
     h1{font-size:25px}
     .card{padding:14px;border-radius:12px}
+    .topbar{align-items:stretch;flex-direction:column}
+    .topbar .btn{width:100%}
 
     table{min-width:620px}
     .calendar{min-width:600px}
@@ -903,6 +907,13 @@ tr.clickable:hover{
     }
     .form-group > div[style*="display:flex"] .btn{
         flex:0 0 auto;
+    }
+    .inline-selector-actions{
+        flex-direction:column;
+    }
+    .inline-selector-actions select,
+    .inline-selector-actions .btn{
+        width:100%;
     }
 
     .info-grid,
@@ -4103,8 +4114,8 @@ function openNewRapportinoUfficio(){
     openModal('📋 Nuovo rapportino',`
         <div style="display:flex;gap:8px;margin:0 0 20px"><span id="nuovoRapportinoIndicatore" style="font-weight:700;color:#1769d1">Passaggio 1 di 7 — Cliente e cantiere</span></div>
         <section data-step-rapportino="1">
-            <div class="form-group"><label>Cliente</label><div style="display:flex;gap:8px"><select id="nuovoRapportinoCliente" onchange="idrolistCaricaCantieriNuovoRapportino()"><option value="">-- Seleziona cliente --</option>${clienti.map(nome=>`<option value="${escapeHtml(nome)}">${escapeHtml(nome)}</option>`).join('')}</select><button class="btn" type="button" onclick="apriNuovoClienteDaRapportino()">＋ Nuovo</button></div></div>
-            <div class="form-group"><label>Cantiere</label><div style="display:flex;gap:8px"><select id="nuovoRapportinoCantiere" disabled><option value="">-- Seleziona prima il cliente --</option></select><button class="btn" type="button" onclick="apriNuovoCantiereDaRapportino()">＋ Nuovo</button></div></div>
+            <div class="form-group"><label>Cliente</label><div class="inline-selector-actions"><select id="nuovoRapportinoCliente" onchange="idrolistCaricaCantieriNuovoRapportino()"><option value="">-- Seleziona cliente --</option>${clienti.map(nome=>`<option value="${escapeHtml(nome)}">${escapeHtml(nome)}</option>`).join('')}</select><button class="btn" type="button" onclick="apriNuovoClienteDaRapportino()">＋ Nuovo cliente</button></div></div>
+            <div class="form-group"><label>Cantiere</label><div class="inline-selector-actions"><select id="nuovoRapportinoCantiere" disabled><option value="">-- Seleziona prima il cliente --</option></select><button class="btn" type="button" onclick="apriNuovoCantiereDaRapportino()">＋ Nuovo cantiere</button></div></div>
             <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" type="button" onclick="idrolistAvantiStepRapportino(2)">Avanti →</button></div>
         </section>
         <section data-step-rapportino="2" hidden>
@@ -4702,18 +4713,23 @@ openModal(
 `
 
 <div class="form-group">
-<label>Nome e cognome</label>
-<input placeholder="Mario Rossi">
+<label>Nome cliente</label>
+<input id="nuovoClienteNome" placeholder="Nome o ragione sociale">
+</div>
+
+<div class="form-group">
+<label>Città</label>
+<input id="nuovoClienteCitta" placeholder="Es. Varese">
+</div>
+
+<div class="form-group">
+<label>Via / Piazza</label>
+<input id="nuovoClienteVia" placeholder="Es. Via Roma 1">
 </div>
 
 <div class="form-group">
 <label>Telefono</label>
-<input placeholder="333 1234567">
-</div>
-
-<div class="form-group">
-<label>Indirizzo</label>
-<input placeholder="Via Roma 1, Varese">
+<input id="nuovoClienteTelefono" type="tel" placeholder="Es. 0332 123456">
 </div>
 
 `,
@@ -4728,10 +4744,7 @@ Annulla
 
 <button
 class="btn btn-primary"
-onclick="
-closeModal();
-showNotification('Cliente aggiunto');
-">
+onclick="salvaNuovoClienteGenerale()">
 💾 Salva cliente
 </button>
 
@@ -4739,6 +4752,22 @@ showNotification('Cliente aggiunto');
 
 );
 
+}
+
+function salvaNuovoClienteGenerale(){
+    const nome=document.getElementById('nuovoClienteNome')?.value.trim();
+    const citta=document.getElementById('nuovoClienteCitta')?.value.trim();
+    const via=document.getElementById('nuovoClienteVia')?.value.trim();
+    const telefono=document.getElementById('nuovoClienteTelefono')?.value.trim();
+    if(!nome||!citta||!via||!telefono){alert('Completa nome, città, via/piazza e telefono.');return;}
+    const dati=idrolistGetData();
+    dati.clienti=dati.clienti||[];
+    if([...(dati.clienti||[]),...(dati.cantieri||[])].some(voce=>String(voce.nome||'').toLocaleLowerCase('it')===nome.toLocaleLowerCase('it'))){alert('Questo cliente è già presente.');return;}
+    dati.clienti.push({id:'CLI-'+Date.now(),nome,citta,via,telefono,creatoIl:new Date().toISOString()});
+    idrolistSaveData(dati);
+    closeModal();
+    idrolistRenderClienti();
+    showNotification('Cliente aggiunto con successo.');
 }
 
 
@@ -5608,9 +5637,12 @@ async function stampaRapportino(id){
 }
 
 function newCantiere(){
+    const dati=idrolistGetData();
+    const clienti=[...new Set([...(dati.clienti||[]).map(c=>c.nome),...(dati.cantieri||[]).map(c=>c.nome)].filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it'));
     openModal('📍 Nuovo cantiere',`
-        <div class="form-group"><label>Cliente</label><input id="newClient" placeholder="Nome cliente"></div>
-        <div class="form-group"><label>Indirizzo</label><input id="newAddress" placeholder="Indirizzo cantiere"></div>
+        <div class="form-group"><label>Cliente</label><div style="display:flex;gap:8px"><select id="newClient"><option value="">-- Seleziona cliente --</option>${clienti.map(nome=>`<option value="${escapeHtml(nome)}">${escapeHtml(nome)}</option>`).join('')}</select><button class="btn" type="button" onclick="newCliente()">＋ Nuovo</button></div></div>
+        <div class="form-group"><label>Città</label><input id="newCity" placeholder="Es. Varese"></div>
+        <div class="form-group"><label>Via / Piazza</label><input id="newVia" placeholder="Es. Via Roma 1"></div>
         <div class="form-group"><label>Data primo intervento</label><input id="newDate" type="date"></div>
         <div class="form-group"><label>Note</label><textarea id="newNotes" rows="4"></textarea></div>
     `,`<button class="btn" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="saveCantiere()">💾 Crea cantiere</button>`);
@@ -5618,15 +5650,19 @@ function newCantiere(){
 
 function saveCantiere(){
     const client=document.getElementById('newClient').value.trim();
-    const address=document.getElementById('newAddress').value.trim();
+    const city=document.getElementById('newCity').value.trim();
+    const via=document.getElementById('newVia').value.trim();
+    const address=via&&city?via+', '+city:'';
     const date=document.getElementById('newDate').value;
     const notes=document.getElementById('newNotes').value.trim();
-    if(!client||!address){alert('Inserisci almeno cliente e indirizzo.');return;}
+    if(!client||!city||!via){alert('Seleziona il cliente e inserisci città e via/piazza.');return;}
     const data=idrolistGetData();
     const cantiere={
         id:'CAN-'+Date.now(),
         nome:client,
         indirizzo:address,
+        citta:city,
+        via:via,
         data:date,
         note:notes,
         stato:'Attivo',
